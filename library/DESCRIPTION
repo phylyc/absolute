@@ -5,5 +5,5 @@ Version: 1.4
 Author: Scott L. Carter
 Maintainer: Scott L. Carter <scarter@broadinstitute.org>
 Depends: GenomicRanges, data.table, matrixStats, reshape2, doMC 
-License: Fill me in later
+License: NONE
 LazyLoad: yes
