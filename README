@@ -1,0 +1,28 @@
+This file describes the easiest way to get up and running with ABSOLUTE.
+
+1) From Unix prompt:  > R CMD INSTALL library
+
+2) Make a copy of batch_exec_ABSv1.3.R in your own project directory
+
+3) Edit the top portion of your copy of batch_exec_ABSv1.3.R:
+	2a. To specify the full path to the ABSOLUTE_stub.R file (in your local ABSv1.3 install dir)
+	2b. To specify a SIF_FN file for your project (located in your project dir)
+	2c. To specify the output subdir in your project dir using the obj.name variable.
+
+4) From your project directory, launch R (v3.1.1 has been tested).  From the R prompt:  > source("batch_exec_ABSv1.3.R")
+
+5) After the initial run has completed, read the instructions in batch_exec_ABSv1.3.R to apply manual review, extract called result data, forced calling, etc.
+
+
+The batch_exec_ABSv1.3.R script will set up a run of your sample batch by creating a .R file for every sample specified in a sample information file (SIF) that you supply (in your project directory).  In addition, the script will attempt to dispatch jobs for each .R file to your local compute farm.   The details of this can be changed by editing the arguments in the call to the 'batch_exec_ABSOLUTE()' function in the script.  I have used this on LSF, SGE, UGE, and multicore (not reccomended) architectures.  The default is setup for UGE.   You will likely have to tinker with this to get it to work on your own system.  You can prevent the script from trying to dispatch jobs for each sample by setting dry_run=TRUE.
+
+The SIF file specifies the files neccesary to run ABSOLUTEv1.3 on each sample (1 per line).   Example column names are:
+
+SID	AllelicCapseg_skew	alleliccapseg_tsv	maf_file_SSNV	maf_file_indel
+
+SID: unique sample id
+AllelicCapseg_skew: real number, output from AllelicCapseg
+alleliccapseg_tsv: tsv file with allelic segmention summary from AllelicCapseg
+maf_file_SSNV: tsv file with one line per SSNV 
+maf_file_indel: tsv file with one line per indel
+
