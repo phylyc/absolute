@@ -1,5 +1,8 @@
 classic_CreateMutCnDat <- function(maf, indel.maf, seg.dat, min.mut.af=0, verbose=FALSE) 
 {
+	maf <- rename_maf_colnames(maf);
+	indel.maf <- rename_maf_colnames(indel.maf);
+
   indel_filters = function(maf)
   {
      class = maf[, "Variant_Classification"]
@@ -213,6 +216,9 @@ classic_CreateMutCnDat <- function(maf, indel.maf, seg.dat, min.mut.af=0, verbos
 
 minimal_CreateMutCnDat = function(maf, indel.maf, seg.dat, verbose=FALSE) 
 {
+	maf <- rename_maf_colnames(maf);
+	indel.maf <- rename_maf_colnames(indel.maf);
+
   mut.cn.dat = maf
 
   mut.seg.ix <- GetMutSegIx(mut.cn.dat, seg.dat[["segtab"]])  
@@ -341,3 +347,15 @@ select_protein_change_annot_using_COSMIC = function( MAF, verbose=FALSE )
 
    return(MAF)
 }
+
+# Start_Position and End_Position are fields defined in the MAF
+# specificiation; however, ABSOLUTE internally uses different field names.
+# Therefore, rename the fields of the maf data.frame
+rename_maf_colnames <- function(maf) {
+	if (!is.null(maf)) {
+		colnames(maf)[colnames(maf) == "Start_Position"] <- "Start_position";
+		colnames(maf)[colnames(maf) == "End_Position"] <- "End_position";
+	}
+	maf
+}
+
