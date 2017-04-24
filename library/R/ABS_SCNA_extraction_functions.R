@@ -415,9 +415,9 @@ get_refgene_transcript_GRs = function( genelist=NA )
 
    ix = match( genelist, refgene[,"symb"] )
    chr = refgene[ix,"chr"]
-   XY.ix = chr %in% c("chrX", "chrY")
-   if( any(XY.ix) ) { print( "Dropping XY-chr genes:"); print( genelist[XY.ix] ) }
-   ix = ix[ !(chr %in% c("chrX", "chrY"))]
+   Y.ix = chr %in% c("chrY")
+   if( any(Y.ix) ) { print( "Dropping Y chromosome genes:"); print( genelist[Y.ix] ) }
+   ix = ix[ !(chr %in% c("chrY"))]
    gene_regs = GRanges( gsub("chr", "", refgene[ix,"chr"]), IRanges(refgene[ix,"start"], refgene[ix,"end"]) )
    names(gene_regs) = refgene[ix,"symb"]
 
@@ -425,20 +425,20 @@ get_refgene_transcript_GRs = function( genelist=NA )
 }
 
 
-get_GENCODE_transcript_GRs = function( genelist=NA, dropXY=TRUE )
+get_GENCODE_transcript_GRs = function( genelist=NA, dropY=TRUE )
 {
    data( "gencode.hg19.genes", package="ABSOLUTE" )   # provides GENCODE 
    txdb = gencode
 
    if( is.na(genelist) ) { genelist = unique(txdb[,"HGNC"]) }
 
-   if( dropXY  )
+   if( dropY  )
    {
       ix = match( genelist, txdb[,"HGNC"] )
       chr = txdb[ix,"Chr"]
-      XY.ix = chr %in% c("X", "Y")
-      if( any(XY.ix) ) { print( "Dropping XY-chr genes:"); print( genelist[XY.ix] ) }
-      ix = ix[ !(chr %in% c("X", "Y"))]
+      Y.ix = chr %in% c("Y")
+      if( any(Y.ix) ) { print( "Dropping Y chromosome genes:"); print( genelist[Y.ix] ) }
+      ix = ix[ !(chr %in% c("Y"))]
 
       gene_regs = GRanges( txdb[ix,"Chr"], IRanges(txdb[ix,"Start"], txdb[ix,"End"]) )
       names(gene_regs) = txdb[ix,"HGNC"]
