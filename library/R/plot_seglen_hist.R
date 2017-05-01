@@ -51,7 +51,7 @@ PlotSeglenHist <- function(D, W, seg_colors=NA, color.by=NA, color.range=NA, x.m
     }
   }
 
-  if( !is.na(seg_colors) ) ## input arg
+  if( !all( is.na(seg_colors)) ) ## input arg
   {
 
      for (p in seq_len(P)) {
@@ -126,7 +126,7 @@ MyBarplot <- function(height.mat, col.mat, ylab, xlab, max.data, max.y,
   }
   
   if (!add) {
-    if (is.na(xlim)) {
+    if( all(is.na(xlim))) {
       xlim <- c(0,max.data+break.sz / 2)
     }
 

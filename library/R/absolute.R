@@ -99,7 +99,7 @@ RunAbsolute = function(seg.dat.fn, primary.disease, platform, sample.name, resul
     }
     else
     {
-       if(!file.exists(seg.dat.fn)) { stop("seg.dat.fn does not exist") }
+       if( !is.na(seg.dat.fn) && !file.exists(seg.dat.fn)) { stop("seg.dat.fn does not exist") }
 
         segtab = read.delim( seg.dat.fn, row.names=NULL, stringsAsFactors=FALSE, check.names=FALSE)
 

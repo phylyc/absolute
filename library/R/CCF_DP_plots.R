@@ -20,7 +20,7 @@ sample_trans_ccf_plot = function(mut_cols, grid, ccf_dens, sid, y_max) {
     
     xx = c(seq_len(ncol(ccf_dens)), rev(seq_len(ncol(ccf_dens))))
     yy = c(rep(0, ncol(ccf_dens)), rev(ccf_dens[i,]))
-    polygon( xx, yy, border=FALSE, col=use_col, add=TRUE)
+    polygon( xx, yy, border=FALSE, col=use_col )
   }
 }
 

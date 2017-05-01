@@ -244,7 +244,7 @@ PlotModes <- function(segobj, n.print = NA, called.mode.ix=NA, verbose=FALSE)
   ## Genome plot
     PlotHscrAndSeghist( d0.allele.segs, mut_cols, max_CR=2.5, plot.abs.fit=FALSE, comb=comb, plot.seg.sem=FALSE, y.lab="Copy number" )
 
-    if(!is.null(segobj[["mut.cn.dat"]]) & !all(is.na(segobj[["mode.res"]][["modeled.muts"]][[i]][,"ccf_hat"])) )  ## protect against edge case of all muts on homozygously del SCNAs
+    if(!is.null(segobj[["mode.res"]][["modeled.muts"]][[i]]) && !all(is.na(segobj[["mode.res"]][["modeled.muts"]][[i]][,"ccf_hat"])) )  ## protect against edge case of all muts on homozygously del SCNAs
     {
        mut.cn.dat <- segobj[["mut.cn.dat"]]
        modeled <- segobj[["mode.res"]][["modeled.muts"]][[i]]
@@ -441,12 +441,12 @@ plot_ABS_comb_fit = function( sideways, col, max_CR, comb, mode.info, Wq0, comb.
     if (!sideways) 
     {
       abline(v = comb[q], lwd = 0.5, lty = 3, col = col)
-      lines( x=c(comb[q], comb[q]), y=c(0,Wq0[q]), lwd=0.5, lty=1, color="black")
+      lines( x=c(comb[q], comb[q]), y=c(0,Wq0[q]), lwd=0.5, lty=1, col="black")
     }
     else
     {
       abline(h = comb[q], lwd = 0.5, lty = 3, col = col)
-      lines( y=c(comb[q], comb[q]), x=c(0,Wq0[q]), lwd=0.5, lty=1, color="black")
+      lines( y=c(comb[q], comb[q]), x=c(0,Wq0[q]), lwd=0.5, lty=1, col="black")
     }
     
     side <- ifelse(!sideways, 3, 4)
@@ -456,7 +456,7 @@ plot_ABS_comb_fit = function( sideways, col, max_CR, comb, mode.info, Wq0, comb.
     }
     
     ## % AB in each level
-    if (!is.na(comb.ab)) {
+    if (!all(is.na(comb.ab))) {
       q.ab <- round(comb.ab[q], 2)
       if (is.finite(q.ab) & q.ab > 0) 
       {
@@ -514,7 +514,7 @@ SCNA_CCF_plot = function( seg.dat, mode.ix )
 
 get_seg_colors = function(color.by, use.pal=NA, color.range=NA)
 {
-  if(is.na(use.pal)) { use.pal <- heat.colors(1000) }
+  if(any(is.na(use.pal))) { use.pal <- heat.colors(1000) }
 
   col.scale <- length(use.pal)
   

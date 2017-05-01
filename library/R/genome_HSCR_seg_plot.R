@@ -209,7 +209,7 @@ PlotHscrAndSeghist <- function(allele.segs, seg_colors, max_CR, min_CR=-0.05, pl
         }
      }
 
-     GenomeHscrSegPlot(allele.segs, seg_colors, y.lab=y.lab, y.min=min_CR, y.max=max_CR, plot.model.fit=!is.na(mode.info), plot.comb.fit=plot.abs.fit, mode.info=mode.info, comb=comb, comb.color=fit.color, plot.seg.sem=plot.seg.sem, plot.total.CN=plot.total.CN, total.seg.dat=total.seg.dat, tot.seg.colors=tot.seg.colors, log2CR=log2CR, label.chrs=label.chrs, seg.width=seg.width, min.sem.width=min.sem.width, yaxt=yaxt ) 
+     GenomeHscrSegPlot(allele.segs, seg_colors, y.lab=y.lab, y.min=min_CR, y.max=max_CR, plot.model.fit=!all(is.na(mode.info)), plot.comb.fit=plot.abs.fit, mode.info=mode.info, comb=comb, comb.color=fit.color, plot.seg.sem=plot.seg.sem, plot.total.CN=plot.total.CN, total.seg.dat=total.seg.dat, tot.seg.colors=tot.seg.colors, log2CR=log2CR, label.chrs=label.chrs, seg.width=seg.width, min.sem.width=min.sem.width, yaxt=yaxt ) 
    
      if( !is.na(SID_label)) { 
         mtext( SID_label, side=3, line=0.5, adj=0, cex=par("cex")+0.1, font=2 )

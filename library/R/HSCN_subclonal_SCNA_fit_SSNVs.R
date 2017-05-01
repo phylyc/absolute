@@ -178,9 +178,14 @@ allelic_calc_sample_muts_on_subclonal_scna = function(mut.cn.dat, mode_info, all
   H.123.ssnv.ccf.dens = res[["H.123.ssnv.ccf.dens"]] ## conditional on H* hypotheses
   H.123.ssnv.log.Z = res[["H.123.ssnv.log.Z"]] # log partition func of each H*
 
-  H1.log.ev = LogAdd( cbind( H.123_qm_ll[1,,,drop=FALSE], H.123.ssnv.log.Z[,1,drop=FALSE]) )
-  H2.log.ev = LogAdd( cbind( H.123_qm_ll[2,,,drop=FALSE], H.123.ssnv.log.Z[,2,drop=FALSE]) )
-  H3.log.ev = LogAdd( cbind( H.123_qm_ll[3,,,drop=FALSE], H.123.ssnv.log.Z[,3,drop=FALSE]) )
+#  H1.log.ev = LogAdd( cbind( H.123_qm_ll[1,,,drop=FALSE], H.123.ssnv.log.Z[,1,drop=FALSE]) )
+#  H2.log.ev = LogAdd( cbind( H.123_qm_ll[2,,,drop=FALSE], H.123.ssnv.log.Z[,2,drop=FALSE]) )
+#  H3.log.ev = LogAdd( cbind( H.123_qm_ll[3,,,drop=FALSE], H.123.ssnv.log.Z[,3,drop=FALSE]) )
+#SLC 4/28/2017:
+  H1.log.ev = LogAdd( cbind( H.123_qm_ll[1,,,drop=TRUE], H.123.ssnv.log.Z[,1,drop=TRUE]) )
+  H2.log.ev = LogAdd( cbind( H.123_qm_ll[2,,,drop=TRUE], H.123.ssnv.log.Z[,2,drop=TRUE]) )
+  H3.log.ev = LogAdd( cbind( H.123_qm_ll[3,,,drop=TRUE], H.123.ssnv.log.Z[,3,drop=TRUE]) )
+
   H4.log.ev = H.123.ssnv.log.Z[,4,drop=FALSE]
 
   H.log.ev = cbind(H1.log.ev, H2.log.ev, H3.log.ev, H4.log.ev) + log(1/4)
@@ -244,7 +249,7 @@ allelic_calc_sample_muts_on_subclonal_scna = function(mut.cn.dat, mode_info, all
 
   result = list( "mut.ev.mat"=mut.ev.mat, "ssnv.ccf.dens"=ssnv.ccf.dens, "H.ev"=H.ev, "som_mut_Q_tab"=som_mut_Q_tab, "post_Prs"=post_Prs, "H.123_Pr_q_a"=H.123_Pr_q, "H.123.ssnv.ccf.dens"=H.123.ssnv.ccf.dens, "H.123.ssnv.log.Z"=H.123.ssnv.log.Z )
 
-  if( any( lapply( lapply(result, is.nan), any ) ) ) { stop("NaN in result") }
+  if( any( unlist(lapply( lapply(result, is.nan), any ) ) ) ) { stop("NaN in result") }
 
   return( result )
 }

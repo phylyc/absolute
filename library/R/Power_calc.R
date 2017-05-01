@@ -133,7 +133,7 @@ mode_SSNV_pow_calc = function( SSNV_model, mut.cn.dat, mut.modeled.cn, alpha, si
 
    cov = rowSums(mut.cn.dat[,c("alt", "ref")])
    qt = mut.modeled.cn[,"q_hat"]
-   qt[is.na(qt)] = mut.modeled.cn[,"total_q_hat"]
+   qt[is.na(qt)] = mut.modeled.cn[is.na(qt),"total_q_hat"]
 
 ## allelic fraction of CCF=1 mutation at mult 1
    nc = mut.cn.dat[,"normal_allele_count"]

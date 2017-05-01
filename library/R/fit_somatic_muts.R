@@ -31,10 +31,13 @@ ApplySSNVModel <- function(mode.res, mut.cn.dat, SSNV_model, verbose=FALSE)
     res = FitPPModeSomaticMuts(SSNV_model, mode.res[["mode_SCNA_models"]][[j]], mut.cn.dat, mode.res$mode.tab[j, ], subclonal_scna_tab, SCNA_log_ccf_dens, seg.q.tab, 
 			total_subclonal_scna_tab, total_scna_log_ccf_dens, tot.seg.q.tab, verbose=verbose)
         
+    res[["purity"]] = alpha
+    res[["SSNV_skew"]] = SSNV_skew
     modeled.muts <- res[["modeled.muts"]]
     som.theta.q.map <- res[["som.theta.q.map"]]
     mode.res[["SSNV.ccf.dens"]][j,,] <- res[["ccf.dens"]] 
-    mode.res[["modeled.muts"]][[j]] <- cbind(modeled.muts, purity = alpha, SSNV_skew=SSNV_model[["SSNV_skew"]] )
+#    rownames(modeled.muts)=NULL
+#    mode.res[["modeled.muts"]][[j]] = data.frame(modeled.muts, "purity" = alpha, "SSNV_skew"=SSNV_model[["SSNV_skew"]], stringsAsFactors=FALSE, check.names=FALSE )
 
     mode.res[["mode_SSNV_models"]][[j]] = res[["mode_SSNV_models"]]
     
@@ -101,6 +104,7 @@ FitPPModeSomaticMuts <- function(SSNV_model, SCNA_model, mut.cn.dat, mode_info,
 
   modeled.muts <- cbind( mut.modeled.cn, post_prs, var_classes, mut_mult_res, fit_res[["H.ev"]], detection_power=detection_power, detection_power_for_single_read=detection_power_for_single_read )
 #  modeled.muts <- cbind( mut.modeled.cn, post_prs, fit_res[["H.ev"]] )
+
 
   return(list( "ccf.dens" = ssnv.ccf.dens, "modeled.muts" = modeled.muts, "som.theta.q.map" = som_theta_q_map, "mode_SSNV_models"=fit_res[["SSNV_model"]]))
 }
