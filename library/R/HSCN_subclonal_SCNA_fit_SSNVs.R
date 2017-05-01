@@ -11,8 +11,8 @@ allelic_get_muts_nearest_clonal_scna <- function(mut.cn.dat, seg.q.tab, Q) {
   }
   
   ## todo: integrate over this instead
-  muts.q.hat <- cbind(apply(muts.p.q[, 1, , drop=F], 1, which.max ) - 1,
-                      apply(muts.p.q[, 2, , drop=F], 1, which.max ) - 1)
+  muts.q.hat <- cbind(apply(muts.p.q[, 1, ], 1, which.max ) - 1,
+                      apply(muts.p.q[, 2, ], 1, which.max ) - 1)
 
   mut.cn.tab <- cbind("q_hat" = rowSums(muts.q.hat),
                       "HS_q_hat_1"=muts.q.hat[,1],

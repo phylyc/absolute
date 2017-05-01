@@ -39,9 +39,17 @@ write_R_files = function( bsub_argv, var_bsub_argv, control_argv )
    cat("done\n")
 }
 
-
-serial_dispatch = function( var_bsub_argb, control_argv )
+# FIXME
+# Dispatch now works, but we are not collecting the job ids,
+# which causes failure in scatter_jobs
+# Since multiple job ids will need to be monitored, the current code will
+# *not* for SGE.
+# Task array dispatch seems to work on SGE (invoked by specifycing EXE_ENGINE
+# as UGER)... perhaps UGER and SGE should be consolidated?
+# Should serial dispatch still be supported?
+serial_dispatch = function( control_argv, var_bsub_argv )
 {
+	R_DIR = control_argv$R_DIR
 # now dispatch jobs
    res = foreach( i = 1:nrow(var_bsub_argv) ) %dopar%
    {
@@ -64,11 +72,11 @@ serial_dispatch = function( var_bsub_argb, control_argv )
          if( control_argv$QUEUE %in% c("hour", "bhour") )
          {
 #            sc = paste( "bsub < bsub.tmp -W 4:00 -q ", control_argv$QUEUE, " -o ", qjout, " -e ",  qjerr, " -J ", control_argv$BJOB, sep="" )
-            sc = paste( "echo \"", bsub, "\" | bsub -W 4:00 -q ", control_argv$QUEUE, " -o ", qjout, " -e ",  qjerr, " -J ", control_argv$BJOB, sep="" )
+            sc = paste(control_argv$engine_setup, " echo \"", bsub, "\" | bsub -W 4:00 -q ", control_argv$QUEUE, " -o ", qjout, " -e ",  qjerr, " -J ", control_argv$BJOB, sep="" )
          } 
          else {
 #            sc = paste( "bsub < bsub.tmp -q ", control_argv$QUEUE, " -o ", qjout, " -e ",  qjerr, " -J ", control_argv$BJOB, sep="" )
-            sc = paste( "echo \"", bsub, "\" | bsub -q ", control_argv$QUEUE, " -o ", qjout, " -e ",  qjerr, " -J ", control_argv$BJOB, sep="" )
+            sc = paste(control_argv$engine_setup, " echo \"", bsub, "\" | bsub -q ", control_argv$QUEUE, " -o ", qjout, " -e ",  qjerr, " -J ", control_argv$BJOB, sep="" )
          } 
          if( control_argv[["groupname"]] != "" )
          {
@@ -80,7 +88,7 @@ serial_dispatch = function( var_bsub_argb, control_argv )
       if( control_argv[["EXE_ENGINE"]] == "SGE" )
       {
 #            sc = paste( "bsub < bsub.tmp -q ", control_argv$QUEUE, " -o ", qjout, " -e ",  qjerr, " -J ", control_argv$BJOB, sep="" )
-         sc = paste( "echo \"", bsub, "\" | qsub -o ", qjout, " -e ", qjerr, " -N ", control_argv$BJOB, sep="" )
+         sc = paste(control_argv$engine_setup,  " echo \"", bsub, "\" | qsub -o ", qjout, " -e ", qjerr, " -N ", control_argv$BJOB, sep="" )
        
          if( control_argv[["groupname"]] != "" )
          {
@@ -111,7 +119,6 @@ serial_dispatch = function( var_bsub_argb, control_argv )
       }
    }
 }
-
 
 
 scatter_jobs = function( control_argv, bsub_argv, var_bsub_argv )
@@ -148,13 +155,15 @@ scatter_jobs = function( control_argv, bsub_argv, var_bsub_argv )
       cat("#!/bin/bash\n", file=SH_FN, append=FALSE)
       cat(bsub, file=SH_FN, append=TRUE)
 
-      sc = paste( "qsub -q ", control_argv[["QUEUE"]], " -t 1-", N_tasks, " -tc ", N_tasks, " -cwd", " -V", " -o /dev/null -e /dev/null ", " -N ", control_argv$BJOB, " ", SH_FN, sep="" )
+      sc = paste(control_argv$engine_setup, "qsub", "-q", control_argv[["QUEUE"]], sprintf("-t 1-%d", N_tasks), "-tc", N_tasks, "-cwd", "-V", "-o /dev/null", "-e /dev/null", "-l h_vmem=4g", "-N", control_argv$BJOB, SH_FN)
       
       stdout = system(sc, intern=TRUE)
 # extract job id from qsub stdout
-      job.id = strsplit(stdout, "\\." )
-      job.id = strsplit(job.id[[2]], "Your job-array " )
-      job.id = job.id[[1]][2]
+      #job.id = strsplit(stdout, "\\." )
+      #job.id = strsplit(job.id[[2]], "Your job-array " )
+      #job.id = job.id[[1]][2]
+			stdout = paste(stdout, collapse="\n")
+      job.id = sub(".*Your job-array ([0-9]+).*", "\\1", stdout)
       print( paste("Captured qsub job.id ", job.id, sep=""))
 
       if(is.na(job.id)) { stop(paste("Invalid job.id.  Captured: ", stdout, " from stdout.", sep="") ) }
@@ -167,9 +176,10 @@ scatter_jobs = function( control_argv, bsub_argv, var_bsub_argv )
       {
          while ( TRUE )
          {
-            Sys.sleep(60) 
-            stdout = system(paste("qstat", sep=""), intern=TRUE )
+            stdout = system(paste(control_argv$engine_setup, "qstat"), intern=TRUE )
+            # FIXME if EXE_ENGINE == "SGE", job.id will be undefined here!
             if( length( grep( job.id, stdout, value=TRUE ) ) == 0 ) { break }
+            Sys.sleep(60) 
          }
 
        ## if the short queue was used, look for tasks that were killed for going over the 2hr (7200 second) time limit
@@ -200,20 +210,22 @@ scatter_jobs = function( control_argv, bsub_argv, var_bsub_argv )
             cat("#!/bin/bash\n", file=SH_FN, append=FALSE)
             cat(bsub, file=SH_FN, append=TRUE)
 
-            sc = paste( "qsub -q long -t 1-", N_failed, " -tc ", N_failed, " -cwd", " -V", " -o /dev/null -e /dev/null ", " -N ", control_argv$BJOB, " ", SH_FN, sep="" )
+            sc = paste(control_argv$engine_setup, "qsub", "-q long", sprintf("-t 1-%d", N_failed), "-tc", N_failed, "-cwd", "-V", "-o /dev/null", "-e /dev/null", "-N", control_argv$BJOB, SH_FN)
       
             stdout = system(sc, intern=TRUE)
-# extract job id from qsub stdout
-            job.id = strsplit(stdout, "\\." )
-            job.id = strsplit(job.id[[2]], "Your job-array " )
-            job.id = job.id[[1]][2]
+            # extract job id from qsub stdout
+            #job.id = strsplit(stdout, "\\." )
+            #job.id = strsplit(job.id[[2]], "Your job-array " )
+            #job.id = job.id[[1]][2]
+						stdout = paste(stdout, collapse="\n")
+            job.id = sub(".*Your job-array ([0-9]+).*", "\\1", stdout)
             print( paste("Captured qsub job.id ", job.id, sep=""))
 
             if(is.na(job.id)) { stop(paste("Invalid job.id.  Captured: ", stdout, " from stdout.", sep="") ) }
 
             while ( TRUE )
             {
-               stdout = system(paste("qstat", sep=""), intern=TRUE )
+               stdout = system(paste(control_argv$engine_setup, "qstat"), intern=TRUE )
                if( length( grep( job.id, stdout, value=TRUE ) ) == 0 ) { break }
                Sys.sleep(60) 
             }

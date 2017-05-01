@@ -2,7 +2,7 @@
 #source("~scarter/CGA/R/broad_utils/qq_pval.R")
 
 #batch_exec_ABSOLUTE = function( ABSOLUTE_argv, obj.name, MAF_DIR, SIF_FN, sample_list_FN, MAF_SIF_FN, queue="hour", overwrite=FALSE, dry_run=FALSE )
-batch_exec_ABSOLUTE = function( ABSOLUTE_argv, obj.name, var_bsub_argv, R_STUB_FN, queue="hour", overwrite=FALSE, dry_run=FALSE, num_solutions_plotted=NA, plot.mode.review=FALSE, wait=TRUE, summarize=TRUE, EXE_ENGINE="LSF", groupname="" )
+batch_exec_ABSOLUTE = function( ABSOLUTE_argv, obj.name, var_bsub_argv, R_STUB_FN, queue="hour", overwrite=FALSE, dry_run=FALSE, num_solutions_plotted=NA, plot.mode.review=FALSE, wait=TRUE, summarize=TRUE, EXE_ENGINE="LSF", groupname="", engine_setup=NULL )
 {
    ABSOLUTE_argv = insert_default_args( ABSOLUTE_argv )
 
@@ -14,6 +14,7 @@ batch_exec_ABSOLUTE = function( ABSOLUTE_argv, obj.name, var_bsub_argv, R_STUB_F
 	control_argv$QUEUE = queue
 #	control_argv$R_STUB_FN = file.path(CGA_DIR, "broad_utils/ABSOLUTE_stub.R" )
 	control_argv$R_STUB_FN = R_STUB_FN
+	control_argv$engine_setup = engine_setup
         control_argv$BJOB = obj.name
         control_argv$EXE_ENGINE=EXE_ENGINE
         control_argv$groupname=groupname

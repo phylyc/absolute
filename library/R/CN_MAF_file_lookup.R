@@ -73,7 +73,7 @@ firehose_CAPSEG_SIF = function( SIF, PP_CALLS_FN=NA, FORCE_CALL=FALSE, EXCLUDE_C
 
    if( !is.na(indel_col) )
    {
-      mat[[indel_col]] = SIF[,indel_col]
+      mat[["indel.maf.fn"]] = SIF[,indel_col]
    }
 
    if( !is.na(maf_col) )
