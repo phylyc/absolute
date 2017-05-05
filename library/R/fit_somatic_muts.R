@@ -28,12 +28,14 @@ ApplySSNVModel <- function(mode.res, mut.cn.dat, SSNV_model, verbose=FALSE)
     total_scna_log_ccf_dens = mode.res[["subclonal_SCNA_res"]][["total_log_ccf_dens"]][j, , ]
 
     
-    res = FitPPModeSomaticMuts(SSNV_model, mode.res[["mode_SCNA_models"]][[j]], mut.cn.dat, mode.res$mode.tab[j, ], subclonal_scna_tab, SCNA_log_ccf_dens, seg.q.tab, 
-			total_subclonal_scna_tab, total_scna_log_ccf_dens, tot.seg.q.tab, verbose=verbose)
+    res = FitPPModeSomaticMuts(SSNV_model, mode.res[["mode_SCNA_models"]][[j]], mut.cn.dat, mode.res$mode.tab[j, ], subclonal_scna_tab, SCNA_log_ccf_dens, seg.q.tab, total_subclonal_scna_tab, total_scna_log_ccf_dens, tot.seg.q.tab, verbose=verbose)
         
-    res[["purity"]] = alpha
-    res[["SSNV_skew"]] = SSNV_skew
-    modeled.muts <- res[["modeled.muts"]]
+    res[["modeled.muts"]][["purity"]] = alpha
+    res[["modeled.muts"]][["SSNV_skew"]] = SSNV_skew
+    modeled.muts = res[["modeled.muts"]]
+
+    mode.res[["modeled.muts"]][[j]] = modeled.muts
+
     som.theta.q.map <- res[["som.theta.q.map"]]
     mode.res[["SSNV.ccf.dens"]][j,,] <- res[["ccf.dens"]] 
 #    rownames(modeled.muts)=NULL
@@ -52,7 +54,7 @@ ApplySSNVModel <- function(mode.res, mut.cn.dat, SSNV_model, verbose=FALSE)
 #  new.ll <- mode.res[["mode.tab"]][, "combined_LL"] +
 #            mode.res[["mode.tab"]][, "SSNV_LL"]
 #  mode.res[["mode.tab"]][, "combined_LL"] <- new.ll
-  
+
   return(mode.res)
 }
 
