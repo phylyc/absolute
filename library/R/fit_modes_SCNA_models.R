@@ -99,7 +99,7 @@ fit_modes_SCNA_models = function( seg.obj, mode.tab, SCNA_model, mut.cn.dat, ver
   ## compute ev score/data
     mode_SCNA_models[[i]][["DP_CN_chrarm_states"]] = get_post_DP_chrarm_states( seg.obj, mode_SCNA_models[[i]], subclonal_scna_tab[i,,] )
     mode_SCNA_models[[i]][["SCNA_minev_chrarm_result"]] = compute_chrarm_ev_score( mode_SCNA_models[[i]][["DP_CN_chrarm_states"]], mode_SCNA_models[[i]],  WGD0_Prs, WGD1_Prs, )
-#    SCNA_model[["WGD"]] =  SCNA_model[["SCNA_minev_chrarm_result"]][["WGD"]]  ## override provisional estimate
+    SCNA_model[["WGD"]] =  SCNA_model[["SCNA_minev_chrarm_result"]][["WGD"]]  ## override provisional estimate
 
     mode.tab = fill_mode.tab_row( seg.obj, mode_SCNA_models[[i]], obs, b, delta, mode.tab, i )
   }
