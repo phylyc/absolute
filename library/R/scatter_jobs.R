@@ -12,7 +12,6 @@ write_R_files = function( bsub_argv, var_bsub_argv, control_argv )
       }
 
       TMPFN = tempfile(pattern="tmp", tmpdir="." )
-      cat(".libPaths(c('/broad/software/free/Linux/redhat_6_x86_64/pkgs/r_3.1.1-bioconductor-3.0/bin/R'))", file=TMPFN, "\n", sep="", append=F)
       for( j in 1:length(bsub_argv) )
       {
          A =T #= ifelse( j == 1, FALSE, TRUE ) ## overwrite exiting file
