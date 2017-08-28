@@ -60,13 +60,15 @@ DrawMutBetaDensities <- function(beta.grid, pr.clonal, hz.del.flag, cols,
     use_col = rgb(cr[1, 1], cr[2, 1], cr[3, 1], trans, maxColorValue=255)
     xx = c( grid.vals, rev(grid.vals) )
     yy = c(rep(0, length(grid.vals)), rev( colSums(sc.grid)) )
-    polygon( xx, yy, border=FALSE, col=use_col, add=TRUE)
+    polygon( xx, yy, border=FALSE, col=use_col)
+    #, add)
 
     cr = col2rgb(cols[2])
     use_col = rgb(cr[1, 1], cr[2, 1], cr[3, 1], trans, maxColorValue=255)
     xx = c( grid.vals, rev(grid.vals) )
     yy = c(rep(0, length(grid.vals)), rev( colSums(clonal.grid)) )
-    polygon( xx, yy, border=FALSE, col=use_col, add=TRUE)
+    polygon( xx, yy, border=FALSE, col=use_col)
+    #, add)
   }
 }
 
@@ -197,13 +199,15 @@ draw_mut_multiplicity_densities = function(mut_pr, grid, pr_clonal, pr_cryptic_S
      use_col = rgb(cr[1, 1], cr[2, 1], cr[3, 1], trans, maxColorValue=255)
      xx = c( mult_grid, rev(mult_grid) )
      yy = c(rep(0, length(mult_grid)), rev( colSums(sc_dens*pr_subclonal)) )
-     polygon( xx, yy, border=FALSE, col=use_col, add=TRUE)
+     polygon( xx, yy, border=FALSE, col=use_col)
+     #, add)
 
      cr = col2rgb(cols[2])
      use_col = rgb(cr[1, 1], cr[2, 1], cr[3, 1], trans, maxColorValue=255)
      xx = c( mult_grid, rev(mult_grid) )
      yy = c(rep(0, length(mult_grid)), rev( colSums(clonal_dens*pr_clonal)) )
-     polygon( xx, yy, border=FALSE, col=use_col, add=TRUE)
+     polygon( xx, yy, border=FALSE, col=use_col)
+     #, add)
    }
 }
 
@@ -212,9 +216,9 @@ multiplicity_plot = function( seg.dat, mut.dat, af_post_pr, grid_mat, SSNV_cols,
 {
   hz.del.ix <- mut.dat[, "q_hat"] == 0
   SC_CN.ix = !is.na(mut.dat[,"H1"]) ## SSNVs on subclonal SCNAs
-  nix = hz.del.ix | SC_CN.ix |  mut.dat[,"alt"]==0  # drop force-called muts
+  nix = hz.del.ix | SC_CN.ix | mut.dat[,"alt"]==0  # drop force-called muts
 
-  mut.dat <- mut.dat[!nix, , drop=FALSE]
+  mut.dat <- mut.dat[!nix,, drop=FALSE] 
   af_post_pr = af_post_pr[!nix,, drop=FALSE]
   grid_mat = grid_mat[!nix,, drop=FALSE]
 
@@ -223,7 +227,6 @@ multiplicity_plot = function( seg.dat, mut.dat, af_post_pr, grid_mat, SSNV_cols,
     frame()
     return()
   }
-
  
   res = get_SSNV_on_clonal_CN_multiplicity_densities( seg.dat, mut.dat, af_post_pr, grid_mat, verbose=verbose )
 
@@ -234,7 +237,6 @@ multiplicity_plot = function( seg.dat, mut.dat, af_post_pr, grid_mat, SSNV_cols,
   pr.clonal <- mut.dat[, "Pr_somatic_clonal"]
   pr.cryptic.SCNA <- mut.dat[, "Pr_cryptic_SCNA"]
   SSNV_skew <- mut.dat[1, "SSNV_skew"]
-
 
   mult.xlim <- 2.5
   draw_mut_multiplicity_densities(mult_dens, mult_grid, pr.clonal, pr.cryptic.SCNA, x_lim=mult.xlim,
@@ -292,7 +294,7 @@ get_SSNV_plot_colors = function( mut.dat, SSNV_cols )
   SSNV_mut_cols = get_mut_cols( SSNV_cols, SSNV_pr_clonal[!H123.SSNV.ix], SSNV.amp.ix )
 
 #  H123.SSNV_mut_cols = get_mut_cols( H123_SSNV_cols, SSNV_pr_clonal[H123.SSNV.ix] )
-  H123.SSNV_mut_cols = rgb( "red"=mut.dat[H123.SSNV.ix,"H1"], "green"=mut.dat[H123.SSNV.ix,"H2"], "blue"=mut.dat[H123.SSNV.ix,"H3"] )
+  H123.SSNV_mut_cols = rgb( "red"=mut.dat[H123.SSNV.ix,"H1"], "green"=mut.dat[H123.SSNV.ix,"H2"], "blue"=mut.dat[H123.SSNV.ix, "H3"] )
 
 
   cols = rep(NA, nrow(mut.dat) )
@@ -536,7 +538,7 @@ plot_SSNV_on_subclonal_SCNA_CCF_summaries = function(mut.dat, seg.dat, mode.ix, 
 {
   cov <- mut.dat[, "alt"] + mut.dat[, "ref"]
   ix <- cov > min.cov & mut.dat[,"alt"] > 0
-  mut.dat <- mut.dat[ix, , drop=FALSE]
+  mut.dat <- mut.dat[which(ix), , drop=FALSE]
 
   SSNV_ccf_dens_temp = seg.dat[["mode.res"]][["SSNV.ccf.dens"]][mode.ix, , ]
   # make certain this is a data.frame

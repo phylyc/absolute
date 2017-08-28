@@ -84,7 +84,7 @@ RunAbsolute = function(seg.dat.fn, primary.disease, platform, sample.name, resul
   }
   else
   {
-    if( !is.na(allelic_capseg_rds) && file.exists(allelic_capseg_rds) )
+    if( is.na(SSNV_skew) && !is.na(allelic_capseg_rds) && file.exists(allelic_capseg_rds) )
     {
        print("Overriding seg.dat.fn with allelic_capseg_rds")
        

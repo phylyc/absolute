@@ -29,7 +29,7 @@ detailed_SSNV_on_subclonal_HSCN_plot = function( SSNV_model, seg.dat, mut.dat, m
   if( sum(H123.SSNV.ix) == 0 ) { frame(); return() }
 
   mut.dat = mut.dat[H123.SSNV.ix,,drop=FALSE]
-  SSNV_ccf_dens = SSNV_ccf_dens[H123.SSNV.ix, ,drop=FALSE ]
+  SSNV_ccf_dens = SSNV_ccf_dens[H123.SSNV.ix,,drop=FALSE ]
 
   SC_Aq_a = mut.dat[,"SC_Aq_a"]
   SC_Aq_d = mut.dat[,"SC_Aq_d"]

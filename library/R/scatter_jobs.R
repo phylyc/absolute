@@ -12,16 +12,18 @@ write_R_files = function( bsub_argv, var_bsub_argv, control_argv )
       }
 
       TMPFN = tempfile(pattern="tmp", tmpdir="." )
+       #cat(".libPaths('/xchip/scarter/ncamarda/R')", file=TMPFN, "\n",sep="", append=FALSE)
+      cat(".libPaths(c('/broad/software/free/Linux/redhat_6_x86_64/pkgs/r_3.1.1-bioconductor-3.0/bin/R'))", file=TMPFN, "\n", sep="", append=F)
       for( j in 1:length(bsub_argv) )
       {
-         A = ifelse( j == 1, FALSE, TRUE ) ## overwrite exiting file
-         if( is.character( bsub_argv[[j]] ) )
+         A =T #= ifelse( j == 1, FALSE, TRUE ) ## overwrite exiting file
+      	 if( is.character( bsub_argv[[j]] ) )
          {
             cat( names(bsub_argv)[j], "= \"",  bsub_argv[[j]], "\"\n", file=TMPFN, sep="", append=A)
          }
          else
          {
-            cat( names(bsub_argv)[j], "= ",  bsub_argv[[j]], "\n", file=TMPFN, sep="", append=A )
+            cat( names(bsub_argv)[j], "= ",  bsub_argv[[j]], "\n", file=TMPFN, sep="", append=A)
          }
       } 
       

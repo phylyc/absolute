@@ -26,8 +26,8 @@ CreateReviewObject = function(obj.name, absolute.files, copy_num_type, plot.mode
   so.ix = 1
   fa.ix = 1
   
-  for (i in seq_along(absolute.files)) 
-#  for (i in 1:10)
+  for (i in seq_along(absolute.files))  
+  #  for (i in 1:10)
   {
     ## read in absolute rda
     seg.out.fn = absolute.files[i]

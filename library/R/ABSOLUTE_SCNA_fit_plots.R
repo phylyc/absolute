@@ -264,6 +264,7 @@ PlotModes <- function(segobj, n.print = NA, called.mode.ix=NA, verbose=FALSE)
     }
     else { for(i in 1:4){ frame() } }
   }  ## modes
+
 }
 
 
@@ -388,7 +389,7 @@ PpModeScorerBarplot <- function(mode.tab, mode.colors, obs, n.print) {
   colnames(mat)[ncol(mat)] <- "combined"
   
 #  cols = mode.colors[(1:n.print)[!ix]]
-  cols = mode.colors[ which(!ix) ]
+  cols = mode.colors[ !ix ]
   barplot(mat, beside = TRUE, col = cols, axes = FALSE, 
           ylab = "", space = c(0, 2), cex.names = par("cex.axis"))
   

@@ -148,8 +148,12 @@ AllelicCalcGermlineSNVLoglik <- function(mut.cn.dat, mode_info, SSNV_model)
     log.gl.w <- log(GermlineMutPrior(mut_class_w))
     
     germ.comb <- GetHscnGermlineMutComb(alpha, q1, q2, nc)
-    log.gl.w <-  matrix(log.gl.w, ncol=nrow(germ.comb), nrow=length(alt), byrow=TRUE) 
-    LL_mat[mut.ix,] <- log.gl.w + SSNV_FhatCombPost(alt, ref, germ.comb[,"f.reads"], SSNV_model )
+
+    alt = mut.cn.dat[mut.ix,"alt"]
+    ref = mut.cn.dat[mut.ix,"ref"]
+#    log.gl.w <-  matrix(log.gl.w, ncol=nrow(germ.comb), nrow=length(alt), byrow=TRUE) 
+
+    LL_mat[mut.ix,] = SSNV_FhatCombPost(alt, ref, germ.comb[,"f.reads"], SSNV_model )
   }
 
   return(LL_mat)
@@ -224,7 +228,7 @@ allelic_eval_SNV_models_evidence = function(mut.cn.dat, mode_info, post.ccf.LL.g
    if( SSNV_model[["mut_class_w"]][["GL"]] > 0 )
    {
       germline.comb.LL = AllelicCalcGermlineSNVLoglik(mut.cn.dat, mode_info, SSNV_model)
-      germline.log.ev = LogAdd(germline.comb.LL) #+ log(SSNV_model[["mut_class_w"]][["GL"]])
+      germline.log.ev = LogAdd(germline.comb.LL) + log(SSNV_model[["mut_class_w"]][["GL"]])
       colnames(germline.log.ev) = c("alt_minor", "alt_major", "hom_alt")
    } else {
       germline.log.ev= -Inf
@@ -240,14 +244,14 @@ allelic_eval_SNV_models_evidence = function(mut.cn.dat, mode_info, post.ccf.LL.g
    LL = LogAdd(mut.log.ev.mat)
    mut.ev.mat = exp(mut.log.ev.mat - LL)
 
-   post_Prs = allelic_annotate_SSNVs_on_clonal_SCNAs( mut.ev.mat, som_mut_Q_tab, mut.cn.dat, SSNV_model, LL)
+   post_Prs = allelic_annotate_SSNVs_on_clonal_SCNAs( mut.ev.mat, som_mut_Q_tab, mut.cn.dat, mode_info, SSNV_model, LL)
 
 #   if( any(is.na(som_mut_Q_tab))) { stop("NaN in som_mut_Q_tab") } ## can be NaN when hom del
    return(list("mut.ev.mat"=mut.ev.mat, "som_mut_Q_tab"=som_mut_Q_tab, "post_Prs"=post_Prs))
 }
 
 
-allelic_annotate_SSNVs_on_clonal_SCNAs = function( mut.ev.mat, som_mut_Q_tab, mut.cn.dat, SSNV_model, LL )
+allelic_annotate_SSNVs_on_clonal_SCNAs = function( mut.ev.mat, som_mut_Q_tab, mut.cn.dat, mode_info, SSNV_model, LL )
 {
    mut.w = SSNV_model[["mut_class_w"]]
 
@@ -260,11 +264,19 @@ allelic_annotate_SSNVs_on_clonal_SCNAs = function( mut.ev.mat, som_mut_Q_tab, mu
    post_Prs[,"LL"] = LL
 
    LOH.ix = mut.cn.dat[, "HS_q_hat_1"]==0 & mut.cn.dat[, "HS_q_hat_2"] > 0 
-   if( any(LOH.ix) & mut.w[["GL"]] > 0) 
+#   if( any(LOH.ix) & mut.w[["GL"]] > 0) 
+#SLC: 5/1/2017
+## Changed behavior so that All SSNVs get annotations regarding LOH of a germline allele - relies on user knowing whether 
+## germline designation is appropriate
+   if( any(LOH.ix) ) 
    {
-      GL_PR = rowSums(mut.ev.mat[LOH.ix, c("alt_minor", "alt_major", "hom_alt"), drop=FALSE])
-      post_Prs[LOH.ix, "Pr_GL_som_HZ_alt"] <- mut.ev.mat[LOH.ix, "alt_major"] / GL_PR
-      post_Prs[LOH.ix, "Pr_GL_som_HZ_ref"] <- mut.ev.mat[LOH.ix, "alt_minor"] / GL_PR
+#      GL_PR = rowSums(mut.ev.mat[LOH.ix, c("alt_minor", "alt_major", "hom_alt"), drop=FALSE])
+      germline.comb.LL = AllelicCalcGermlineSNVLoglik(mut.cn.dat, mode_info, SSNV_model)
+      GL_Prs = exp(germline.comb.LL - LogAdd(germline.comb.LL)) #  prior over GL status is ignored
+      colnames(GL_Prs) = c("alt_minor", "alt_major", "hom_alt")
+
+      post_Prs[LOH.ix, "Pr_GL_som_HZ_alt"] = GL_Prs[LOH.ix, "alt_major"] 
+      post_Prs[LOH.ix, "Pr_GL_som_HZ_ref"] = GL_Prs[LOH.ix, "alt_minor"] 
    }
 
    post_Prs[,"Pr_somatic_clonal"] = mut.ev.mat[,1]

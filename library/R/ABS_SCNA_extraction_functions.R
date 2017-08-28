@@ -790,29 +790,29 @@ genotype_transcript_SCNAs_in_called_ABS_files = function( ABS_BASE_DIR, regs, SC
 
    if( length(files) == 0 ) { stop( paste("No ABSOLUTE result files found in ABS_BASE_DIR ", ABS_BASE_DIR, sep="")) }
 
-#   res = foreach( i = 1:length(files)) %dopar%
-   for( i in 1:length(files) )
+   res = foreach( i = 1:length(files)) %dopar%
+#   for( i in 1:length(files) )
    {
       load( files[i] )  
       ABS.dat = seg.obj
 
       called.segtab = call_genome_wide_ABSOLUTE_SCNAs( ABS.dat, SCNA_thresholds )
-      res = call_regions_ABSOLUTE_SCNAs( called.segtab, regs ) 
+      r = call_regions_ABSOLUTE_SCNAs( called.segtab, regs ) 
 
-      del.reg.segtab = res[["del.reg.segtab"]]
-      amp.reg.segtab = res[["amp.reg.segtab"]]
+      del.reg.segtab = r[["del.reg.segtab"]]
+      amp.reg.segtab = r[["amp.reg.segtab"]]
 
       cat(".")
-#      return( list("called.segtab"=called.segtab, "amp.segtab"=amp.reg.segtab, "del.segtab"=del.reg.segtab) )
+      return( list("called.segtab"=called.segtab, "amp.segtab"=amp.reg.segtab, "del.segtab"=del.reg.segtab) )
 
-      called.segtabs[[i]] = called.segtab
-      amp.segtabs[[i]] = amp.reg.segtab
-      del.segtabs[[i]] = del.reg.segtab
+#      called.segtabs[[i]] = called.segtab
+#      amp.segtabs[[i]] = amp.reg.segtab
+#      del.segtabs[[i]] = del.reg.segtab
    }
 
-#   called.segtabs = lapply( res, "[[", "called.segtab" )
-#   amp.segtabs = lapply( res, "[[", "amp.segtab" )
-#   del.segtabs = lapply( res, "[[", "del.segtab" )
+   called.segtabs = lapply( res, "[[", "called.segtab" )
+   amp.segtabs = lapply( res, "[[", "amp.segtab" )
+   del.segtabs = lapply( res, "[[", "del.segtab" )
 
    for( i in 1:length(files) )
    {

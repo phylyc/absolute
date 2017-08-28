@@ -73,7 +73,7 @@ if( FALSE )
    file.base = file.path(paste(names(called.segobj.list), ".ABSOLUTE.", analyst.id, 
                                ".called", sep = ""))
    called.files= file.path(indv.called.dir, paste(file.base, "RData", sep = "."))
-   for (i in seq_along(called.files)) {
+   foreach (i=seq_along(called.files)) %dopar% {
       seg.obj = called.segobj.list[[i]]
       save(seg.obj, file=called.files[i])
       cat(".")
@@ -138,7 +138,7 @@ called_detailed_SSNV_plots = function( called.segobj.list, out.dir.base )
   plot_dir = file.path(out.dir.base, "reviewed", "SSNV_detail")
   dir.create( plot_dir, recursive=TRUE)
 
-  for( i in 1:length(called.segobj.list) )
+  for ( i in 1:length(called.segobj.list) )
   {
      SID = names(called.segobj.list)[i]
      pdf.fn = file.path( plot_dir, paste(SID, ".SSNV.detail.plot.pdf", sep=""))

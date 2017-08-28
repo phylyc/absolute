@@ -205,7 +205,7 @@ ClassifySomaticVariants <- function(prs, pr.thresh)
 # Used for plotting
 get_SSNV_on_clonal_CN_multiplicity_densities = function( seg.dat, mut.dat, af_post_pr, grid_mat, verbose=FALSE )
 {
-  alpha <- mut.dat[1, "purity"]
+  a_p <- mut.dat[, "purity"]; alpha <- a_p[!is.na(a_p)]
   Q <- mut.dat[, "q_hat"]
   Q[is.na(Q)] = mut.dat[is.na(Q),"total_q_hat"]
 
