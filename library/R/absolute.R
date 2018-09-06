@@ -102,6 +102,8 @@ RunAbsolute = function(seg.dat.fn, primary.disease, platform, sample.name, resul
        if( !is.na(seg.dat.fn) && !file.exists(seg.dat.fn)) { stop("seg.dat.fn does not exist") }
 
         segtab = read.delim( seg.dat.fn, row.names=NULL, stringsAsFactors=FALSE, check.names=FALSE)
+	message("Removing segs with NA sigma")
+	segtab = na.omit(segtab)
 
        seg.dat = MakeSegObj(segtab, gender, min_probes=min_probes, max_sd=max_sd, 
                              filter_segs=filter_segs, verbose=verbose)
@@ -186,6 +188,10 @@ RunAbsolute = function(seg.dat.fn, primary.disease, platform, sample.name, resul
 #    data(ChrArmsDat, package = "ABSOLUTE")
     if ((!is.null(maf)) && (nrow(maf) > 0)) 
     {
+      if (is.na(SSNV_skew)){
+	message("Applying default f_skew value of 0.95")
+        SSNV_skew = 0.95
+      }
       SSNV_model = init_SSNV_model( SCNA_model[["kQ"]], SSNV_skew, nrow(maf) )
 #      mut.cn.dat = classic_CreateMutCnDat(maf, indel.maf, seg.dat, min.mut.af, verbose=verbose)
 

@@ -132,6 +132,8 @@ log_density_alt_cond_coverage = function( alt, cov, f, SSNV_model)
    f_skew = SSNV_model[["SSNV_skew"]]
    rho = SSNV_model[["rho"]]
    eps = SSNV_model[["epsilon"]]
+   
+   if (is.na(f_skew)) f_skew = 0.9494511
 
    A = f_skew * f * rho
    B = (1 - f_skew * f) * rho
