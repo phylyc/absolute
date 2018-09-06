@@ -10,8 +10,9 @@ write_R_files = function( bsub_argv, var_bsub_argv, control_argv )
       {
          bsub_argv[[ colnames(var_bsub_argv)[j] ]] = var_bsub_argv[i,j] 
       }
-
+      
       TMPFN = tempfile(pattern="tmp", tmpdir="." )
+      cat(".libPaths(c('/broad/software/free/Linux/redhat_6_x86_64/pkgs/r_3.1.1-bioconductor-3.0/bin/R'))", file=TMPFN, "\n", sep="", append=F)
       for( j in 1:length(bsub_argv) )
       {
          A =T #= ifelse( j == 1, FALSE, TRUE ) ## overwrite exiting file
@@ -28,9 +29,10 @@ write_R_files = function( bsub_argv, var_bsub_argv, control_argv )
      ## create .R executable code
       R_FN = paste( i, ".R", sep="")
       qjr = file.path( R_DIR, R_FN )
+      qjr = gsub('/+','/', qjr)
+      
       sc = paste( "cat ", TMPFN, " ", control_argv$R_STUB_FN, " > ", qjr, sep="" )
       system(sc)
-      
       sc = paste( "rm ", TMPFN, sep="")
       system(sc)
       cat(".")
@@ -155,7 +157,7 @@ scatter_jobs = function( control_argv, bsub_argv, var_bsub_argv )
       cat("#!/bin/bash\n", file=SH_FN, append=FALSE)
       cat(bsub, file=SH_FN, append=TRUE)
 
-      sc = paste(control_argv$engine_setup, "qsub", "-q", control_argv[["QUEUE"]], sprintf("-t 1-%d", N_tasks), "-tc", N_tasks, "-cwd", "-V", "-o /dev/null", "-e /dev/null", "-l h_vmem=4g", "-N", control_argv$BJOB, SH_FN)
+      sc = paste(control_argv$engine_setup, "qsub", "-q", control_argv[["QUEUE"]], sprintf("-t 1-%d", N_tasks),"-l h_rt=0:20:00", "-tc", N_tasks, "-cwd", "-V", "-o /dev/null", "-e /dev/null", "-l h_vmem=4g", "-N", control_argv$BJOB, SH_FN)
       
       stdout = system(sc, intern=TRUE)
 # extract job id from qsub stdout

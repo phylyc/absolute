@@ -89,6 +89,8 @@ CreateReviewObject = function(obj.name, absolute.files, copy_num_type, plot.mode
 #    ix = which.max(mtab[, "combined_LL"])
 #    mode.ent[i] = mtab[ix, "entropy"]
 #
+     print(str(mtab))
+     write.table(mtab, paste0("/cga/scarter/ncamarda/sds/ABSOLUTE_results/mtab", i, ".tsv"), quote = F, sep = "\t")
      ix = order(mtab[,"combined_LL"], decreasing=TRUE)[1:2]
      mode.ent[i] = mtab[ix[1], "combined_LL"] - mtab[ix[2], "combined_LL"]
   }

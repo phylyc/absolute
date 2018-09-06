@@ -8,9 +8,9 @@ get_LOF_var_classes = function()
 
 prioritize_clinically_actionable_variants = function( maf )
 {
-   data("VanAllen2014_TARGET", package="ABSOLUTE")  ## provides TARGET
-   target_genes = TARGET
-
+   #data("VanAllen2014_TARGET", package="ABSOLUTE")  ## provides TARGET
+   #target_genes = TARGET
+	target_genes = read.delim("/xchip/scarter/ncamarda/projects/paad_ccpm/PDAC_TARGET_v11_83117.txt",sep="\t", header=T, stringsAsFactors=F)
    LOF_classes = get_LOF_var_classes()
    silent_classes = reject_mutation_classes()
 
@@ -41,11 +41,14 @@ prioritize_clinically_actionable_variants = function( maf )
    hotspot.ix = maf[,"Number of times codon change is in COSMIC"] > 0 & maf[,"Hugo_Symbol"] %in% c(hotspot_TARGET)
    hotspot.ix[ is.na(maf[,"Number of times codon change is in COSMIC"]) ] = 0
   
-# two kinds of biallelic inactivation (in addition to hom del) :
+# three kinds of biallelic inactivation (in addition to hom del) :
 # 1) Het del &  mutation
    maf[ is.na(maf[,"homozygous.ix"]), "homozygous.ix"] = FALSE
-   biallelic.ix = maf[,"homozygous.ix"] & maf[,"Hugo_Symbol"] %in% c(biallelic_TARGET)
-# 2) two het muts in same gene / patient with at least one of them either LOF or COSMIC
+   biallelic.ix = maf[,"homozygous.ix"]  & maf[,"Hugo_Symbol"] %in% c(biallelic_TARGET)
+print("executing clinical actionability analysis")
+   # 2) two het muts in same gene / patient with at least one of them either LOF or COSMIC
+# NDC
+# 3) Germline mutation and somatic LOH
 
    if( any( biallelic_TARGET %in% maf[,"Hugo_Symbol"] ) )
    {

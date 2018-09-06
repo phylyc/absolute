@@ -198,7 +198,7 @@ get_multi_VCF = function( agg_MAF, gene_list, ordered_sample_names )
    primary_MAF = filtered_MAF[ !second.mut.ix,] 
    secondary_MAF = filtered_MAF[ second.mut.ix, ]
 #   third.mut.ix = duplicated( second_filtered_MAF[, c("pair_id", "Hugo_Symbol")] )
-
+#stop("check mafs")
    primary_multi_VCF = make_multi_VCF( primary_MAF, gene_list, ordered_sample_names, annot_names, TF_annot )
    secondary_multi_VCF = make_multi_VCF( secondary_MAF, gene_list, ordered_sample_names, annot_names, TF_annot )
 
@@ -348,7 +348,8 @@ get_MAF_list_from_called_seglist_obj = function( called_segobj_list )
 aggregate_sample_MAF_list = function( MAF_list )
 {
    cols = colnames(MAF_list[[1]] )
-
+#print(cols)
+#stop()
    if( length(MAF_list) > 1 )
    {
       for( i in 2:length(MAF_list))

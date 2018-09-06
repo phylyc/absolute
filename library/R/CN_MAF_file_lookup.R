@@ -28,11 +28,12 @@ firehose_CAPSEG_SIF = function( SIF, PP_CALLS_FN=NA, FORCE_CALL=FALSE, EXCLUDE_C
    }
    else { cols =  c( "sample.name", "seg.dat.fn", "output.fn.base", "SSNV_skew", "gender" ) }
 
+   print(cols)
 
    FH_maf_annots = c( "maf_file_capture_master_filter_removed", "union_maf_file_forcecalled", "maf_union_forcecalls", "maf_file_ffpeBias_capture", "maf_file_oxoG3_capture", "maf_file_capture", "maf_file", "maf_file_SSNV"  )
    FH_indel_annots = c( "strelka_passed_somatic_indel_maf_file_capture_pair", "maf_file_capture_strelka_forcecalled_newversion", "maf_file_capture_indel_forcecalled", "indel_maf_file_capture", "maf_file_indel" )
 
-   FH_seg_annots = c("alleliccapseg_tsv", "allelic_scottseg_tsv", "HAPSEG_result")
+   FH_seg_annots = c("alleliccapseg_tsv", "allelic_scottseg_tsv", "HAPSEG_result", "seg.dat.fn")
    FH_skew_annots = c("AllelicCapseg_skew", "allelic_scottseg_skew")
 
    if( is.na(MAF_COL) )

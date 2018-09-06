@@ -67,7 +67,6 @@ FindLocationModes <- function(obs, force.alpha, force.tau, SCNA_model, mut.cn.da
   }
   
   mode.tab <- cbind(mode.tab, NA, NA, NA)
-  
   for (i in 1:nrow(mode.tab)) {
     par <- mode.tab[i, c(1, 2)]
     cur.par <- par
@@ -141,34 +140,34 @@ MargModeFinder <- function(obs, mut.cn.dat, SSNV_model, SCNA_model, b.res=0.125,
   d.grid <- log( seq( exp(SCNA_model[["kDom2"]][1]), exp(SCNA_model[["kDom2"]][2]), 0.01) )
   n.b <- length(b.grid)
   n.d <- length(d.grid)
-
+  
   mode.tab <- array(NA, dim = c(n.b * n.d, 3))
-#  for (i in seq_len(n.b)) 
+  #  for (i in seq_len(n.b)) 
   opt_res = foreach( i = 1:n.b ) %dopar%
   {
     res= matrix( NA, nrow=n.d, ncol=3)
     for (j in seq_len(n.d)) 
     {
-#       val = RunOpt(cur.par, obs, SCNA_model, verbose=verbose) 
-#       res[j,] =  c(val[[1]], val[[2]], val[[3]])
-       res[j,] = fit_func( b.grid, d.grid, i, j, obs, SCNA_model )
+      #       val = RunOpt(cur.par, obs, SCNA_model, verbose=verbose) 
+      #       res[j,] =  c(val[[1]], val[[2]], val[[3]])
+      res[j,] = fit_func( b.grid, d.grid, i, j, obs, SCNA_model )
     }
     return(res)
   }
   if (verbose) { cat("\n") }
-
+  
   for( i in 1:n.b )
   {
-     res = opt_res[[i]] 
-#       cur.par <- c(b.grid[i], d.grid[j])
-#       res <- RunOpt(cur.par, obs, SCNA_model, verbose=verbose) 
-     if (!is.na(res))
-     {
-#       mode.tab[(i - 1) * n.d + j, ] <- c(res[[1]], res[[2]], res[[3]])
-       for( j in seq_len(n.d)) {
-          mode.tab[(i - 1) * n.d + j, ] = res[j,]
-       }
-     }
+    res = opt_res[[i]] 
+    #       cur.par <- c(b.grid[i], d.grid[j])
+    #       res <- RunOpt(cur.par, obs, SCNA_model, verbose=verbose) 
+    if (!is.na(res))
+    {
+      #       mode.tab[(i - 1) * n.d + j, ] <- c(res[[1]], res[[2]], res[[3]])
+      for( j in seq_len(n.d)) {
+        mode.tab[(i - 1) * n.d + j, ] = res[j,]
+      }
+    }
   }
 
   ## Try 1d opt for pure tumors
@@ -392,9 +391,14 @@ CombLL <- function(par, obs, SCNA_model )
 #   b = res[["b"]]
 #   delta = res[["delta"]]
 
+#  print(str(obs))
+#  print(str(b))
+#  print(str(delta))
+#  print(str(SCNA_model))
+  
   LL = provisional_SCNA_LL( obs, b, delta, SCNA_model )
     
-  if( !is.finite(-LL)) { stop() }
+  if( !is.finite(LL)) { stop("Not a finite LL") }
 
   return(-LL)
 }
@@ -402,7 +406,6 @@ CombLL <- function(par, obs, SCNA_model )
 provisional_SCNA_LL = function( obs, b, delta, SCNA_model )
 {
    clonal_seg_LL_mat = get_clonal_seg_LL_mat( obs, b, delta, SCNA_model )
-
 ## don't add outlier prob to segs below comb(0)
 if( FALSE )
 {

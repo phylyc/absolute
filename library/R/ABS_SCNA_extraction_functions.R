@@ -1,4 +1,4 @@
-get_SCNA_thresholds = function()
+get_old_SCNA_thresholds = function()
 {
  ## Used in Brastianos et al. Can Disc 2015  (brain met paper 1)
   ## Default threshold parameters for calling SCNAs
@@ -18,6 +18,29 @@ get_SCNA_thresholds = function()
 
    return( SCNA_thresholds )
 }
+
+get_SCNA_thresholds = function( amp.CN.threshold = 7, H.amp.CN.threshold = 10 )
+{
+## Threshold parameters for calling SCNAs
+   SCNA_thresholds = list()
+## This works OK - hom dels in CDKN2A can be up to 11MB! (0.5% genome)
+   SCNA_thresholds[["del_thresh_rCN"]] = 0.25  
+   SCNA_thresholds[["del_thresh_foc"]] = 0.995
+
+   SCNA_thresholds[["amp_thresh_slope"]] = -1/5
+   SCNA_thresholds[["amp_delta_k"]] = 0.1
+   SCNA_thresholds[["amp_thresh_foc"]] = 0.98
+   SCNA_thresholds[["amp_thresh_log2_rCN"]] = log(amp.CN.threshold, 2)
+
+   SCNA_thresholds[["H.amp_thresh_slope"]] = -1/5
+   SCNA_thresholds[["H.amp_delta_k"]] = 0.1
+   SCNA_thresholds[["H.amp_thresh_foc"]] = 0.98
+   SCNA_thresholds[["H.amp_thresh_log2_rCN"]] = log( H.amp.CN.threshold, 2 )
+
+   return(SCNA_thresholds)
+}
+
+
 
 build_gene_GR_data = function()
 {
