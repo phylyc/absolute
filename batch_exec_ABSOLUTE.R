@@ -3,6 +3,12 @@ R_STUB_FN = "/fullpathto/ABSOLUTE_stub.R"       ## Change to point to your own i
 SIF_FN = "/yourproject/SIF.txt"                 ## your own Sample info file
 obj.name = "initial_ABSv1.3_run"  ## Speficies subdir for ABS results.  Rename this to test different runs on the same project 
 
+## NOTE:It is now possible to specify runtimes and runmem for absolute qsub.
+## To do so, alter those values in the batch_exec_ABSOLUTE function below
+## Where time is in the format HH:MM:SS and memory is a numeric amount followed
+## by a unit -- G is recommended
+
+
 ## Example SIF columns:
 #SID	AllelicCapseg_skew	alleliccapseg_tsv	maf_file_SSNV	maf_file_indel
 # SID: unique sample id
@@ -74,7 +80,7 @@ var_bsub_argv  = firehose_CAPSEG_SIF( SIF, PP_CALLS_FN=PP_CALLS_FN, FORCE_CALL=F
 ## Step 2: run ABSOLUTE on each sample - create a review table / plot when finished
 ## resutls will be in ./ABSOLUTE_resutls/obj.name/results/
 ## The default behavior of this function is to dispatch jobs for each sample and then to wait for them all to finish, at which point the results are gathered and some summaries are output.  You can change this using different arguemnts
-batch_exec_ABSOLUTE( ABSOLUTE_argv, obj.name, var_bsub_argv, R_STUB_FN, queue="short", dry_run=FALSE, EXE_ENGINE="UGER" )
+batch_exec_ABSOLUTE( ABSOLUTE_argv, obj.name, var_bsub_argv, R_STUB_FN, queue="short", dry_run=FALSE, EXE_ENGINE="UGER", run_time="6:00:00", run_mem="10G" )
 
 ## Step 3: review .pdf files in the results output and manually select solutions, if neccesary.
 ## 	a. Create a 'man_review.txt' file by copying: ./ABSOLUTE_resutls/obj.name/results/obj.name.PP-calls_tab.txt

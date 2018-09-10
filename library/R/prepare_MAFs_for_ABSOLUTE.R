@@ -130,6 +130,27 @@ classic_CreateMutCnDat <- function(maf, indel.maf, seg.dat, min.mut.af=0, verbos
   }
   
 #  na.ix <- apply(is.na(mut.cn.dat[, c("ref", "alt")]), 1, sum) > 0
+
+# rklein-debugging; it appears that mut.cn.dat does not contain columns ref and alt as purported below
+# instead it contains columns: ref_count and alt_count
+# Altering those column names appropriately
+  check_colnames_src = colnames(mut.cn.dat)
+  check_colnames_suspected = c("ref_count","alt_count")
+  check_colnames_suspected2 = c("ref", "alt")
+  if(all(check_colnames_suspected %in% check_colnames_src) && all(check_colnames_suspected2 %in% check_colnames_src)) {
+    stop("Assertion Error: Both ref_count, alt_count and alt, ref columns exist; unsure which to use as alt and ref for purposes of count computation")
+  }
+
+  if(all(check_colnames_suspected %in% check_colnames_src)) {
+    colnames(mut.cn.dat)[which(names(mut.cn.dat) == "ref_count")] <- "ref"
+    colnames(mut.cn.dat)[which(names(mut.cn.dat) == "alt_count")] <- "alt"  
+  }
+
+# it is also necessary to convert these columns into integers as they are represented as character by default
+# which breaks the below arithmetic
+  mut.cn.dat[, "alt"] = as.integer(mut.cn.dat[, "alt"])
+  mut.cn.dat[, "ref"] = as.integer(mut.cn.dat[, "ref"])
+
   na.ix <- is.na(mut.cn.dat[, "alt"] + mut.cn.dat[, "ref"])
   if (verbose) {
     print(paste("Removing ", sum(na.ix), " of ", length(na.ix),

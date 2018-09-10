@@ -157,7 +157,7 @@ scatter_jobs = function( control_argv, bsub_argv, var_bsub_argv )
       cat("#!/bin/bash\n", file=SH_FN, append=FALSE)
       cat(bsub, file=SH_FN, append=TRUE)
 
-      sc = paste(control_argv$engine_setup, "qsub", "-q", control_argv[["QUEUE"]], sprintf("-t 1-%d", N_tasks),"-l h_rt=0:20:00", "-tc", N_tasks, "-cwd", "-V", "-o /dev/null", "-e /dev/null", "-l h_vmem=4g", "-N", control_argv$BJOB, SH_FN)
+      sc = paste(control_argv$engine_setup, "qsub", sprintf("-t 1-%d", N_tasks), paste0("-l h_rt=", control_argv$run_time), "-tc", N_tasks, "-cwd", "-V", "-o /dev/null", "-e /dev/null", paste0("-l h_vmem=", control_argv$run_mem), "-N", control_argv$BJOB, SH_FN)
       
       stdout = system(sc, intern=TRUE)
 # extract job id from qsub stdout

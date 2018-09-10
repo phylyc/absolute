@@ -1,9 +1,12 @@
 library(devtools)
+# Instead of command installing the absolute library, Nick loads it in using devtools, I prefer this approach
+# though it should be better documented
 
-soft.dir = "/xchip/scarter/ncamarda/software/"
-load_all( paste(soft.dir,"AllelicCapseg/",sep=""), export_all=FALSE )
 
-pkg_loc = paste(soft.dir,"ABSOLUTEv1.4/library/",sep="")
+soft.dir = "/cga/scarter/rklein/Workflows/"
+# load_all( paste(soft.dir,"AllelicCapseg/",sep=""), export_all=FALSE )
+
+pkg_loc = paste(soft.dir,"absolutev1.4/library/",sep="")
 load_all(pkg_loc, export_all=TRUE )
 
 
