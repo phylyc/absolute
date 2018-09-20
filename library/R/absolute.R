@@ -13,6 +13,7 @@
 {
 #   packageStartupMessage("ABSOLUTE v1.2 [BETA] succesfully loaded.")
    packageStartupMessage("ABSOLUTE v1.4 [ALPHA] succesfully loaded.")
+   options(error = recover)
 }
 
  compute_cached = function( results.dir, file.base, file.ext, fn, verbose, ... )
@@ -261,7 +262,7 @@ RunAbsolute = function(seg.dat.fn, primary.disease, platform, sample.name, resul
 #  }
     
   save(seg.dat, file = file.path(results.dir, paste(file.base, "RData", sep = ".")))
-
+ 
 ## plot result
   if (is.na(seg.dat[["mode.res"]][["mode.flag"]])) {
     sample.pdf.fn = file.path(results.dir,

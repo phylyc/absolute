@@ -107,7 +107,8 @@ calc_ccf_summary = function(ccf_dens)
   ccf_grid = as.numeric(colnames(ccf_dens))
 
   for( i in 1:n_seg )
-  {
+  { 
+    if(n_seg==0) break
     ccf_hat[i] = ccf_grid[which.max(ccf_dens[i, ])]
     ecdf = cumsum(ccf_dens[i, ])
     

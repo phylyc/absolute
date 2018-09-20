@@ -122,6 +122,10 @@ AllelicMakeSegObj <- function(seg.dat, gender, filter_segs=FALSE, min_probes=NA,
   as.seg.dat <- rbind(as.1, as.2)
   colnames(as.seg.dat)[ncol(as.seg.dat)] <- "seg.ix"
  
+  ##debug--Looking at certain samples, it appears these lengths are incorrect, so
+  ##they'll be recalculated  to be End.bp-Start.bp
+  as.seg.dat[, "length"] = as.numeric(as.seg.dat[, "End.bp"])-as.numeric(as.seg.dat[, "Start.bp"])
+  
   
   W <- as.numeric(as.seg.dat[, "length"])
   W <- W / sum(W)
@@ -281,6 +285,7 @@ AllelicExtractSampleObs <- function(seg.obj)
   obs <- list(d=d, d.tx=d, d.stderr=stderr, W=W, seg.ix=seg.ix, AS.seg.ix=AS.seg.ix, bi.allelic=bi.allelic,
               error.model=list(), n_probes=seg.dat[,"n_probes"], e.cr=e.cr,
 	      platform=seg.obj[["platform"]], "normal_allele_count"=normal_allele_count )
+  
   
   return(obs)
 }
