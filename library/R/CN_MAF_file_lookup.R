@@ -103,7 +103,8 @@ firehose_CAPSEG_SIF = function( SIF, PP_CALLS_FN=NA, FORCE_CALL=FALSE, EXCLUDE_C
 
    if( FORCE_CALL ) ## Lookup old PP modes and add t0 mat
    {
-      pp = read.delim(PP_CALLS_FN, row.names=1, check.names=FALSE, stringsAsFactors=FALSE )
+      #pp = read.delim(PP_CALLS_FN, row.names=1, check.names=FALSE, stringsAsFactors=FALSE )
+      pp = read.delim(PP_CALLS_FN, check.names=FALSE, stringsAsFactors=FALSE)
 
       SIDs = intersect( mat[,1], rownames(pp) )
 

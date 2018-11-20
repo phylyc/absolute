@@ -2,17 +2,22 @@ allelic_get_muts_nearest_clonal_scna <- function(mut.cn.dat, seg.q.tab, Q) {
   if (!all(c("A1.ix", "A2.ix") %in% colnames(mut.cn.dat)) ) {
     stop("wrong colnames")
   }
+   
+  muts.p.q <- array(NA, dim=c( NROW(mut.cn.dat), 2, Q))
   
-  muts.p.q <- array(NA, dim=c( nrow(mut.cn.dat), 2, Q))
-  
-  for (i in seq_len(nrow(mut.cn.dat))) {
+  for (i in seq_len(NROW(mut.cn.dat))) {
     muts.p.q[i, 1, ] <- seg.q.tab[mut.cn.dat[i,"A1.ix"], ]   
     muts.p.q[i, 2, ] <- seg.q.tab[mut.cn.dat[i,"A2.ix"], ]   
   }
   
   ## todo: integrate over this instead
-  muts.q.hat <- cbind(apply(muts.p.q[, 1, ], 1, which.max ) - 1,
-                      apply(muts.p.q[, 2, ], 1, which.max ) - 1)
+  if(NROW(mut.cn.dat)>1) {
+    muts.q.hat <- cbind(apply(muts.p.q[, 1, ], 1, which.max ) - 1,
+                        apply(muts.p.q[, 2, ], 1, which.max ) - 1)
+  } else {
+    muts.q.hat <- cbind(which.max(muts.p.q[, 1, ]) - 1,
+                        which.max(muts.p.q[, 2, ]) - 1)
+  }
 
   mut.cn.tab <- cbind("q_hat" = rowSums(muts.q.hat),
                       "HS_q_hat_1"=muts.q.hat[,1],

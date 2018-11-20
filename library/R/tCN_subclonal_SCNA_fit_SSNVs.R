@@ -8,15 +8,19 @@ total_get_muts_nearest_clonal_scna <- function(mut.cn.dat, seg.q.tab, Q)
   }
   
 #  T.seg.ix = total_get_mut_seg_ix(mut.cn.dat, seg.dat[["total.seg.dat"]] ) 
-
-  muts.p.q <- array(NA, dim=c( nrow(mut.cn.dat), Q))
+  muts.p.q <- array(NA, dim=c( NROW(mut.cn.dat), Q))
   
-  for (i in seq_len(nrow(mut.cn.dat))) {
+  for (i in seq_len(NROW(mut.cn.dat))) {
     muts.p.q[i, ] <- seg.q.tab[mut.cn.dat[i,"T.seg.ix"], ]   
   }
   
-  muts.q.hat <- apply(muts.p.q, 1, which.max ) - 1
-
+  
+  if(NROW(mut.cn.dat)>1) {
+    muts.q.hat <- apply(muts.p.q, 1, which.max ) - 1
+  } else {
+    muts.q.hat <- which.max(muts.p.q) - 1
+  }
+  
   mut.cn.tab <- matrix( muts.q.hat, ncol=1 )
   colnames(mut.cn.tab) = "q_hat"
   

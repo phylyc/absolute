@@ -157,7 +157,7 @@ scatter_jobs = function( control_argv, bsub_argv, var_bsub_argv )
       cat("#!/bin/bash\n", file=SH_FN, append=FALSE)
       cat(bsub, file=SH_FN, append=TRUE)
 
-      sc = paste(control_argv$engine_setup, "qsub", sprintf("-t 1-%d", N_tasks), paste0("-l h_rt=", control_argv$run_time), "-tc", N_tasks, "-cwd", "-V", "-o /dev/null", "-e /dev/null", paste0("-l h_vmem=", control_argv$run_mem), "-N", control_argv$BJOB, SH_FN)
+      sc = paste(control_argv$engine_setup, "qsub", sprintf("-t 1-%d", N_tasks), paste0("-l h_rt=", control_argv$run_time), "-P carterlab", "-tc", N_tasks, "-cwd", "-V", "-o /dev/null", "-e /dev/null", paste0("-l h_vmem=", control_argv$run_mem), "-N", control_argv$BJOB, SH_FN)
       
       stdout = system(sc, intern=TRUE)
 # extract job id from qsub stdout
@@ -185,8 +185,9 @@ scatter_jobs = function( control_argv, bsub_argv, var_bsub_argv )
          }
 
        ## if the short queue was used, look for tasks that were killed for going over the 2hr (7200 second) time limit
-         if( control_argv[["QUEUE"]] == "short" ) 
-         {
+#         if( control_argv[["QUEUE"]] == "short" ) 
+
+          if(FALSE) {
             user.id = Sys.getenv("USER")
             cmd = paste( "cat /broad/uge/research/research/common/accounting | grep ", user.id, " | grep short | grep ", job.id, " | awk -F: -v max=7198 \' $14 >= max {print $36}\'", sep="")
 # {print $6\".\"$36\" : \"$14}\'", sep="")

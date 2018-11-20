@@ -41,7 +41,11 @@ options(error=recover)
 require(doMC)
 registerDoMC(16)
 
-library(ABSOLUTE)
+#library(ABSOLUTE)
+
+library(devtools)
+pkg_loc = "/cga/scarter/rklein/Workflows/absolutev1.4/library"
+load_all(pkg_loc, export_all=TRUE )
 
 #library(devtools)
 #pkg_loc = "~/ABS_lib/"

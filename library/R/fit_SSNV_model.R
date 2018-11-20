@@ -34,7 +34,9 @@ fit_SSNV_model = function(mut.cn.dat, mode_info, SSNV_model, allelic_subclonal_s
   mut.cn.dat[nx,"q_hat"] = mut.cn.dat[nx,"total_q_hat"]
 
   post.ccf.LL.grid = calc_muts_ccf_postrior_LL_grid( mut.cn.dat, mode_info["alpha"], SSNV_model )
-  ssnv.ccf.dens = exp( post.ccf.LL.grid - LogAdd( post.ccf.LL.grid))
+  if(!all(is.na(post.ccf.LL.grid))){
+    ssnv.ccf.dens = exp( post.ccf.LL.grid - LogAdd( post.ccf.LL.grid))
+} else {ssnv.ccf.dens = NA}
 
   iter=1
   cur.loglik = -Inf
@@ -91,7 +93,7 @@ fit_SSNV_model = function(mut.cn.dat, mode_info, SSNV_model, allelic_subclonal_s
       SSNV_on_subclonal_SCNA_res = allelic_calc_sample_muts_on_subclonal_scna( mut.cn.dat[ !clonal_scna_mut_ix,, drop=FALSE ], mode_info, allelic_subclonal_scna_tab, scna_log_ccf_dens, SSNV_model ) 
       post_Prs[!clonal_scna_mut_ix,] = SSNV_on_subclonal_SCNA_res[["post_Prs"]]
 ## update ccf dens for ssnvs on subclonal scnas
-      ssnv.ccf.dens[!clonal_scna_mut_ix,] = SSNV_on_subclonal_SCNA_res[["ssnv.ccf.dens"]]
+      if(!is.na(ssnv.ccf.dens)) ssnv.ccf.dens[!clonal_scna_mut_ix,] = SSNV_on_subclonal_SCNA_res[["ssnv.ccf.dens"]]
       som_mut_Q_tab[!clonal_scna_mut_ix,] = SSNV_on_subclonal_SCNA_res[["som_mut_Q_tab"]] 
     }  
     else
@@ -135,7 +137,7 @@ fit_SSNV_model = function(mut.cn.dat, mode_info, SSNV_model, allelic_subclonal_s
 
   if( any( is.nan(ssnv.ccf.dens))) { stop("NaN in ssnv.ccf.dens") }
 
-  if( nrow(ssnv.ccf.dens) != nrow(post_Prs) ) { stop() }
+  if( nrow(ssnv.ccf.dens) != nrow(post_Prs) && !is.na(ssnv.ccf.dens)) { stop() }
 
   return( list( "post_Prs" = post_Prs, "som_theta_Q_MAP" = SSNV_model[["som_theta_Q_mode"]], "ssnv.ccf.dens" = ssnv.ccf.dens, "som_mut_Q_tab" = som_mut_Q_tab, "mut.ev.mat" = mut.ev.mat, "H.ev"=H.ev, "SSNV_model"=SSNV_model ) )
 }
