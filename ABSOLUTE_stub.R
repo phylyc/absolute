@@ -3,10 +3,8 @@ library(devtools)
 # though it should be better documented
 
 
-soft.dir = "/cga/scarter/rklein/Workflows/"
-# load_all( paste(soft.dir,"AllelicCapseg/",sep=""), export_all=FALSE )
-
-pkg_loc = paste(soft.dir,"absolutev1.4/library/",sep="")
+soft.dir = "/carterlab/phahnel/tools/"
+pkg_loc = paste(soft.dir,"absolute/library/",sep="")
 load_all(pkg_loc, export_all=TRUE )
 
 

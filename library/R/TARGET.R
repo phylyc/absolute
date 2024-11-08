@@ -8,9 +8,9 @@ get_LOF_var_classes = function()
 
 prioritize_clinically_actionable_variants = function( maf )
 {
-   #data("VanAllen2014_TARGET", package="ABSOLUTE")  ## provides TARGET
-   #target_genes = TARGET
-	target_genes = read.delim("/xchip/scarter/ncamarda/projects/paad_ccpm/PDAC_TARGET_v11_83117.txt",sep="\t", header=T, stringsAsFactors=F)
+   data("VanAllen2014_TARGET", package="ABSOLUTE")  ## provides TARGET
+   target_genes = TARGET
+	# target_genes = read.delim("/xchip/scarter/ncamarda/projects/paad_ccpm/PDAC_TARGET_v11_83117.txt",sep="\t", header=T, stringsAsFactors=F)
    LOF_classes = get_LOF_var_classes()
    silent_classes = reject_mutation_classes()
 

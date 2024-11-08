@@ -1,7 +1,7 @@
 Package: ABSOLUTE
 Title: ABSOLUTE
 Description: Absolute Quantification of Somatic DNA Alterations in Human Cancer
-Version: 1.4
+Version: 1.6
 Author: Scott L. Carter
 Maintainer: Scott L. Carter <scarter@broadinstitute.org>
 Depends: GenomicRanges, data.table, matrixStats, reshape2, doMC 

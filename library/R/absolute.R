@@ -12,7 +12,8 @@
 .onLoad = function(...) 
 {
 #   packageStartupMessage("ABSOLUTE v1.2 [BETA] succesfully loaded.")
-   packageStartupMessage("ABSOLUTE v1.4 [ALPHA] succesfully loaded.")
+#    packageStartupMessage("ABSOLUTE v1.4 [ALPHA] succesfully loaded.")
+   packageStartupMessage("ABSOLUTE v1.6 [ALPHA] succesfully loaded.")
    options(error = recover)
 }
 
@@ -94,20 +95,18 @@ RunAbsolute = function(seg.dat.fn, primary.disease, platform, sample.name, resul
        print("Overriding SSNV_skew with ACS value")
        SSNV_skew = ACS_result[["capture.em.fit"]][["Theta"]][["f_skew"]]
 
-       seg.dat = import_AllelicCapseg_data( ACS_result, gender, min_probes=min_probes, max_sd=max_sd, 
-                          filter_segs=filter_segs, verbose=verbose)
-
+       seg.dat = import_AllelicCapseg_data( ACS_result, gender, min_probes=min_probes, max_sd=max_sd, filter_segs=filter_segs, verbose=verbose)
     }
     else
     {
-       if( !is.na(seg.dat.fn) && !file.exists(seg.dat.fn)) { stop("seg.dat.fn does not exist") }
+      if( !is.na(seg.dat.fn) && !file.exists(seg.dat.fn)) { stop("seg.dat.fn does not exist") }
 
-        segtab = read.delim( seg.dat.fn, row.names=NULL, stringsAsFactors=FALSE, check.names=FALSE)
-	message("Removing segs with NA sigma")
-	segtab = na.omit(segtab)
+      segtab = read.delim( seg.dat.fn, row.names=NULL, stringsAsFactors=FALSE, check.names=FALSE)
+      message("Removing segs with NA sigma")
+      segtab = na.omit(segtab)
 
-       seg.dat = MakeSegObj(segtab, gender, min_probes=min_probes, max_sd=max_sd, 
-                             filter_segs=filter_segs, verbose=verbose)
+      seg.dat = MakeSegObj(segtab, gender, min_probes=min_probes, max_sd=max_sd,
+                           filter_segs=filter_segs, verbose=verbose)
     }
   }
 
@@ -121,8 +120,6 @@ RunAbsolute = function(seg.dat.fn, primary.disease, platform, sample.name, resul
   dir.create(results.dir, recursive=TRUE, showWarnings=FALSE)
   file.base = paste(output.fn.base, ".ABSOLUTE", sep = "")
 
-  
- 
   seg.dat[["primary.disease"]] = primary.disease
   seg.dat[["group"]] = DetermineGroup(primary.disease)
   seg.dat[["platform"]] = platform
@@ -135,17 +132,12 @@ RunAbsolute = function(seg.dat.fn, primary.disease, platform, sample.name, resul
   seg.dat[["indel.maf.fn"]] = indel.maf.fn
   
   ## either allelic or total CR, to be modeled.
-#  seg.dat[["obs.scna"]] = ExtractSampleObs(seg.dat)
+ # seg.dat[["obs.scna"]] = ExtractSampleObs(seg.dat)
   seg.dat[["obs.scna"]] = AllelicExtractSampleObs(seg.dat)
 
 #  seg.dat[["obs.total.scna"]] = total_make_seg_obj(segtab, gender, min_probes=min_probes, max_sd=max_sd, filter_segs=filter_segs, verbose=verbose)
   seg.dat[["obs.total.scna"]] = extract_total_copy_ratios_from_allelic_CAPSEG(seg.dat) 
 #  seg.dat[["obs.total.scna"]] = total_extract_sample_obs(total.seg.dat)
-
-
-
-
-
 
   SCNA_model[["N_probes"]] = seg.dat[["obs.scna"]][["N_probes"]]
 
@@ -190,12 +182,11 @@ RunAbsolute = function(seg.dat.fn, primary.disease, platform, sample.name, resul
     if ((!is.null(maf)) && (nrow(maf) > 0)) 
     {
       if (is.na(SSNV_skew)){
-	message("Applying default f_skew value of 0.95")
+	      message("Applying default f_skew value of 0.95")
         SSNV_skew = 0.95
       }
       SSNV_model = init_SSNV_model( SCNA_model[["kQ"]], SSNV_skew, nrow(maf) )
 #      mut.cn.dat = classic_CreateMutCnDat(maf, indel.maf, seg.dat, min.mut.af, verbose=verbose)
-
       mut.cn.dat = classic_CreateMutCnDat(maf, indel.maf, seg.dat, verbose=verbose)
     } else {
       mut.cn.dat = NA
