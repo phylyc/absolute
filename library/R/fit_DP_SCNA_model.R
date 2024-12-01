@@ -511,7 +511,7 @@ apply_allelic_model_to_total_copy_ratios = function( tot.obs, b, delta, SCNA_mod
 
 
 
-calc_mode_seg_tabs = function( seg.obj, SCNA_model, b, delta )
+calc_mode_seg_tabs = function( seg.obj, SCNA_model, b, delta, chr.arms.dat )
 {
    obs <- seg.obj[["obs.scna"]]
 

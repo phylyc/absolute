@@ -16,7 +16,7 @@ PlotModes_layout = function()
 #  par( cex=0.6 )
 }
 
-PlotModes <- function(segobj, n.print = NA, called.mode.ix=NA, verbose=FALSE) 
+PlotModes <- function(segobj, chr.arms.dat, n.print = NA, called.mode.ix=NA, verbose=FALSE)
 {
 #  Q = dim(segobj[["mode.res"]][["seg.q.tab"]])[3]
   Q = segobj[["mode.res"]][["mode_SCNA_models"]][[1]][["kQ"]] 
@@ -105,7 +105,7 @@ PlotModes <- function(segobj, n.print = NA, called.mode.ix=NA, verbose=FALSE)
 
     # New plot version with genome-plot and sideways hist summary
 # 2 and 3 - genome and seghist
-      PlotHscrAndSeghist( allele.segs, clonal_seg_colors, max_CR, plot.hist=TRUE, plot.abs.fit=TRUE, comb=comb, mode.info=mode.info, Wq0=Wq0, comb.ab=comb.ab, fit.color=mode.colors[i], plot.seg.sem=TRUE )      
+      PlotHscrAndSeghist( allele.segs, clonal_seg_colors, chr.arms.dat, max_CR, plot.hist=TRUE, plot.abs.fit=TRUE, comb=comb, mode.info=mode.info, Wq0=Wq0, comb.ab=comb.ab, fit.color=mode.colors[i], plot.seg.sem=TRUE )
 
 
   # 4 - SCNAs CCF
@@ -174,14 +174,14 @@ PlotModes <- function(segobj, n.print = NA, called.mode.ix=NA, verbose=FALSE)
 ## color genome by seg clust
 #      if( length(mut_cols) != nrow(allele.segs)) { stop("wrong # of cols/segs") }
 
-      PlotHscrAndSeghist( allele.segs, mut_cols, max_CR, plot.hist=TRUE, plot.abs.fit=TRUE, comb=comb, mode.info=NA, Wq0=Wq0, comb.ab=comb.ab, fit.color=mode.colors[i], plot.seg.sem=TRUE )      
+      PlotHscrAndSeghist( allele.segs, mut_cols, chr.arms.dat, max_CR, plot.hist=TRUE, plot.abs.fit=TRUE, comb=comb, mode.info=NA, Wq0=Wq0, comb.ab=comb.ab, fit.color=mode.colors[i], plot.seg.sem=TRUE )
 
       seg_LL = SCNA_model[["seg_LL"]] 
       seg_CN_LL = SCNA_model[["seg_CN_LL"]]  
       use.pal = (colorRampPalette(c("red", "yellow", "green")))  (1000)
 # color by seg LL
       seg_LL_cols = get_seg_colors(seg_LL, use.pal=use.pal)
-      PlotHscrAndSeghist(allele.segs, seg_LL_cols, max_CR=5.0, plot.genome=FALSE, plot.hist=TRUE, plot.abs.fit=TRUE, comb=comb, mode.info=NA, Wq0=Wq0, comb.ab=comb.ab, fit.color=mode.colors[i], plot.seg.sem=TRUE )      
+      PlotHscrAndSeghist(allele.segs, seg_LL_cols, chr.arms.dat, max_CR=5.0, plot.genome=FALSE, plot.hist=TRUE, plot.abs.fit=TRUE, comb=comb, mode.info=NA, Wq0=Wq0, comb.ab=comb.ab, fit.color=mode.colors[i], plot.seg.sem=TRUE )
 
 #  CCF of hard-clusters
       clust_dens = SCNA_model[["seg_CCF_DP"]][["tree_clust"]][["CCF_dens"]] 
@@ -207,7 +207,7 @@ PlotModes <- function(segobj, n.print = NA, called.mode.ix=NA, verbose=FALSE)
     seg_ix_colors[ no.ix ] = 1     ## No flags
     seg_ix_colors[ !no.ix ] = apply( SCNA_model[["seg.ix.tab"]][ !no.ix , c("amp.ix", "neg.ix", "high.sem.ix"), drop=FALSE ], 1, which.max ) + 1
     seg_ix_colors[ SCNA_model[["seg.ix.tab"]][, 5] ] = max(seg_ix_colors, na.rm=TRUE)+1
-    PlotHscrAndSeghist( allele.segs, seg_ix_colors, max_CR, plot.hist=TRUE, plot.abs.fit=TRUE, comb=comb, plot.seg.sem=TRUE )
+    PlotHscrAndSeghist( allele.segs, seg_ix_colors, chr.arms.dat, max_CR, plot.hist=TRUE, plot.abs.fit=TRUE, comb=comb, plot.seg.sem=TRUE )
 
    ## SCNA ev summary
     arm_ev_result = SCNA_model[["SCNA_minev_chrarm_result"]]
@@ -215,7 +215,7 @@ PlotModes <- function(segobj, n.print = NA, called.mode.ix=NA, verbose=FALSE)
 
 #    barplot( c(arm_ev_result[["ancestral_LL"]], arm_ev_result[["subclonal_LL"]],  arm_ev_result[["num_NA"]]), names=c("ancestral CN", "subclonal CN", "num_NA"), ylab="Log likelihood"  )
     ev_plot_dat = arm_ev_result[ c("average_WGD_score", "log_multinom_coef", "SC_ev_steps_LL", "neg_arm_LL", "subclone_CCF_volume") ]
-    barplot( unlist(ev_plot_dat), names=names(ev_plot_dat), ylab="Log likelihood" )
+    barplot( unlist(ev_plot_dat), names=names(ev_plot_dat), las=2, ylab="Log likelihood" )
 
 #"WGD_Pr"=WGD_Pr, "ancestral_LL"=WGD_ev_result, "subclonal_LL"=log_multinom_coef, "num_NA"=num_NA_chrarms
     frame()
@@ -224,7 +224,7 @@ PlotModes <- function(segobj, n.print = NA, called.mode.ix=NA, verbose=FALSE)
     frame()
  ## plot genome with total segs 
 #    tcols = rep( 1, nrow(segobj[["total.seg.dat"]]) )
-#    PlotHscrAndSeghist( allele.segs, seg_LL_cols, max_CR=5, plot.hist=TRUE, plot.abs.fit=TRUE, comb=comb, plot.seg.sem=TRUE,
+#    PlotHscrAndSeghist( allele.segs, seg_LL_cols, chr.arms.dat, max_CR=5, plot.hist=TRUE, plot.abs.fit=TRUE, comb=comb, plot.seg.sem=TRUE,
 # plot.total.CN=TRUE, tot.seg.colors=tcols ) 
 
 ## plot d0_segs
@@ -234,7 +234,7 @@ PlotModes <- function(segobj, n.print = NA, called.mode.ix=NA, verbose=FALSE)
     d0.allele.segs[,"A1.Seg.CN"] = segs_d0[ AS.seg.ix[,1] ]
     d0.allele.segs[,"A2.Seg.CN"] = segs_d0[ AS.seg.ix[,2] ]
  
-    PlotHscrAndSeghist( d0.allele.segs, mut_cols, max_CR=4.25, plot.hist=TRUE, plot.abs.fit=FALSE, comb=comb, plot.seg.sem=FALSE, y.lab="Copy number" )
+    PlotHscrAndSeghist( d0.allele.segs, mut_cols, chr.arms.dat, max_CR=4.25, plot.hist=TRUE, plot.abs.fit=FALSE, comb=comb, plot.seg.sem=FALSE, y.lab="Copy number" )
 
     frame(); frame(); frame()
      
@@ -242,7 +242,7 @@ PlotModes <- function(segobj, n.print = NA, called.mode.ix=NA, verbose=FALSE)
 # new row
     frame()
   ## Genome plot
-    PlotHscrAndSeghist( d0.allele.segs, mut_cols, max_CR=2.5, plot.abs.fit=FALSE, comb=comb, plot.seg.sem=FALSE, y.lab="Copy number" )
+    PlotHscrAndSeghist( d0.allele.segs, mut_cols, chr.arms.dat, max_CR=2.5, plot.abs.fit=FALSE, comb=comb, plot.seg.sem=FALSE, y.lab="Copy number" )
 
     if(!is.null(segobj[["mode.res"]][["modeled.muts"]][[i]]) && !all(is.na(segobj[["mode.res"]][["modeled.muts"]][[i]][,"ccf_hat"])) )  ## protect against edge case of all muts on homozygously del SCNAs
     {
@@ -269,7 +269,7 @@ PlotModes <- function(segobj, n.print = NA, called.mode.ix=NA, verbose=FALSE)
 
 
 modes_purity_ploidy_plot <- function(mode.tab, mode.colors, alpha.dom, tau.dom, sample.name, 
-                      seg.dat, called.mode.ix, debug.info=FALSE, call.status = NA, model.id = NA, mode.focus.ix=1) 
+                      seg.dat, called.mode.ix, debug.info=TRUE, call.status = NA, model.id = NA, mode.focus.ix=1)
 {
   mode.colors <- mode.colors[c(1:NROW(mode.tab))]
     
@@ -323,9 +323,10 @@ modes_purity_ploidy_plot <- function(mode.tab, mode.colors, alpha.dom, tau.dom, 
   }
   
   if (debug.info) {
-    title(sample.name, line = 3)
-    mtext(call.status, line = 0, adj = 0)
-    mtext(model.id, line = 0, adj = 1)
+    title(paste("Solution", mode.focus.ix), line = 3)
+    # title(sample.name, line = 3)
+    # mtext(call.status, line = 0, adj = 0)
+    # mtext(model.id, line = 0, adj = 1)
   }
   
   if ((seg.dat[["platform"]] == "SNP_6.0") && debug.info) {
@@ -390,7 +391,7 @@ PpModeScorerBarplot <- function(mode.tab, mode.colors, obs, n.print) {
   
 #  cols = mode.colors[(1:n.print)[!ix]]
   cols = mode.colors[ !ix ]
-  barplot(mat, beside = TRUE, col = cols, axes = FALSE, 
+  barplot(mat, beside = TRUE, col = cols, axes = FALSE, las = 2,
           ylab = "", space = c(0, 2), cex.names = par("cex.axis"))
   
   mtext("Log-likelihood", side = 2, line = 1, las = 3, cex = par("cex") * par("cex.axis"))

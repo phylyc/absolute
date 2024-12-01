@@ -69,10 +69,10 @@ batch_exec_ABSOLUTE = function( ABSOLUTE_argv, obj.name, var_bsub_argv, R_STUB_F
          for( i in 1:length(segobj.list) )
          {
 #            PlotModes_review_layout()  ## redo layout to make sure each sample starts at top of new page
-#            dens_PlotMode_review_summary( segobj.list[[i]], n.print=4 )
+#            dens_PlotMode_review_summary( segobj.list[[i]], chr.arms.dat, n.print=4 )
 #
             PlotModes_layout()
-            PlotModes( segobj.list[[i]], n.print=4 )
+            PlotModes( segobj.list[[i]], chr.arms.dat, n.print=4 )
             cat(".")
          }
          dev.off()

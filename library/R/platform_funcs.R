@@ -20,6 +20,7 @@ set_allelic_funcs = function() {
 
 ## Allelic models
   ExtractSampleObs <<- AllelicExtractSampleObs
+  ExtractTotalObs <<- extract_total_copy_ratios_from_allelic_CAPSEG
 
   GetMutSegIx <<- AllelicGetMutSegIx
   get_muts_nearest_clonal_scna <<- allelic_get_muts_nearest_clonal_scna
@@ -45,6 +46,8 @@ set_allelic_funcs = function() {
 set_total_funcs = function() {
 
   ExtractSampleObs <<- total_extract_sample_obs
+  ExtractTotalObs <<- total_extract_sample_obs
+
   GetMutSegIx <<- total_get_mut_seg_ix    
   get_muts_nearest_clonal_scna<<- total_get_muts_nearest_clonal_scna
   CalcChrArmDistr <<- total_calc_chr_arm_distr

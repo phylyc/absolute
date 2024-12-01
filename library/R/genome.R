@@ -14,8 +14,7 @@ GetChrLens <- function(x=FALSE) {
   return(lens)
 }
 
-GetCentromerePos <- function(x=FALSE) {
-  data(hg18_ChrArmsDat, package = "ABSOLUTE")
+GetCentromerePos <- function(chr.arms.dat, x=FALSE) {
   chrarm_names <- paste(c(1:22), "q", sep = "")
   
   if (x) {

@@ -8,7 +8,27 @@
 ## whatsoever. Neither the Broad Institute nor MIT can be responsible for its
 ## use, misuse, or functionality.
 
-run_PP_calls_liftover = function( reviewed.pp.calls.fn, analyst.id, modes.fn, out.dir.base, obj.name, pp.calls_ploidy_colname = "ploidy", ploidy_colname="genome mass", verbose=FALSE)
+run_PP_calls_liftover_from_num = function(solution_num, analyst.id, modes.fn, out.dir.base, obj.name, verbose=FALSE) {
+  ## provides segobj.list
+  if( verbose ) { cat("Loading ABS multi-sample object...") }
+  load(modes.fn)
+  if( verbose ) { cat(" Done.\n") }
+
+  review.dir = paste( file.path(out.dir.base, "reviewed"))
+  dir.create(review.dir, recursive=TRUE)
+  call_override = list(solution_num)
+  cat(paste("Solution num:", solution_num))
+
+  called.segobj.list = override_absolute_calls(segobj.list, call_override)
+
+  ## PP tab
+  out.fn = file.path(out.dir.base, "reviewed", paste(obj.name, ".", analyst.id, ".ABSOLUTE.table.txt", sep=""))
+  PrintPpCallTable(called.segobj.list, out.fn)
+
+  return(called.segobj.list)
+}
+
+run_PP_calls_liftover = function( reviewed.pp.calls.fn, analyst.id, modes.fn, out.dir.base, obj.name, chr.arms.dat, pp.calls_ploidy_colname = "ploidy", ploidy_colname="genome mass", verbose=FALSE)
 {
   ## provides agg_res
   if( verbose ) { cat("Loading ABS multi-sample object...") }
@@ -101,7 +121,7 @@ run_PP_calls_liftover = function( reviewed.pp.calls.fn, analyst.id, modes.fn, ou
 
         for( i in 1:length(plot.wix)) 
         {        
-           PlotModes(segobj.list[[plot.wix[i]]], n.print=3)
+           PlotModes(segobj.list[[plot.wix[i]]], chr.arms.dat, n.print=3)
         }
         dev.off()
      }

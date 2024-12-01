@@ -366,8 +366,9 @@ select_samples_from_gene_SCNA_calls = function( gene_SCNA_calls, samples )
 
 get_TARGET_SCNA_genes = function()
 {
-## use other cancer DBs to auto-name peaks
-   data("VanAllen2014_TARGET", package="ABSOLUTE")  ## provides TARGET
+   ## use other cancer DBs to auto-name peaks
+   # data("VanAllen2014_TARGET", package="ABSOLUTE")  ## provides TARGET
+  load(file.path(pkg_dir, "data", "VanAllen2014_TARGET.RData"))
    target_genes = TARGET
 
    crit_col = "Types_of_recurrent_alterations"
@@ -384,13 +385,15 @@ get_TARGET_SCNA_genes = function()
 get_GISTIC_SCNA_genes = function()
 {
 #   data( "refgene.hg19.genes", package="ABSOLUTE" )   # provides refgene
-    data( "gencode.hg19.genes", package="ABSOLUTE" )   # provides GENCODE 
+#     data( "gencode.hg19.genes", package="ABSOLUTE" )   # provides GENCODE
+  load(file.path(pkg_dir, "data", "gencode.hg19.genes.RData"))
     txdb = gencode
     genelist = unique(txdb[,"HGNC"]) 
 
 
 ## provide regs
-   data("Zack2013_GISTIC_regions", package="ABSOLUTE")  
+   # data("Zack2013_GISTIC_regions", package="ABSOLUTE")
+  load(file.path(pkg_dir, "data", "Zack2013_GISTIC_regions.RData"))
    amp_GISTIC = names(regs[["pancan"]][["amps"]])
    amp_GISTIC = gsub( "\\[", "", amp_GISTIC )
    amp_GISTIC = gsub( "\\]", "", amp_GISTIC )
@@ -403,7 +406,8 @@ get_GISTIC_SCNA_genes = function()
    del_GISTIC = intersect( del_GISTIC, genelist )
 
 # Annotated GISTIC peaks in various cancer pubs - curated by amaro
-   data("CN_genes", package="ABSOLUTE") 
+#    data("CN_genes", package="ABSOLUTE")
+  load(file.path(pkg_dir, "data", "CN_genes.RData"))
 
 ## this is a hack to assign genes curated by aramo to amp or del status
 # pare them down to only those genes not in curated GISTIC / TARGET sets
@@ -432,7 +436,8 @@ get_GISTIC_SCNA_genes = function()
 
 get_refgene_transcript_GRs = function( genelist=NA )
 {
-   data( "refgene.hg19.genes", package="ABSOLUTE" )   # provides refgene
+   # data( "refgene.hg19.genes", package="ABSOLUTE" )   # provides refgene
+  load(file.path(pkg_dir, "data", "refgene.hg19.genes.RData"))
 
    if( is.na(genelist) ) { genelist = unique(refgene[,"symb"]) }
 
@@ -450,7 +455,8 @@ get_refgene_transcript_GRs = function( genelist=NA )
 
 get_GENCODE_transcript_GRs = function( genelist=NA, dropY=TRUE )
 {
-   data( "gencode.hg19.genes", package="ABSOLUTE" )   # provides GENCODE 
+   # data( "gencode.hg19.genes", package="ABSOLUTE" )   # provides GENCODE
+  load(file.path(pkg_dir, "data", "gencode.hg19.genes.RData"))
    txdb = gencode
 
    if( is.na(genelist) ) { genelist = unique(txdb[,"HGNC"]) }

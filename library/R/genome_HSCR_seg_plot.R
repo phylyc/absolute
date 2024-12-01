@@ -16,7 +16,7 @@ get_genome_coords = function( chrpos )  ## chrs must be integer
   return( genome.coords )
 }
 
-GenomeHscrSegPlot <- function(allele.segs, seg_colors, y.lab, y.min, y.max, plot.model.fit=FALSE, plot.comb.fit=FALSE, mode.info=NA, comb=NA, comb.color=NA, plot.seg.sem=FALSE, plot.total.CN=FALSE, total.seg.dat=NA, tot.seg.colors=NA, log2CR = FALSE, label.chrs=TRUE, seg.width=0.025, min.sem.width=0.015, yaxt="s" ) 
+GenomeHscrSegPlot <- function(allele.segs, seg_colors, y.lab, y.min, y.max, chr.arms.dat, plot.model.fit=FALSE, plot.comb.fit=FALSE, mode.info=NA, comb=NA, comb.color=NA, plot.seg.sem=FALSE, plot.total.CN=FALSE, total.seg.dat=NA, tot.seg.colors=NA, log2CR = FALSE, label.chrs=TRUE, seg.width=0.025, min.sem.width=0.015, yaxt="s" )
 {
   chr.lens <- GetChrLens(x=TRUE)
   chr.lens <- as.numeric(chr.lens)
@@ -43,7 +43,7 @@ GenomeHscrSegPlot <- function(allele.segs, seg_colors, y.lab, y.min, y.max, plot
    }
     
   chr.offsets <- c(0, cumsum(chr.w[c(1:(length(chr.w) - 1))]), 1)
-  cent.pos <- (GetCentromerePos(x=TRUE))/sum(chr.lens) +
+  cent.pos <- (GetCentromerePos(chr.arms.dat, x=TRUE))/sum(chr.lens) +
     chr.offsets[c(1:(length(chr.offsets) - 1))]
     
   for (i in 1:(length(chr.offsets) - 1)) {
@@ -183,7 +183,7 @@ GetSegColsByAllelicBalance <- function( obs, allele.segs, seg.phase=NULL)
 
 
 ## Top-level called functions
-PlotHscrAndSeghist <- function(allele.segs, seg_colors, max_CR, min_CR=-0.05, plot.genome=TRUE, plot.hist=FALSE, plot.abs.fit=FALSE, comb=NA, mode.info=NA, Wq0=NA, comb.ab=NA, fit.color=NA, plot.seg.sem=FALSE, plot.total.CN=FALSE, tot.seg.colors=NA, total.seg.dat=NA, y.lab=NA, log2CR=FALSE, label.chrs=TRUE, SID_label=NA, label.genomic.fraction.axis=TRUE, seg.width=0.025, min.sem.width=0.015, yaxt="s" ) 
+PlotHscrAndSeghist <- function(allele.segs, seg_colors, chr.arms.dat, max_CR, min_CR=-0.05, plot.genome=TRUE, plot.hist=FALSE, plot.abs.fit=FALSE, comb=NA, mode.info=NA, Wq0=NA, comb.ab=NA, fit.color=NA, plot.seg.sem=FALSE, plot.total.CN=FALSE, tot.seg.colors=NA, total.seg.dat=NA, y.lab=NA, log2CR=FALSE, label.chrs=TRUE, SID_label=NA, label.genomic.fraction.axis=TRUE, seg.width=0.025, min.sem.width=0.015, yaxt="s" )
 {
 #  obs = seg.dat[["obs.scna"]]
 #  allele.segs = get_hom_pairs_segtab( seg.dat )
@@ -209,7 +209,7 @@ PlotHscrAndSeghist <- function(allele.segs, seg_colors, max_CR, min_CR=-0.05, pl
         }
      }
 
-     GenomeHscrSegPlot(allele.segs, seg_colors, y.lab=y.lab, y.min=min_CR, y.max=max_CR, plot.model.fit=!all(is.na(mode.info)), plot.comb.fit=plot.abs.fit, mode.info=mode.info, comb=comb, comb.color=fit.color, plot.seg.sem=plot.seg.sem, plot.total.CN=plot.total.CN, total.seg.dat=total.seg.dat, tot.seg.colors=tot.seg.colors, log2CR=log2CR, label.chrs=label.chrs, seg.width=seg.width, min.sem.width=min.sem.width, yaxt=yaxt ) 
+     GenomeHscrSegPlot(allele.segs, seg_colors, y.lab=y.lab, y.min=min_CR, y.max=max_CR, chr.arms.dat=chr.arms.dat, plot.model.fit=!all(is.na(mode.info)), plot.comb.fit=plot.abs.fit, mode.info=mode.info, comb=comb, comb.color=fit.color, plot.seg.sem=plot.seg.sem, plot.total.CN=plot.total.CN, total.seg.dat=total.seg.dat, tot.seg.colors=tot.seg.colors, log2CR=log2CR, label.chrs=label.chrs, seg.width=seg.width, min.sem.width=min.sem.width, yaxt=yaxt )
    
      if( !is.na(SID_label)) { 
         mtext( SID_label, side=3, line=0.5, adj=0, cex=par("cex")+0.1, font=2 )

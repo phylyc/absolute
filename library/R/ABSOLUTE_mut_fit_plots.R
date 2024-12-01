@@ -104,10 +104,10 @@ Mut_AF_plot = function(mut.dat, SSNV_cols, mode.color, draw.indv, draw.plot=TRUE
      DrawMutBetaDensities(af_post_pr, pr.clonal, hz.del.flag, SSNV_cols, draw.total=TRUE,
                           draw.indv=draw.indv)
 
-#  if(!is.na(SSNV_skew)){
-#     msg = paste("skew = ", round(SSNV_skew,3), sep="")
-#     mtext( text=msg, side=3, adj=1  )
-#  }
+     if(!is.na(SSNV_skew)){
+        msg = paste("skew = ", round(SSNV_skew,3), sep="")
+        mtext( text=msg, line=2, side=3, adj=1, cex=.7 )
+     }
 
      alpha <- mut.dat[1, "purity"]
      abline(v=alpha / 2, lwd=0.5, lty=3, col=mode.color)
@@ -143,7 +143,7 @@ draw_mut_multiplicity_densities = function(mut_pr, grid, pr_clonal, pr_cryptic_S
 #      y = mut_pr[i, ] * pr_clonal[i] 
       y = mut_pr[i, ]
       if (sum(!is.na(y)) > 2) {
-        grid_dens[i, ] = approx(x, y, xout=mult_grid)$y
+        grid_dens[i, ] = approx(x, y, xout=mult_grid, ties=list("ordered", mean))$y
       }
     }
 
@@ -259,7 +259,7 @@ draw_grid_mut_densities = function(mut_pr, grid, col, mut_colors, scale_total, d
   }
   
   if (draw_indv) {
-    for (i in seq_len(nrow(mut_pr))) {
+    for (i in rev(seq_len(nrow(mut_pr)))) {
       lines(grid, mut_pr[i, ], col=mut_colors[i], lty=lty)
     }
   }
@@ -347,7 +347,7 @@ SSNV_CCF_plot = function( mut.dat, SSNV_ccf_dens, mode.ix, SSNV_cols, max_SSNVs_
   draw_grid_mut_densities( H123.SSNV_ccf_dens, ccf_grid, col=H123_SSNV_cols[2], mut_colors=H123.SSNV_mut_cols, scale_total, draw_total=TRUE, draw_indv=TRUE, add=TRUE, y_lim=y_lim )
 
 
-  legend( x='topleft', legend=c("Clonal SSNVs", "Subclonal SSNVs", "Clonal SSNVs on subclonal SCNAs", "Subclonal SSNVs on subclonal SCNAs"), col=c( rev(SSNV_cols), rev(H123_SSNV_cols) ), lty=1, lwd=1.5, bty="n" )
+  legend( x='topleft', legend=c("Clonal SSNVs", "Subclonal SSNVs", "Clonal SSNVs on subclonal SCNAs", "Subclonal SSNVs on subclonal SCNAs"), col=c( rev(SSNV_cols), rev(H123_SSNV_cols) ), lty=1, lwd=1.5, bty="n", cex=.6 )
 }
 
 
@@ -385,7 +385,7 @@ SSNV_on_subclonal_SCNA_CCF_plot = function( mut.dat, SSNV_ccf_dens, mode.ix, max
   draw_grid_mut_densities( SSNV_ccf_dens[loss.ix,,drop=FALSE], ccf_grid, col=NA, mut_colors=rep("black", sum(loss.ix)), scale_total, draw_total=FALSE, draw_indv=TRUE, add=TRUE, y_lim=y_lim, lty=3 )
 
   mtext( text="SSNVs on subclonal SCNAs", side=3, line=0, adj=0, cex=0.7)
-  legend( x='topleft', legend=c("H1: Ancestral SSNV in trans", "H2: Ancestral SSNV in cis", "H3: Derived SSNV", "Subclonal deletion SCNA"), col=c(H_cols,"black"), lty=c(1,1,1,3), lwd=1.5, bty="n" )
+  legend( x='topleft', legend=c("H1: Ancestral SSNV in trans", "H2: Ancestral SSNV in cis", "H3: Derived SSNV", "Subclonal deletion SCNA"), col=c(H_cols,"black"), lty=c(1,1,1,3), lwd=1.5, bty="n", cex=.7 )
 }
 
 
@@ -411,7 +411,7 @@ get_grid_dens_95CI = function( dens, grid )
       if(ecdf[1]==1) { mult_ci95[i,]=c(0,0.1) }
       else
       {
-         mult_ci95[i, ] = approx(ecdf, y=mult_grid[i,], xout=c(0.025, 0.975))$y
+         mult_ci95[i, ] = approx(ecdf, y=mult_grid[i,], xout=c(0.025, 0.975), ties=list("ordered", mean))$y
       }
    }
 
@@ -560,7 +560,8 @@ plot_SSNV_on_subclonal_SCNA_CCF_summaries = function(mut.dat, seg.dat, mode.ix, 
   }
 
 
-  SSNV_cols = c("dodgerblue", "darkgrey", "seagreen3")   ## SC, clonal, mult>1
+  # SSNV_cols = c("dodgerblue", "darkgrey", "seagreen3")   ## SC, clonal, mult>1
+  SSNV_cols = c("dodgerblue", "magenta", "olivedrab")   ## mult>1, SC, clonal
 
 ## 3rd plot: combined SCNAs and muts
   SSNV_CCF_plot( mut.dat, SSNV_ccf_dens, mode.ix, SSNV_cols, max_SSNVs_plot )

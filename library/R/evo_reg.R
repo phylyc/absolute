@@ -1,4 +1,4 @@
-get_post_DP_chrarm_states = function( seg.obj, SCNA_model, subclonal_scna_tab )
+get_post_DP_chrarm_states = function( seg.obj, SCNA_model, subclonal_scna_tab, chr.arms.dat )
 {
    get_segs_modal_CN = function( CN, w )
    {

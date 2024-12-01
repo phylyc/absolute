@@ -10,7 +10,7 @@
 
 ## seg.dat is the result of ABSOLUTE
 
-AbsoluteResultPlot <- function(sample.pdf.fn, seg.dat, called.mode.ix=NA,
+AbsoluteResultPlot <- function(sample.pdf.fn, seg.dat, chr.arms.dat, called.mode.ix=NA,
                                verbose=FALSE) {
   pdf(sample.pdf.fn, 17.5, 18.5 )
     
@@ -27,7 +27,7 @@ AbsoluteResultPlot <- function(sample.pdf.fn, seg.dat, called.mode.ix=NA,
   {
     allele.segs = get_hom_pairs_segtab(seg.dat)
     seg_colors = GetSegColsByAllelicBalance(seg.dat[["obs.scna"]], allele.segs  ) 
-    PlotHscrAndSeghist(allele.segs, seg_colors, max_CR=2, plot.hist=TRUE )
+    PlotHscrAndSeghist(allele.segs, seg_colors, chr.arms.dat, max_CR=2, plot.hist=TRUE )
     frame()
     frame()
   }
@@ -48,7 +48,7 @@ AbsoluteResultPlot <- function(sample.pdf.fn, seg.dat, called.mode.ix=NA,
 # par(mgp=)    # closer axis labels
 # short axis ticks
 
-  PlotModes( seg.dat, n.print=nrow(seg.dat[["mode.res"]][["mode.tab"]]), 
+  PlotModes( seg.dat, chr.arms.dat, n.print=nrow(seg.dat[["mode.res"]][["mode.tab"]]),
              called.mode.ix=called.mode.ix, verbose=verbose)
 
   dev.off()

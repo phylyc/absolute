@@ -48,7 +48,7 @@ ExtractReviewedResults = function( called.segobj.list, analyst.id, out.dir.base,
   pdf.fn = file.path(out.dir.base, "reviewed", 
                      paste(obj.name, ".called.ABSOLUTE.plots.pdf", sep=""))
   
-#  PlotModes(called.segobj.list, pdf.fn, n.print=1)
+#  PlotModes(called.segobj.list, chr.arms.dat, pdf.fn, n.print=1)
 
 ## This is useless because it does not include sample names in the plot!
 if( FALSE )
@@ -58,7 +58,7 @@ if( FALSE )
   PlotModes_layout()
   for( i in 1:length(called.segobj.list)) 
   {        
-     PlotModes(called.segobj.list[[i]], n.print=1)
+     PlotModes(called.segobj.list[[i]], chr.arms.dat, n.print=1)
      cat(".")
   }
   dev.off()
@@ -103,28 +103,40 @@ if( FALSE )
 
 }
 
-apply_review_and_extract = function( pp.review.fn, obj.name, analyst.id, pp.calls_ploidy_colname = "ploidy", ploidy_colname="genome mass",
- copy_num_type = "allelic", verbose=TRUE )
+apply_review_and_extract = function( pp.review.fn=NA, pp.solution.num=NA, obj.name, analyst.id, pp.calls_ploidy_colname = "ploidy", ploidy_colname="genome mass",
+ copy_num_type = "allelic", genome_build = "hg19", verbose=TRUE )
 {
    if( copy_num_type == "allelic" )  {  set_allelic_funcs() }
    if( copy_num_type == "total" )  {  set_total_funcs() }
    if( !(copy_num_type %in% c("allelic", "total") ) ) { stop( "apply_review_and_extract: copy_num_type must be either 'allelic' or 'total'!") }
 
+  if ( genome_build == "hg18") { chr.arms.dat.file = file.path(pkg_dir, "data", "hg18_ChrArmsDat.RData") }
+  else if ( genome_build == "hg19") { chr.arms.dat.file = file.path(pkg_dir, "data", "hg19_ChrArmsDat.RData") }
+  else if ( genome_build == "hg38") { chr.arms.dat.file = file.path(pkg_dir, "data", "hg38_ChrArmsDat.RData") }
+  else if ( genome_build == "mm9" ) { chr.arms.dat.file = file.path(pkg_dir, "data", "mm9_ChrArmsDat.RData") }
+  else {}
+  print(paste("Loading", chr.arms.dat.file))
+  load(chr.arms.dat.file)
 
-   calls_FN = pp.review.fn
+  if (copy_num_type == "total") {
+    set_total_funcs()
+  } else if (copy_num_type == "allelic") {
+    set_allelic_funcs()
+  } else {
+    stop("Unsupported copy number type: ", copy_num_type)
+  }
+
    out.dir.base = file.path( "ABSOLUTE_results", obj.name )
 
-   called.out.fn = file.path(out.dir.base, "reviewed", paste(obj.name, ".", analyst.id, 
-                                                     ".called.segobj.list.Rds", sep=""))
+   modesegs.fn = file.path(out.dir.base, paste0(obj.name, ".PP-modes.data.RData"))
 
-   nm = file.path(out.dir.base, paste(obj.name, ".PP-modes", sep = ""))
-   modesegs.fn = paste(nm, ".data.RData", sep = "")
-
-   if( file.exists(calls_FN) )
-   {
-      called.segobj.list = run_PP_calls_liftover(calls_FN, analyst.id, modesegs.fn, out.dir.base, obj.name, pp.calls_ploidy_colname, ploidy_colname, verbose=verbose )
+   if ( file.exists(pp.review.fn) ) {
+      called.segobj.list = run_PP_calls_liftover(pp.review.fn, analyst.id, modesegs.fn, out.dir.base, obj.name, chr.arms.dat, pp.calls_ploidy_colname, ploidy_colname, verbose=verbose )
+   } else if (!isna(pp.solution.num)) {
+     called.segobj.list = run_PP_calls_liftover_from_num(pp.solution.num, analyst.id, modesegs.fn, out.dir.base, obj.name, chr.arms.dat, pp.calls_ploidy_colname, ploidy_colname, verbose=verbose )
+   } else {
+     stop("pp.review.fn or pp.solution.num does not exist!")
    }
-   else{ stop("calls_FN does not exist!") }
 
    if( length(called.segobj.list) > 0 )
    {

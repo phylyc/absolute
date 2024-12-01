@@ -9,7 +9,9 @@
 ## use, misuse, or functionality.
 
 DetermineGroup <- function(primary.disease) {
-  data(diseaseMap)
+
+  # data(diseaseMap)
+  load(file.path(pkg_dir, "data", "diseaseMap.RData"))
 
   if(is.na(primary.disease)) { return(NA) }
 

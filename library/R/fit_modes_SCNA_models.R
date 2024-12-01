@@ -1,13 +1,12 @@
 
-fit_modes_SCNA_models = function( seg.obj, mode.tab, SCNA_model, mut.cn.dat, verbose=FALSE )
+fit_modes_SCNA_models = function( seg.obj, mode.tab, SCNA_model, mut.cn.dat, chr.arms.dat, verbose=FALSE )
 {
   Q = SCNA_model[["kQ"]]
   n.modes = nrow(mode.tab)
   obs <- seg.obj[["obs.scna"]]
 
   if (verbose) {
-    print(paste("Optimizing SCNA_model | comb) for ",
-                n.modes, " modes: ", sep=""))
+    print(paste0("Optimizing SCNA_model | comb) for ", n.modes, " modes: "))
   }
   
 ## TODO: absorb into SCNA_model
@@ -69,7 +68,7 @@ fit_modes_SCNA_models = function( seg.obj, mode.tab, SCNA_model, mut.cn.dat, ver
 
 #    mode_SCNA_models[[i]] = SCNA_model_calc_CCF_DP_loglik( obs, b, delta, init, verbose=verbose )
     mode_SCNA_models[[i]] = modes_DP_res[[i]]
-    mode_SCNA_models[[i]] = calc_mode_seg_tabs( seg.obj, mode_SCNA_models[[i]], b, delta )
+    mode_SCNA_models[[i]] = calc_mode_seg_tabs( seg.obj, mode_SCNA_models[[i]], b, delta, chr.arms.dat )
 
 ## Annotate SCNA clonality summary for SSNV models
 ## Note - these functions only use the mut.cn.dat to disallow clonal homozygous calls if there is 1 > alt SSNV read in the seg
@@ -97,7 +96,7 @@ fit_modes_SCNA_models = function( seg.obj, mode.tab, SCNA_model, mut.cn.dat, ver
  
 
   ## compute ev score/data
-    mode_SCNA_models[[i]][["DP_CN_chrarm_states"]] = get_post_DP_chrarm_states( seg.obj, mode_SCNA_models[[i]], subclonal_scna_tab[i,,] )
+    mode_SCNA_models[[i]][["DP_CN_chrarm_states"]] = get_post_DP_chrarm_states( seg.obj, mode_SCNA_models[[i]], subclonal_scna_tab[i,,], chr.arms.dat )
     mode_SCNA_models[[i]][["SCNA_minev_chrarm_result"]] = compute_chrarm_ev_score( mode_SCNA_models[[i]][["DP_CN_chrarm_states"]], mode_SCNA_models[[i]],  WGD0_Prs, WGD1_Prs, )
     SCNA_model[["WGD"]] =  SCNA_model[["SCNA_minev_chrarm_result"]][["WGD"]]  ## override provisional estimate
 
@@ -118,7 +117,7 @@ WeighSampleModes <- function(mode.res)
   mode.tab = mode.res[["mode.tab"]]
 
 ## Only use SCNA LL score 
-#  mode.res[["mode.tab"]][, "combined_LL"] = mode.tab[,"SCNA_LL"] # + mode.tab[,"Kar_LL"] + mode.tab[,"SSNV_LL"] 
+#  mode.res[["mode.tab"]][, "combined_LL"] = mode.tab[,"SCNA_LL"] # + mode.tab[,"Kar_LL"] + mode.tab[,"SSNV_LL"]
 
 ## Only use SCNA ev score 
   mode.res[["mode.tab"]][, "combined_LL"] = mode.tab[,"SCNA_min_chrarm_events"]

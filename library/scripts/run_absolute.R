@@ -1,12 +1,15 @@
 #!/usr/bin/env Rscript
 
-pkg_dir = path.expand("/carterlab/phahnel/tools")  # LOCAL & KRAKEN
-
 options(warn=1)
 
 #library(ABSOLUTE, quietly = TRUE)
 library(optparse, quietly = TRUE)
-library(devtools)
+library(data.table)
+library(reshape2)
+library(matrixStats)
+library(doMC)
+library(GenomicRanges)
+# library(devtools)
 
 option_list <- list(
   make_option("--results_dir", type = "character", default = NULL, help="results local directory [required]", metavar = "string"),
@@ -22,7 +25,9 @@ option_list <- list(
   make_option("--min_ploidy", type = "double", default = 1.1, help = "minimum ploidy [default= %default]", metavar = "number"),
   make_option("--max_ploidy", type = "double", default = 6, help = "maximum ploidy [default= %default]", metavar = "number"),
   make_option("--copy_num_type", type = "character", default = "allelic", help = "type: allelic or total [default= %default]", metavar = "string"),
-  make_option("--genome_build", type = "character", default = "hg19", help = "build of the genome: hg19, hg38, mm9 [default= %default]", metavar = "string")
+  make_option("--primary_disease", type = "character", default = NA, help = "Disease type of the primary tumor [default= %default]", metavar = "string"),
+  make_option("--genome_build", type = "character", default = "hg19", help = "build of the genome: hg18, hg19, mm9 [default= %default]", metavar = "string"),
+  make_option("--pkg_dir", type = "character", default = ".", help = "package directory", metavar = "string")
 )
 
 opt_parser <- OptionParser(option_list = option_list)
@@ -39,7 +44,7 @@ if (is.null(opt$results_dir)) {
   stop("rds or seg_dat_fn must be provided", call. = FALSE)
 }
 
-primary.disease <- NA
+primary.disease <- opt$primary_disease
 platform <- "Illumina_WES"
 copy_num_type <- opt$copy_num_type
 genome_build <- opt$genome_build
@@ -66,11 +71,19 @@ verbose <- TRUE
 sample.name <- opt$sample
 seg.dat.fn <- opt$seg_dat_fn
 gender <- opt$gender
+pkg_dir <- file.path(opt$pkg_dir, "library")
 
-load_all(file.path(pkg_dir, "absolute", "library"), export_all = FALSE)
+# load_all(file.path(pkg_dir, "library"), export_all = FALSE)
+
+print(paste0("sourcing files in ", file.path(pkg_dir, "R")))
+rr = dir(file.path(pkg_dir, "R") , full.names=TRUE, pattern = "*.R" )
+for( i in 1:length(rr) ) {
+  # print(paste0("sourcing ", rr[i]))
+  source(rr[i])
+}
 
 
-ABSOLUTE::RunAbsolute(
+RunAbsolute(
   seg.dat.fn, primary.disease, platform, sample.name, results.dir, copy_num_type, genome_build, gender,
   min.ploidy, max.ploidy, max.as.seg.count, max.non.clonal, max.neg.genome, maf.fn, indel.maf.fn, min.mut.af,
   output.fn.base, min_probes, max_sd, sigma.h, SSNV_skew, filter_segs, force.alpha, force.tau,

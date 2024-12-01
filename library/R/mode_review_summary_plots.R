@@ -11,7 +11,7 @@ PlotModes_review_layout = function()
   par( cex=0.6 )
 }
 
-PlotMode_review_summary = function(segobj, n.print = NA, called.mode.ix=NA, max_SSNVs_plot=500, verbose=FALSE) 
+PlotMode_review_summary = function(segobj, chr.arms.dat, n.print = NA, called.mode.ix=NA, max_SSNVs_plot=500, verbose=FALSE)
 {
   Q = segobj[["mode.res"]][["mode_SCNA_models"]][[1]][["kQ"]] 
 
@@ -102,7 +102,7 @@ PlotMode_review_summary = function(segobj, n.print = NA, called.mode.ix=NA, max_
       mut_cols[!n.ix] = seg_clust_CCF_colors[ seg_assign[!n.ix] ]
       if( length(mut_cols) != 2*nrow(allele.segs)) { stop("wrong # of cols/segs") }
 
-      PlotHscrAndSeghist( allele.segs, mut_cols, max_CR, plot.hist=TRUE, plot.abs.fit=TRUE, comb=comb, mode.info=mode.info, Wq0=Wq0, comb.ab=comb.ab, fit.color=mode.colors[i], plot.seg.sem=TRUE )      
+      PlotHscrAndSeghist( allele.segs, mut_cols, chr.arms.dat, max_CR, plot.hist=TRUE, plot.abs.fit=TRUE, comb=comb, mode.info=mode.info, Wq0=Wq0, comb.ab=comb.ab, fit.color=mode.colors[i], plot.seg.sem=TRUE )
 
 
 ## 2 plots for before / after seg CCF DP
@@ -133,7 +133,7 @@ PlotMode_review_summary = function(segobj, n.print = NA, called.mode.ix=NA, max_
     d0.allele.segs[,"A2.Seg.CN"] = segs_d0[ AS.seg.ix[,2] ]
 
 ## can't overlay SSNVs if you plot.hist=TRUE :(
-    PlotHscrAndSeghist( d0.allele.segs, mut_cols, max_CR=2.5, plot.hist=FALSE, plot.abs.fit=FALSE, comb=comb, plot.seg.sem=FALSE, y.lab="Copy number" )
+    PlotHscrAndSeghist( d0.allele.segs, mut_cols, chr.arms.dat, max_CR=2.5, plot.hist=FALSE, plot.abs.fit=FALSE, comb=comb, plot.seg.sem=FALSE, y.lab="Copy number" )
     frame()
 
     if(!is.null(segobj[["mut.cn.dat"]]) & !all(is.na(segobj[["mode.res"]][["modeled.muts"]][[i]][,"ccf_hat"])) )  ## protect against edge case of all muts on homozygously del SCNAs
@@ -168,7 +168,7 @@ PlotMode_review_summary = function(segobj, n.print = NA, called.mode.ix=NA, max_
 
 
 # 1 solution per row
-dens_PlotMode_review_summary = function(segobj, n.print = NA, called.mode.ix=NA, max_SSNVs_plot=500, verbose=FALSE) 
+dens_PlotMode_review_summary = function(segobj, chr.arms.dat, n.print = NA, called.mode.ix=NA, max_SSNVs_plot=500, verbose=FALSE)
 {
   Q = segobj[["mode.res"]][["mode_SCNA_models"]][[1]][["kQ"]] 
   alpha.dom <- c(0, 1)
@@ -249,7 +249,7 @@ dens_PlotMode_review_summary = function(segobj, n.print = NA, called.mode.ix=NA,
 
       if( length(mut_cols) != 2*nrow(allele.segs)) { stop("wrong # of cols/segs") }
 
-      PlotHscrAndSeghist( allele.segs, mut_cols, max_CR, plot.hist=TRUE, plot.abs.fit=TRUE, comb=comb, mode.info=mode.info, Wq0=Wq0, comb.ab=comb.ab, fit.color=mode.colors[i], plot.seg.sem=TRUE )      
+      PlotHscrAndSeghist( allele.segs, mut_cols, chr.arms.dat, max_CR, plot.hist=TRUE, plot.abs.fit=TRUE, comb=comb, mode.info=mode.info, Wq0=Wq0, comb.ab=comb.ab, fit.color=mode.colors[i], plot.seg.sem=TRUE )
 
 
     if(!is.null(segobj[["mut.cn.dat"]]) & !all(is.na(segobj[["mode.res"]][["modeled.muts"]][[i]][,"ccf_hat"])) )  ## protect against edge case of all muts on homozygously del SCNAs

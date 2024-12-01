@@ -44,12 +44,23 @@ RunAbsolute = function(seg.dat.fn, primary.disease, platform, sample.name, resul
   print( paste("Registering ", N_threads, " threads.", sep=""))
   registerDoMC(N_threads)
   
-  genome_build = match.arg(genome_build, c("mm9", "hg18", "hg19") )
+  genome_build = match.arg(genome_build, c("mm9", "hg18", "hg19", "hg38") )
   
- ##	   3) genome_HSCR_seg_plot.R is currently fixed to hg18 data (in genome.R)	
-  if( genome_build == "hg18") { data(hg18_ChrArmsDat, package="ABSOLUTE") }
-  if( genome_build == "hg19") { data(hg19_ChrArmsDat, package="ABSOLUTE") }
-  if( genome_build == "mm9" ) { data(mm9_ChrArmsDat, package="ABSOLUTE") }
+ ##	   3) genome_HSCR_seg_plot.R is currently fixed to hg18 data (in genome.R)
+
+  # if( genome_build == "hg18") { data(hg18_ChrArmsDat, package="ABSOLUTE") }
+  # if( genome_build == "hg19") { data(hg19_ChrArmsDat, package="ABSOLUTE") }
+  # if( genome_build == "hg38") { data(hg38_ChrArmsDat, package="ABSOLUTE") }
+  # if( genome_build == "mm9" ) { data(mm9_ChrArmsDat, package="ABSOLUTE") }
+
+  if ( genome_build == "hg18") { chr.arms.dat.file = file.path(pkg_dir, "data", "hg18_ChrArmsDat.RData") }
+  else if ( genome_build == "hg19") { chr.arms.dat.file = file.path(pkg_dir, "data", "hg19_ChrArmsDat.RData") }
+  else if ( genome_build == "hg38") { chr.arms.dat.file = file.path(pkg_dir, "data", "hg38_ChrArmsDat.RData") }
+  else if ( genome_build == "mm9" ) { chr.arms.dat.file = file.path(pkg_dir, "data", "mm9_ChrArmsDat.RData") }
+  else {}
+
+  print(paste("Loading", chr.arms.dat.file))
+  load(chr.arms.dat.file)
 
   platform = match.arg(platform, c("SNP_6.0", "Illumina_WES"))
   if (platform == "SNP_6.0") {
@@ -118,7 +129,7 @@ RunAbsolute = function(seg.dat.fn, primary.disease, platform, sample.name, resul
   tmp.dir = file.path(results.dir, "tmp")
   dir.create(tmp.dir, recursive = TRUE, showWarnings = FALSE)
   dir.create(results.dir, recursive=TRUE, showWarnings=FALSE)
-  file.base = paste(output.fn.base, ".ABSOLUTE", sep = "")
+  file.base = paste(output.fn.base, copy_num_type, "ABSOLUTE", sep = ".")
 
   seg.dat[["primary.disease"]] = primary.disease
   seg.dat[["group"]] = DetermineGroup(primary.disease)
@@ -132,12 +143,12 @@ RunAbsolute = function(seg.dat.fn, primary.disease, platform, sample.name, resul
   seg.dat[["indel.maf.fn"]] = indel.maf.fn
   
   ## either allelic or total CR, to be modeled.
- # seg.dat[["obs.scna"]] = ExtractSampleObs(seg.dat)
-  seg.dat[["obs.scna"]] = AllelicExtractSampleObs(seg.dat)
+ seg.dat[["obs.scna"]] = ExtractSampleObs(seg.dat)
 
 #  seg.dat[["obs.total.scna"]] = total_make_seg_obj(segtab, gender, min_probes=min_probes, max_sd=max_sd, filter_segs=filter_segs, verbose=verbose)
-  seg.dat[["obs.total.scna"]] = extract_total_copy_ratios_from_allelic_CAPSEG(seg.dat) 
+ seg.dat[["obs.total.scna"]] = extract_total_copy_ratios_from_allelic_CAPSEG(seg.dat)
 #  seg.dat[["obs.total.scna"]] = total_extract_sample_obs(total.seg.dat)
+#   seg.dat[["obs.total.scna"]] = ExtractTotalObs(seg.dat)
 
   SCNA_model[["N_probes"]] = seg.dat[["obs.scna"]][["N_probes"]]
 
@@ -204,7 +215,7 @@ RunAbsolute = function(seg.dat.fn, primary.disease, platform, sample.name, resul
 
 ## Caching for mode.res
     mode.res = compute_cached( results.dir, file.base, "mode.res", fit_modes_SCNA_models, verbose, 
-                               seg.dat, mode.tab, SCNA_model, mut.cn.dat )
+                               seg.dat, mode.tab, SCNA_model, mut.cn.dat, chr.arms.dat )
   }
 
   if (is.na(mode.res[["mode.flag"]])) 
@@ -222,9 +233,11 @@ RunAbsolute = function(seg.dat.fn, primary.disease, platform, sample.name, resul
   {
     ## 1 - apply karyotype model
     ## Kar model only defined for human cancers
-    if( genome_build %in% c("hg18", "hg19") ) 
+    if( genome_build %in% c("hg18", "hg19", "hg38") )
     {
-       data(ChrArmPriorDb, package="ABSOLUTE")
+       # data(ChrArmPriorDb, package="ABSOLUTE")
+      load(file.path(pkg_dir, "data", "ChrArmPriorDb.RData"))
+
        model.id = ifelse(seg.dat[["group"]] %in% names(train.obj),
                          seg.dat[["group"]], "Primary")
        mode.res = ApplyKaryotypeModel(mode.res, model.id, train.obj, verbose=verbose)
@@ -256,11 +269,10 @@ RunAbsolute = function(seg.dat.fn, primary.disease, platform, sample.name, resul
  
 ## plot result
   if (is.na(seg.dat[["mode.res"]][["mode.flag"]])) {
-    sample.pdf.fn = file.path(results.dir,
-                               paste(file.base, "plot.pdf", sep = "_"))
+    sample.pdf.fn = file.path(results.dir, paste(file.base, "plot.pdf", sep = "_"))
     if( verbose ) { print("Making result plot") }
 
-    AbsoluteResultPlot(sample.pdf.fn, seg.dat)
+    AbsoluteResultPlot(sample.pdf.fn, seg.dat, chr.arms.dat)
   } else {
     if (verbose) {
       print("Mode flag is NA, not generating plots. Sample has failed ABSOLUTE")
