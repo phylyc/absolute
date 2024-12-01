@@ -253,7 +253,8 @@ PlotModes <- function(segobj, chr.arms.dat, n.print = NA, called.mode.ix=NA, ver
        max_SSNVs_plot = 500
 
      ## plot SSNVs on genome
-       SSNV_cols = c("dodgerblue", "darkgrey", "seagreen3")   ## SC, clonal, mult>1
+       # SSNV_cols = c("dodgerblue", "darkgrey", "seagreen3")   ## SC, clonal, mult>1
+       SSNV_cols = c("magenta", "olivedrab", "dodgerblue")   ## SC, clonal, mult>1
        plot_SSNVs_on_genome( SSNV_model, SSNV_cols, modeled.mut.dat, segobj, i, mode.colors[i], max_SSNVs_plot=max_SSNVs_plot, verbose=verbose)
 
   ## Now plot SSNVs densities ... 2 plots 
@@ -314,7 +315,7 @@ modes_purity_ploidy_plot <- function(mode.tab, mode.colors, alpha.dom, tau.dom, 
   }
   
   points(mode.tab[, "tau"], mode.tab[, "alpha"], col = "black", bg = mode.colors, 
-         pch = 21, cex = par("cex") * 2.0)
+         pch = 21, cex = par("cex") * 2.0, lwd = 0.5)
   
   if (!is.na(called.mode.ix)) {
     ix <- called.mode.ix
@@ -323,7 +324,7 @@ modes_purity_ploidy_plot <- function(mode.tab, mode.colors, alpha.dom, tau.dom, 
   }
   
   if (debug.info) {
-    title(paste("Solution", mode.focus.ix), line = 3)
+    title(paste("Solution", mode.focus.ix), line = 3, col.main = pp.grid.col, cex.main = 2)
     # title(sample.name, line = 3)
     # mtext(call.status, line = 0, adj = 0)
     # mtext(model.id, line = 0, adj = 1)
