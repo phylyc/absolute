@@ -108,8 +108,11 @@ fit_SSNV_model = function(mut.cn.dat, mode_info, SSNV_model, allelic_subclonal_s
     loglik = sum(post_Prs[,"LL"])
     cond <- abs(cur.loglik - loglik) / abs(cur.loglik)
 
-    print(paste("loglik = ", round(loglik,4), sep=""))
-    print(paste("cond = ", round(cond, 4), sep=""))
+    if (is.na(cond)) {
+      print(paste("loglik =", round(loglik, 4)))
+    } else {
+      print(paste(paste("loglik =", round(loglik, 4)), paste("cond =", round(cond, 4)), sep="    "))
+    }
  
     if (verbose) { 
       print(SSNV_model[["mut_class_w"]]) 
@@ -119,7 +122,9 @@ fit_SSNV_model = function(mut.cn.dat, mode_info, SSNV_model, allelic_subclonal_s
       print(round( SSNV_model[["som_theta_Q_mode"]], 5)) 
     }
 
-    if(( iter > 1 & cond < tol) || (iter >= max.iter)) { break }
+    if ((!is.na(cond) & iter > 1 & cond < tol) || (iter >= max.iter)) {
+      break
+    }
 #    break  # turn off Hierarchical fitting in a single sample
 
     iter = iter+1
