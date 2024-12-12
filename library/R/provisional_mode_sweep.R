@@ -21,7 +21,7 @@ ProvisionalModeSweep <- function(seg.obj, SCNA_model, mut.cn.dat, SSNV_model, fo
      mode.tab <- res[["mode.tab"]]
    }
 
-   if (is.na(mode.tab))  {
+   if (identical(mode.tab, NA))  {
       return(list(mode.flag="ERROR"))
    }
 
@@ -160,8 +160,8 @@ MargModeFinder <- function(obs, mut.cn.dat, SSNV_model, SCNA_model, b.res=0.125,
   {
     res = opt_res[[i]] 
     #       cur.par <- c(b.grid[i], d.grid[j])
-    #       res <- RunOpt(cur.par, obs, SCNA_model, verbose=verbose) 
-    if (!is.na(res))
+    #       res <- RunOpt(cur.par, obs, SCNA_model, verbose=verbose)
+    if (!identical(res, NA))
     {
       #       mode.tab[(i - 1) * n.d + j, ] <- c(res[[1]], res[[2]], res[[3]])
       for( j in seq_len(n.d)) {
@@ -180,7 +180,7 @@ MargModeFinder <- function(obs, mut.cn.dat, SSNV_model, SCNA_model, b.res=0.125,
   mode.tab = rbind(mode.tab, res_1d)
     
   # try opt on SNVs only for diploid tumors
-  if ( FALSE &   !is.na(mut.cn.dat)) {
+  if ( FALSE &   !identical(mut.cn.dat, NA)) {
     alpha_dom = c(0.1, 1) 
     res_snv_only = run_diploid_snv_purity_opt(obs, mut.cn.dat, SSNV_model, alpha_dom, verbose=verbose)
     
@@ -300,7 +300,7 @@ fill_mode_neighborhoods = function( mode.tab, SCNA_model )
 #     if( new_n_modes == n_modes ) { break }
      n_modes = new_n_modes
   }
-  cat("\n")
+  # cat("\n")
  
   return( mode.tab )
 }

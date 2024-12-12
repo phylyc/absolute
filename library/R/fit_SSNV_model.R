@@ -93,7 +93,7 @@ fit_SSNV_model = function(mut.cn.dat, mode_info, SSNV_model, allelic_subclonal_s
       SSNV_on_subclonal_SCNA_res = allelic_calc_sample_muts_on_subclonal_scna( mut.cn.dat[ !clonal_scna_mut_ix,, drop=FALSE ], mode_info, allelic_subclonal_scna_tab, scna_log_ccf_dens, SSNV_model ) 
       post_Prs[!clonal_scna_mut_ix,] = SSNV_on_subclonal_SCNA_res[["post_Prs"]]
 ## update ccf dens for ssnvs on subclonal scnas
-      if(!is.na(ssnv.ccf.dens)) ssnv.ccf.dens[!clonal_scna_mut_ix,] = SSNV_on_subclonal_SCNA_res[["ssnv.ccf.dens"]]
+      if(!identical(ssnv.ccf.dens, NA)) ssnv.ccf.dens[!clonal_scna_mut_ix,] = SSNV_on_subclonal_SCNA_res[["ssnv.ccf.dens"]]
       som_mut_Q_tab[!clonal_scna_mut_ix,] = SSNV_on_subclonal_SCNA_res[["som_mut_Q_tab"]] 
     }  
     else

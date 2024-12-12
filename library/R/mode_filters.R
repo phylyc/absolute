@@ -92,7 +92,7 @@ NegGenomeFilter = function( obs, mode.tab, max.neg.genome, Q, verbose=FALSE)
   if (max.neg.genome > 0) {
     neg.mode.ix <- (frac.neg.het > max.neg.genome)
 
-  if( is.na(neg.mode.ix)){ stop() }
+  if( any(is.na(neg.mode.ix))){ stop() }
 
     if (verbose) {
       print(paste("removing ", sum(neg.mode.ix), " / ", length(neg.mode.ix),
@@ -104,4 +104,68 @@ NegGenomeFilter = function( obs, mode.tab, max.neg.genome, Q, verbose=FALSE)
   }
 
   return( neg.mode.ix )
+}
+
+
+ClonalSSNVFilter = function(mode.res, mut.cn.dat, max.Z=0.5, verbose=TRUE)
+{
+  mode.tab = mode.res[["mode.tab"]]
+  n.modes = nrow(mode.tab)
+
+  z <- rep(1, n.modes)
+  for (j in 1:n.modes)
+  {
+    modeled <- mode.res[["modeled.muts"]][[j]]
+    mut.dat <- cbind(mut.cn.dat, modeled)
+
+    pr.clonal <- mut.dat[, "Pr_somatic_clonal"]
+    n.grid = 100
+    beta.grid = GetMutBetaDensities(mut.dat, n.grid=n.grid)
+    grid.vals = seq_len(n.grid) / (n.grid + 1)
+    clonal.grid <- matrix(NA, nrow=nrow(beta.grid), ncol=ncol(beta.grid))
+    for (i in seq_len(nrow(beta.grid))) {
+      clonal.grid[i, ] <- beta.grid[i, ] * pr.clonal[i]
+    }
+    obs.vaf = colSums(clonal.grid) * grid.vals
+    obs.vaf.mean = mean(obs.vaf)
+    obs.vaf.sd = sd(obs.vaf)
+    cv = obs.vaf.sd / obs.vaf.mean
+
+    alpha = mode.tab[j, "alpha"]
+    SSNV_skew <- mut.dat[1, "SSNV_skew"]
+    modeled.vaf = alpha * SSNV_skew / 2
+
+    z[j] = abs(obs.vaf.mean / modeled.vaf - 1) / cv
+
+    # print(paste(modeled.vaf, obs.vaf.mean, z[j], sep="  "))
+  }
+
+  Z = max(1.1 * min(z), max.Z)
+
+  neg.mode.ix <- (z > Z)
+
+  if (verbose) {
+    print(paste("removing ", sum(neg.mode.ix), " / ", length(neg.mode.ix),
+                " modes with modeled purity disagreeing with mean clonal SSNV VAF distribution (Z > ", round(Z, 3), ").", sep=""))
+  }
+
+  return(neg.mode.ix)
+}
+
+
+RealAlphaFilter = function(mode.res, verbose=TRUE)
+{
+  mode.tab = mode.res[["mode.tab"]]
+  neg.mode.ix <- (mode.tab[, "alpha"] == 1.)
+
+  if (all(neg.mode.ix)) {
+    neg.mode.ix <- rep(FALSE, length(neg.mode.ix))
+  } else {
+    if (verbose) {
+      print(paste("removing ", sum(neg.mode.ix), " / ", length(neg.mode.ix),
+                  " modes with modeled purity == 1.", sep=""))
+    }
+  }
+
+  return(neg.mode.ix)
 }

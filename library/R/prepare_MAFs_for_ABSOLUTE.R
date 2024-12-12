@@ -353,15 +353,17 @@ select_protein_change_annot_using_COSMIC = function( MAF, verbose=FALSE )
    {
       print( paste("Switching from GENCODE to UNIPROT for ", sum(switch_to_uniprot), " mutations based on COSMIC counts ", sep=""))
 
-      cat("GENCODE:\n")
-      print( cbind( MAF[ switch_to_uniprot, "Hugo_Symbol"], 
-                    MAF[ switch_to_uniprot, "Protein_Change"],
-                    gencode_count[ switch_to_uniprot ] ) )
+     if (sum(switch_to_uniprot) > 0) {
+        cat("GENCODE:\n")
+        print( cbind( MAF[ switch_to_uniprot, "Hugo_Symbol"],
+                      MAF[ switch_to_uniprot, "Protein_Change"],
+                      gencode_count[ switch_to_uniprot ] ) )
 
-      cat("UNIPROT:\n")
-      print( cbind( MAF[ switch_to_uniprot, "Hugo_Symbol"], 
-                    UNIPROT_Protein_Change[switch_to_uniprot],
-                    uniprot_count[ switch_to_uniprot ] ))
+        cat("UNIPROT:\n")
+        print( cbind( MAF[ switch_to_uniprot, "Hugo_Symbol"],
+                      UNIPROT_Protein_Change[switch_to_uniprot],
+                      uniprot_count[ switch_to_uniprot ] ))
+     }
    }
    MAF[ switch_to_uniprot, "Protein_Change"] = UNIPROT_Protein_Change[switch_to_uniprot]
    COSMIC_count = gencode_count

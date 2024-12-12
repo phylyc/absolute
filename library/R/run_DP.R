@@ -48,6 +48,7 @@ run_DP = function( data, N_iter, Pi_k, clust_CCF_prior, use_fixed=FALSE, fixed_d
       cat( est$K[i+1] )
       cat(" ")
    }
+   cat("\n")
 
    return( list("DP_post"=est, "DP_prior"=DP_prior) )
 } 

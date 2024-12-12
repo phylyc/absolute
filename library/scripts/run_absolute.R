@@ -2,14 +2,16 @@
 
 options(warn=1)
 
-#library(ABSOLUTE, quietly = TRUE)
-library(optparse, quietly = TRUE)
-library(data.table)
-library(reshape2)
-library(matrixStats)
-library(doMC)
-library(GenomicRanges)
-# library(devtools)
+suppressPackageStartupMessages({
+  #library(ABSOLUTE)
+  library(optparse)
+  library(data.table)
+  library(reshape2)
+  library(matrixStats)
+  library(doMC)
+  library(GenomicRanges)
+  # library(devtools)
+})
 
 option_list <- list(
   make_option("--results_dir", type = "character", default = NULL, help="results local directory [required]", metavar = "string"),
@@ -32,6 +34,11 @@ option_list <- list(
 
 opt_parser <- OptionParser(option_list = option_list)
 opt <- parse_args(opt_parser)
+
+cat("Input options:\n")
+for (name in names(opt)) {
+  cat(sprintf("  %s: %s\n", name, toString(opt[[name]])))
+}
 
 if (is.null(opt$results_dir)) {
   print_help(opt_parser)

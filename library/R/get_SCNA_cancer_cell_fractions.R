@@ -290,7 +290,7 @@ allelic_get_subclonal_SCNA_info = function(  obs, b, delta, SCNA_model, mut.cn.d
    ccf_sum = calc_ccf_summary( exp(log_ccf_dens) )
 
 
-   if( !is.na(mut.cn.dat) )
+   if( !identical(mut.cn.dat, NA) )
    {
       subclonal_ix = reconcile_clonal_homdels_with_obs_SSNVs( mut.cn.dat, subclonal_ix, seg.q.tab, seg.post.subclonal, SCNA_model )
    }
@@ -317,7 +317,7 @@ total_get_subclonal_SCNA_info = function(  obs, b, delta, SCNA_model, mut.cn.dat
    log_ccf_dens = calc_SCNA_CCF_dens( obs, CN_states, b, delta, SCNA_model  )
    ccf_sum = calc_ccf_summary( exp(log_ccf_dens) )
 
-   if( !is.na(mut.cn.dat))
+   if( !identical(mut.cn.dat, NA))
    {
       clonal.mut.tab = total_get_muts_nearest_clonal_scna(mut.cn.dat, SCNA_model[["tot.seg.q.tab"]], SCNA_model[["kQ"]])
 ## don't allow clonal homozygous deletions over regions with SSNVs having > 0 alt reads.

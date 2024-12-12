@@ -52,6 +52,7 @@ fit_modes_SCNA_models = function( seg.obj, mode.tab, SCNA_model, mut.cn.dat, chr
      modes_DP_res = foreach (i = 1:n.modes) %dopar%
      {
        if(verbose) {
+         cat("\n")
           print( paste("Optimizing PP mode #", i, sep=""))
        }
 
@@ -72,7 +73,7 @@ fit_modes_SCNA_models = function( seg.obj, mode.tab, SCNA_model, mut.cn.dat, chr
 
 ## Annotate SCNA clonality summary for SSNV models
 ## Note - these functions only use the mut.cn.dat to disallow clonal homozygous calls if there is 1 > alt SSNV read in the seg
-    if( !is.na(mut.cn.dat))
+    if( !identical(mut.cn.dat, NA))
     {
        missing.AS.seg.ix = apply( is.na(mut.cn.dat[,c("A1.ix", "A2.ix")]), 1, any )
        if( any(!missing.AS.seg.ix))

@@ -45,20 +45,25 @@ PlotSeglenHist <- function(D, W, seg_colors=NA, color.by=NA, color.range=NA, x.m
                       (color.range[2]-color.range[1]) * (col.scale-1))
      
     for (p in seq_len(P)) {
-      bin <- max(which(breaks <= D[p]))
-      heights[p, bin] <- W[p]
-      seg.colors[p, bin] <- use.pal[pal.idx[p] + 1]
+      bin_index <- which(breaks <= D[p])
+      if (length(bin_index) > 0) {
+        bin <- max(bin_index)
+        heights[p, bin] <- W[p]
+        seg.colors[p, bin] <- use.pal[pal.idx[p] + 1]
+      }
     }
   }
 
   if( !all( is.na(seg_colors)) ) ## input arg
   {
-
-     for (p in seq_len(P)) {
-         bin <- max(which(breaks <= D[p]))
-         heights[p, bin] <- W[p]
-         seg.colors[p, bin] <- seg_colors[p]
-       }
+    for (p in seq_len(P)) {
+      bin_index <- which(breaks <= D[p])
+      if (length(bin_index) > 0) {
+        bin <- max(bin_index)
+        heights[p, bin] <- W[p]
+        seg.colors[p, bin] <- seg_colors[p]
+      }
+    }
   }
   
   ## un-modeled segments

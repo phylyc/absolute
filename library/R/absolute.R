@@ -252,6 +252,20 @@ RunAbsolute = function(seg.dat.fn, primary.disease, platform, sample.name, resul
 ## Caching for updated mode.res with SSNV results
       mode.res = compute_cached( results.dir, file.base, "SSNV.mode.res", ApplySSNVModel, verbose, 
                                  mode.res, mut.cn.dat, SSNV_model )
+
+      # bad.ix = ClonalSSNVFilter(mode.res, mut.cn.dat)
+      # if (sum(bad.ix) == nrow(mode.res[["mode.tab"]])) {
+      #   mode.res = list(mode.flag="ALPHA_TAU_DOM")
+      # } else {
+      #   mode.res = ReorderModeRes(mode.res, !bad.ix)
+      # }
+    }
+
+    bad.ix = RealAlphaFilter(mode.res)
+    if (sum(bad.ix) == nrow(mode.res[["mode.tab"]])) {
+      mode.res = list(mode.flag="ALPHA_TAU_DOM")
+    } else {
+      mode.res = ReorderModeRes(mode.res, !bad.ix)
     }
 
     mode.res = WeighSampleModes(mode.res)

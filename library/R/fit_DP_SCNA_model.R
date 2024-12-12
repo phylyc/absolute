@@ -87,6 +87,7 @@ SCNA_model_calc_CCF_DP_loglik = function( obs, b, delta, SCNA_model, verbose=ver
    SCNA_model[["seg_CN_LL"]] = seg_CN_LL
    SCNA_model[["LL"]] =  sum(seg_LL) 
 
+   cat("\n")
    print(paste("loglik = ", round(SCNA_model[["LL"]] ,4), sep=""))
    print_model(SCNA_model)
 
