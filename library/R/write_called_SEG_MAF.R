@@ -9,7 +9,7 @@
 ## use, misuse, or functionality.
 
 write_called_seg_maf = function(called_segobj_list, pp_calls, out_dir, verbose=FALSE) {
-  dir.create(out_dir) 
+  dir.create(out_dir, showWarnings = FALSE)
   
   for (i in seq_along(called_segobj_list)) {
     called_segobj = called_segobj_list[[i]] 

@@ -28,7 +28,7 @@ GetPpTabVals <- function(segobj, call.status) {
    vals <- data.frame(matrix(NA, nrow=1, ncol=length(val.names)))
    colnames(vals) <- val.names
 
-   vals[1, "array"] <- ifelse(is.null(segobj$array.name), segobj$sample.name, segobj[["array.name"]])
+   vals[1, "array"] <- ifelse(is.null(segobj[["array.name"]]), segobj[["sample.name"]], segobj[["array.name"]])
    vals[1, "sample"] <- segobj[["sample.name"]]
 
    mode.res <- segobj[["mode.res"]]

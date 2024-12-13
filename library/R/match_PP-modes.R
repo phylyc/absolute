@@ -8,18 +8,31 @@
 ## whatsoever. Neither the Broad Institute nor MIT can be responsible for its
 ## use, misuse, or functionality.
 
-run_PP_calls_liftover_from_num = function(solution_num, analyst.id, modes.fn, out.dir.base, obj.name, verbose=FALSE) {
+run_PP_calls_liftover_from_num = function(solution_num, analyst.id, modes.fn, out.dir.base, obj.name, chr.arms.dat, pp.calls_ploidy_colname = "ploidy", ploidy_colname="genome mass", verbose=FALSE) {
   ## provides segobj.list
   if( verbose ) { cat("Loading ABS multi-sample object...") }
   load(modes.fn)
   if( verbose ) { cat(" Done.\n") }
 
-  review.dir = paste( file.path(out.dir.base, "reviewed"))
-  dir.create(review.dir, recursive=TRUE)
+  review.dir = paste(file.path(out.dir.base, "reviewed"))
+  dir.create(review.dir, recursive=TRUE, showWarnings = FALSE)
   call_override = list(solution_num)
-  cat(paste("Solution num:", solution_num))
+  cat(paste("Solution num:", solution_num, "\n"))
 
-  called.segobj.list = override_absolute_calls(segobj.list, call_override)
+  # TRANSPOSE seg.dat
+  n <- length(seg.dat[["mode.res"]][["mode.tab"]])
+  new.seg.dat <- vector("list", n)
+  for (i in seq_len(n)) {
+    new.seg.dat[[i]] <- lapply(seg.dat, function(x) {
+      if (is.list(x) && length(x) == n) {
+        return(x[[i]])
+      } else {
+        return(x)
+      }
+    })
+  }
+
+  called.segobj.list = override_absolute_calls(new.seg.dat, call_override)
 
   ## PP tab
   out.fn = file.path(out.dir.base, "reviewed", paste(obj.name, ".", analyst.id, ".ABSOLUTE.table.txt", sep=""))
@@ -36,11 +49,13 @@ run_PP_calls_liftover = function( reviewed.pp.calls.fn, analyst.id, modes.fn, ou
   if( verbose ) { cat(" Done.\n") }
 #  segobj.list = agg_res[["segobj.list"]]
 
+  if (!file.exists(reviewed.pp.calls.fn)) { stop() }
+
   dat = read.delim(reviewed.pp.calls.fn, row.names=NULL, stringsAsFactors=FALSE, header=1,
                     check.names=FALSE)
 
-  review.dir = paste( out.dir.base, "/reviewed/", sep="")
-  dir.create(review.dir, recursive=TRUE)
+  review.dir = paste(file.path(out.dir.base, "reviewed"))
+  dir.create(review.dir, recursive=TRUE, showWarnings = FALSE)
 
   ## detect whether a manual override column was prepended to the front of this
   if (colnames(dat)[3] == "sample") {

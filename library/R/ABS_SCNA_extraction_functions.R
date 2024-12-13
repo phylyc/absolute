@@ -186,7 +186,7 @@ call_regions_ABSOLUTE_SCNAs = function( segtab, regions )
 #   reg_to_seg = gr.findoverlaps( regions, seg_GRs )
 
    res = findOverlaps( regions, seg_GRs )
-   reg_to_seg = list( "query.id"=res@queryHits, "subject.id"=res@subjectHits )
+   reg_to_seg = list( "query.id"=queryHits(res), "subject.id"=subjectHits(res) )
    
 
 ## Need to resolve multiple matches from regions to genomic segs.   Break ties using CN (highest match for amps, lowest for dels)
@@ -453,7 +453,7 @@ get_refgene_transcript_GRs = function( genelist=NA )
 }
 
 
-get_GENCODE_transcript_GRs = function( genelist=NA, dropY=TRUE )
+get_GENCODE_transcript_GRs = function( genelist=NA, dropY=TRUE, verbose=FALSE )
 {
    # data( "gencode.hg19.genes", package="ABSOLUTE" )   # provides GENCODE
   load(file.path(pkg_dir, "data", "gencode.hg19.genes.RData"))
@@ -466,7 +466,7 @@ get_GENCODE_transcript_GRs = function( genelist=NA, dropY=TRUE )
       ix = match( genelist, txdb[,"HGNC"] )
       chr = txdb[ix,"Chr"]
       Y.ix = chr %in% c("Y")
-      if( any(Y.ix) ) { print( "Dropping Y chromosome genes:"); print( genelist[Y.ix] ) }
+      if( any(Y.ix) & verbose ) { print( "Dropping Y chromosome genes:"); print( genelist[Y.ix] ) }
       ix = ix[ !(chr %in% c("Y"))]
 
       gene_regs = GRanges( txdb[ix,"Chr"], IRanges(txdb[ix,"Start"], txdb[ix,"End"]) )
@@ -639,7 +639,7 @@ seg_focality_plots = function( PP_CALLS, SCNA_calls, drivers )
 
 ## Output 1 table for each del gene:   del.dat X sample
    out.dir = ("CN/genetabs")
-   dir.create(out.dir, recursive = TRUE)
+   dir.create(out.dir, recursive = TRUE, showWarnings = FALSE)
    for( i in 1:length(gene_list) )
    {
       fn = file.path( out.dir, paste( gene_list[i], ".amp.table.txt", sep="") )
@@ -702,7 +702,7 @@ seg_focality_plots = function( PP_CALLS, SCNA_calls, drivers )
 
 ## Output 1 table for each del gene:   del.dat X sample
    out.dir = ("CN/genetabs")
-   dir.create(out.dir)
+   dir.create(out.dir, showWarnings = FALSE)
    for( i in 1:length(gene_list) )
    {
       fn = file.path( out.dir, paste( gene_list[i], ".del.table.txt", sep="") )

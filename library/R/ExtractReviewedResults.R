@@ -39,7 +39,7 @@ ExtractReviewedResults = function( called.segobj.list, analyst.id, out.dir.base,
  ## SEG_MAFs
   cat("Extracting SEG_MAF files...")
   seg.maf.dir = file.path(out.dir.base, "reviewed", "SEG_MAF")
-  dir.create(seg.maf.dir, recursive=TRUE)
+  dir.create(seg.maf.dir, recursive=TRUE, showWarnings = FALSE)
   write_called_seg_maf(called.segobj.list, pp.calls, seg.maf.dir)
   cat("done\n")
  ##
@@ -68,10 +68,9 @@ if( FALSE )
   ## Called indv. RData files
    cat("Extracting RData called mode files for matched samples")
    indv.called.dir = file.path(out.dir.base, "reviewed", "samples")
-   dir.create(indv.called.dir, recursive=TRUE)
+   dir.create(indv.called.dir, recursive=TRUE, showWarnings = FALSE)
 
-   file.base = file.path(paste(names(called.segobj.list), ".ABSOLUTE.", analyst.id, 
-                               ".called", sep = ""))
+   file.base = file.path(paste(called.segobj.list[[1]][["sample.name"]], ".ABSOLUTE.", analyst.id, ".called", sep = ""))
    called.files= file.path(indv.called.dir, paste(file.base, "RData", sep = "."))
    foreach (i=seq_along(called.files)) %dopar% {
       seg.obj = called.segobj.list[[i]]
@@ -90,8 +89,8 @@ if( FALSE )
    
    SCNA_thresholds = get_SCNA_thresholds( amp.CN.threshold = 7, H.amp.CN.threshold = 10 )
 
-   out.dir.base = file.path( "ABSOLUTE_results", obj.name )
-   transcript_GRs = get_GENCODE_transcript_GRs()
+   # out.dir.base = file.path( "ABSOLUTE_results", obj.name )
+   transcript_GRs = get_GENCODE_transcript_GRs(verbose=FALSE)
    gene_SCNA_calls = genotype_transcript_SCNAs_in_called_ABS_files( indv.called.dir, transcript_GRs, SCNA_thresholds, analyst_id = analyst.id )
    saveRDS( gene_SCNA_calls, file.path(out.dir.base, "reviewed", paste(obj.name, "_gene_SCNA_data.Rds", sep="")) )
 
@@ -103,7 +102,7 @@ if( FALSE )
 
 }
 
-apply_review_and_extract = function( pp.review.fn=NA, pp.solution.num=NA, obj.name, analyst.id, pp.calls_ploidy_colname = "ploidy", ploidy_colname="genome mass",
+apply_review_and_extract = function( pp.review.fn=NA, pp.solution.num=NA, results.dir, rdata=NA, obj.name, analyst.id, pp.calls_ploidy_colname = "ploidy", ploidy_colname="genome mass",
  copy_num_type = "allelic", genome_build = "hg19", verbose=TRUE )
 {
    if( copy_num_type == "allelic" )  {  set_allelic_funcs() }
@@ -126,13 +125,18 @@ apply_review_and_extract = function( pp.review.fn=NA, pp.solution.num=NA, obj.na
     stop("Unsupported copy number type: ", copy_num_type)
   }
 
+  out.dir.base = results.dir
+
+  if (is.na(rdata)) {
    out.dir.base = file.path( "ABSOLUTE_results", obj.name )
-
    modesegs.fn = file.path(out.dir.base, paste0(obj.name, ".PP-modes.data.RData"))
+  } else {
+    modesegs.fn = rdata
+  }
 
-   if ( file.exists(pp.review.fn) ) {
+   if (!is.na(pp.review.fn)) {
       called.segobj.list = run_PP_calls_liftover(pp.review.fn, analyst.id, modesegs.fn, out.dir.base, obj.name, chr.arms.dat, pp.calls_ploidy_colname, ploidy_colname, verbose=verbose )
-   } else if (!isna(pp.solution.num)) {
+   } else if (!is.na(pp.solution.num) & file.exists(modesegs.fn)) {
      called.segobj.list = run_PP_calls_liftover_from_num(pp.solution.num, analyst.id, modesegs.fn, out.dir.base, obj.name, chr.arms.dat, pp.calls_ploidy_colname, ploidy_colname, verbose=verbose )
    } else {
      stop("pp.review.fn or pp.solution.num does not exist!")
@@ -149,7 +153,7 @@ apply_review_and_extract = function( pp.review.fn=NA, pp.solution.num=NA, obj.na
 called_detailed_SSNV_plots = function( called.segobj.list, out.dir.base )
 {
   plot_dir = file.path(out.dir.base, "reviewed", "SSNV_detail")
-  dir.create( plot_dir, recursive=TRUE)
+  dir.create( plot_dir, recursive=TRUE, showWarnings = FALSE)
 
   for ( i in 1:length(called.segobj.list) )
   {

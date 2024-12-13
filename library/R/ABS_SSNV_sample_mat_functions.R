@@ -335,7 +335,8 @@ get_MAF_list_from_called_seglist_obj = function( called_segobj_list )
       mut_dat = cbind(called_segobj$mut.cn.dat, modeled)      
 
       SSNV_ccf_dens = called_segobj[["mode.res"]][["SSNV.ccf.dens"]][1,,]
-      MAF_list[[i]] = data.frame( "pair_id"=names(called_segobj_list)[i], mut_dat, SSNV_ccf_dens, check.names=FALSE, stringsAsFactors=FALSE)
+
+      MAF_list[[i]] = data.frame( "pair_id"=called_segobj[["sample.name"]], mut_dat, SSNV_ccf_dens, check.names=FALSE, stringsAsFactors=FALSE)
     }
     else{ nix[i] = TRUE }
   }
@@ -347,21 +348,19 @@ get_MAF_list_from_called_seglist_obj = function( called_segobj_list )
 
 aggregate_sample_MAF_list = function( MAF_list )
 {
-   cols = colnames(MAF_list[[1]] )
-#print(cols)
-#stop()
-   if( length(MAF_list) > 1 )
+   combined_MAF = data.frame()
+   if (length(MAF_list) > 0)
    {
+      cols = colnames(MAF_list[[1]])
       for( i in 2:length(MAF_list))
       {
          cols = intersect(cols, colnames(MAF_list[[i]]))
       }
-   }
 
-   combined_MAF = data.frame()
-   for( i in 1:length(MAF_list))
-   {
-      combined_MAF = rbind( MAF_list[[i]][,cols], combined_MAF ) 
+      for( i in 1:length(MAF_list))
+      {
+         combined_MAF = rbind( MAF_list[[i]][,cols], combined_MAF )
+      }
    }
 
    return(combined_MAF)
