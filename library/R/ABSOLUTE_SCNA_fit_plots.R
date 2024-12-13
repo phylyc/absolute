@@ -157,8 +157,11 @@ PlotModes <- function(segobj, chr.arms.dat, n.print = NA, called.mode.ix=NA, ver
 #      mut_cols = rep(NA, length(seg_assign) )
 #      mut_cols[!n.ix] = seg_clust_CCF_colors[ seg_assign[!n.ix] ]
 
-
-      YMAX = max( c(before_dens) )
+      if (length(c(before_dens)) > 1) {
+        YMAX = max( c(before_dens) )
+      } else {
+        YMAX = 1
+      }
       if( nrow(before_dens) > 0 ) 
       {
          sample_trans_ccf_plot( mut_cols[!nix], GRID, before_dens, SID, YMAX )
