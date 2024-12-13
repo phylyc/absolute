@@ -147,9 +147,11 @@ draw_mut_multiplicity_densities = function(mut_pr, grid, pr_clonal, pr_cryptic_S
       }
     }
 
-    y_lim = colSums(grid_dens, na.rm=TRUE)
+    y_lim = max(colSums(grid_dens, na.rm=TRUE))
     return(list(grid_dens=grid_dens, MULT_GRID=mult_grid, YLIM=y_lim))  
   }
+
+  pr_clonal[is.na(pr_clonal)] = 0
 
   pr_subclonal = 1 - pr_clonal
   pr_subclonal[pr_subclonal < 0] = 0  ## round-off error
@@ -171,7 +173,7 @@ draw_mut_multiplicity_densities = function(mut_pr, grid, pr_clonal, pr_cryptic_S
   clonal_dens = res$grid_dens
 
   res = get_grid_combined_mut_densities(mut_pr, pr_subclonal, grid, x_lim)
-  sc_dens = res$grid_dens 
+  sc_dens = res$grid_dens
   mult_grid= res$MULT_GRID
   
   if (!add) {

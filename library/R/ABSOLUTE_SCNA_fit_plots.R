@@ -160,7 +160,7 @@ PlotModes <- function(segobj, chr.arms.dat, n.print = NA, called.mode.ix=NA, ver
       if (length(c(before_dens)) > 1) {
         YMAX = max( c(before_dens) )
       } else {
-        YMAX = 1
+        YMAX = 0
       }
       if( nrow(before_dens) > 0 ) 
       {

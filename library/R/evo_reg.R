@@ -245,7 +245,7 @@ compute_chrarm_ev_score = function( CN_chrarm_states, SCNA_model, WGD0_Prs, WGD1
    c.ix = as.logical(CN_chrarm_states[,"minor_arm_clonal"]); c.ix = ifelse(is.na(c.ix), F, c.ix)
    minor_ancestral_CN[c.ix,1] =  CN_chrarm_states[c.ix,"minor_arm_CN"]
    minor_ancestral_CN[!c.ix,1] = CN_chrarm_states[!c.ix,"minor_ancestral_CN"]  
-   z.der.ix = CN_chrarm_states[,"minor_derived_CN"] == 0
+   z.der.ix = CN_chrarm_states[,"minor_derived_CN"] == 0; z.der.ix = ifelse(is.na(z.der.ix), F, z.der.ix)
    minor_ancestral_CN[!c.ix & !n.ix & !z.der.ix, 2] = CN_chrarm_states[!c.ix & !n.ix & !z.der.ix, "minor_derived_CN"] 
 #
    minor_derived_CN[!c.ix,1] =  CN_chrarm_states[!c.ix,"minor_derived_CN"]  
@@ -257,7 +257,7 @@ compute_chrarm_ev_score = function( CN_chrarm_states, SCNA_model, WGD0_Prs, WGD1
  
    major_ancestral_CN[c.ix,1] =  CN_chrarm_states[c.ix,"major_arm_CN"]
    major_ancestral_CN[!c.ix,1] = CN_chrarm_states[!c.ix,"major_ancestral_CN"]  
-   z.der.ix = CN_chrarm_states[,"major_derived_CN"] == 0
+   z.der.ix = CN_chrarm_states[,"major_derived_CN"] == 0; z.der.ix = ifelse(is.na(z.der.ix), F, z.der.ix)
    major_ancestral_CN[!c.ix & !n.ix & !z.der.ix ,2] = CN_chrarm_states[!c.ix & !n.ix & !z.der.ix,"major_derived_CN"] 
 #
    major_derived_CN[!c.ix,1] =  CN_chrarm_states[!c.ix,"major_derived_CN"]  
