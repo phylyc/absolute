@@ -108,10 +108,12 @@ fit_SSNV_model = function(mut.cn.dat, mode_info, SSNV_model, allelic_subclonal_s
     loglik = sum(post_Prs[,"LL"])
     cond <- abs(cur.loglik - loglik) / abs(cur.loglik)
 
-    if (is.na(cond)) {
-      print(paste("loglik =", round(loglik, 4)))
-    } else {
-      print(paste(paste("loglik =", round(loglik, 4)), paste("cond =", round(cond, 4)), sep="    "))
+    if (verbose) {
+      if (is.na(cond)) {
+        print(paste("loglik =", round(loglik, 4)))
+      } else {
+        print(paste(paste("loglik =", round(loglik, 4)), paste("cond =", round(cond, 4)), sep="    "))
+      }
     }
  
     if (verbose) { 
