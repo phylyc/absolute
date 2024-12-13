@@ -227,6 +227,12 @@ multiplicity_plot = function( seg.dat, mut.dat, af_post_pr, grid_mat, SSNV_cols,
     frame()
     return()
   }
+
+  if (all(is.na(mut.dat[, "purity"]))) {
+    if (verbose) { print("No valid SSNVs to plot: no valid alpha.") }
+    frame()
+    return()
+  }
  
   res = get_SSNV_on_clonal_CN_multiplicity_densities( seg.dat, mut.dat, af_post_pr, grid_mat, verbose=verbose )
 

@@ -214,7 +214,8 @@ ClassifySomaticVariants <- function(prs, pr.thresh)
 # Used for plotting
 get_SSNV_on_clonal_CN_multiplicity_densities = function( seg.dat, mut.dat, af_post_pr, grid_mat, verbose=FALSE )
 {
-  a_p <- mut.dat[, "purity"]; alpha <- unique(a_p[!is.na(a_p)])
+  a_p <- mut.dat[, "purity"]
+  alpha <- unique(a_p[!is.na(a_p)])
   Q <- mut.dat[, "q_hat"]
   Q[is.na(Q)] = mut.dat[is.na(Q),"total_q_hat"]
 
@@ -238,7 +239,7 @@ get_SSNV_on_clonal_CN_multiplicity_densities = function( seg.dat, mut.dat, af_po
   mult_grid[!nix, ] = (grid_mat / som.delta)   [!nix,, drop=FALSE]
   mult_dens[!nix, ] = (af_post_pr * som.delta) [ !nix,, drop=FALSE]
 
-if( any(!is.finite(mult_grid[!nix,]) | !is.finite(mult_dens[!nix,])) ) { stop("non-finite multiplicity!") }
+  if( any(!is.finite(mult_grid[!nix,]) | !is.finite(mult_dens[!nix,])) ) { stop("non-finite multiplicity!") }
 #  bad_rows = which( apply( is.nan(mult_dens), 1, sum ) > 0 )
 #  if( any(is.nan(mult_dens)) ) { stop() }
 

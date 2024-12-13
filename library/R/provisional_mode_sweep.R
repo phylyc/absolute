@@ -300,7 +300,7 @@ fill_mode_neighborhoods = function( mode.tab, SCNA_model )
 #     if( new_n_modes == n_modes ) { break }
      n_modes = new_n_modes
   }
-  # cat("\n")
+  cat("\n")
  
   return( mode.tab )
 }
