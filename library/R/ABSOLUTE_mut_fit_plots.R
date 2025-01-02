@@ -143,7 +143,7 @@ draw_mut_multiplicity_densities = function(mut_pr, grid, pr_clonal, pr_cryptic_S
 #      y = mut_pr[i, ] * pr_clonal[i] 
       y = mut_pr[i, ]
       if (sum(!is.na(y)) > 2) {
-        grid_dens[i, ] = approx(x, y, xout=mult_grid, ties=list("ordered", mean))$y
+        grid_dens[i, ] = suppressWarnings(approx(x, y, xout=mult_grid, ties=list("ordered", mean))$y)
       }
     }
 
@@ -419,7 +419,7 @@ get_grid_dens_95CI = function( dens, grid )
       if(ecdf[1]==1) { mult_ci95[i,]=c(0,0.1) }
       else
       {
-         mult_ci95[i, ] = approx(ecdf, y=mult_grid[i,], xout=c(0.025, 0.975), ties=list("ordered", mean))$y
+         mult_ci95[i, ] = suppressWarnings(approx(ecdf, y=mult_grid[i,], xout=c(0.025, 0.975), ties=list("ordered", mean))$y)
       }
    }
 

@@ -115,7 +115,7 @@ calc_ccf_summary = function(ccf_dens)
     if(ecdf[1]==1) { ccf_ci95[i,]=c(0,0.1) }
     else
     {
-       ccf_ci95[i, ] = approx(ecdf, y=ccf_grid, xout=c(0.025, 0.975))$y
+       ccf_ci95[i, ] = suppressWarnings(approx(ecdf, y=ccf_grid, xout=c(0.025, 0.975))$y)
     }
   }
 

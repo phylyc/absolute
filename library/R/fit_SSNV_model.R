@@ -165,7 +165,7 @@ calc_CCF_95CI = function(mut_dat, ccf_dens, SSNV_model)
     if(length(max_ix) != 1 ) { next }
     ccf_hat[i] = ccf_grid[max_ix]
     ecdf = cumsum(ccf_dens[i, ])
-    ccf_ci95[i, ] = approx(x=ecdf, y=ccf_grid, xout=c(0.025, 0.975))$y
+    ccf_ci95[i, ] = suppressWarnings(approx(x=ecdf, y=ccf_grid, xout=c(0.025, 0.975))$y)
   }
 
   nix1 = is.na(ccf_ci95[, 1])

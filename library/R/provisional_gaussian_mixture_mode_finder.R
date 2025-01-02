@@ -210,7 +210,7 @@ get_comb_Wq0 = function( e.cr, comb, theta.Q, theta.0 )
    if(max(comb)<1){ use_out = max(comb) }
    else{ use_out = 1 }
 
-   mu = approx( y=c(0:(length(comb)-1)), x=comb, xout=use_out)$y
+   mu = suppressWarnings(approx( y=c(0:(length(comb)-1)), x=comb, xout=use_out)$y)
    Q = length(comb)
    sigma = exp(theta.Q)
    pq = dnorm( c(1:(Q-1)), mu, sigma, log=FALSE )

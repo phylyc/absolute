@@ -125,7 +125,7 @@ get_gamma_prior_from_k_prior = function( N, k_0_map, k_prior )
    obj = array(NA, dim=c(length(sigma_grid), length(mu_grid)) )
    mode_vals = array( NA, dim=c( length(sigma_grid)*length(mu_grid), 3 ) )
 
-   int_k_prior = approx( x=c(1:N), y=k_prior, xout=k_0_map[,1])$y 
+   int_k_prior = suppressWarnings(approx( x=c(1:N), y=k_prior, xout=k_0_map[,1])$y)
 #   int_k_prior = int_k_prior * c(1, 1/diff(c(k_0_map[,1])) )
    int_k_prior = int_k_prior / sum(int_k_prior)
 
@@ -196,7 +196,7 @@ test_prior = function(N, lambda, mu)
    plot( 0, type='n', bty="n",  xlab="Number of DP components (K)", ylab="Density", main="", ylim=c(0,YLIM), xlim=c(0, XMAX) )
 
    min_K = k_0_map[1,1]
-   int_k_prior = approx( x=c(1:N), y=k_prior, xout=k_0_map[,1])$y 
+   int_k_prior = suppressWarnings(approx( x=c(1:N), y=k_prior, xout=k_0_map[,1])$y)
 #   int_k_prior = int_k_prior/sum(int_k_prior) * c(1, 1/diff(c(k_0_map[,1])) ) 
 
    lines( k_0_map[,1], k_prob, col=1, lty=2 )
