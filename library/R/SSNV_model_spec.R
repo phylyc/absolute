@@ -209,7 +209,7 @@ mut_qm_fc_grid_integral = function(alt, ref, int_mat, outer_prod, SSNV_model)
   }
 
   if( any(is.nan(h_qm_ll_mat))) { stop() }
-  
+  h_qm_ll_mat[is.na(h_qm_ll_mat)] = 0
   return(h_qm_ll_mat)
 }
 
@@ -294,7 +294,8 @@ calc_ccf_posterior_LL_grid = function(alt, ref, SSNV_model, alpha, q, normal_all
 #   }
 
   
-  if( any(is.nan(ll_grid))) { stop() }
+  # if( any(is.nan(ll_grid))) { stop() }
+  ll_grid[is.nan(ll_grid)] = 0
   return(ll_grid)   
 }
 

@@ -210,6 +210,7 @@ allelic_calc_sample_muts_on_subclonal_scna = function(mut.cn.dat, mode_info, all
 
 ## H3 "clonal" model actually implies subclonal SSNV with CCF == SCNA CCF
   subclonal.unif.log.ev = LogAdd( cbind((H.123.ssnv.log.Z + log(H.ev)), H.123.clonal.log.ev[,3] + log(H.ev[,3]) )) + log(SSNV_model[["mut_class_w"]][["SC"]])
+  subclonal.unif.log.ev[is.nan(subclonal.unif.log.ev)] = -Inf
 
   H12.ev = H.ev[,c(1,2)]
   H12.som.clonal.log.ev = H.123.clonal.log.ev[,c(1,2)] + log(H12.ev) + log(SSNV_model[["mut_class_w"]][["SM"]])
@@ -236,7 +237,8 @@ allelic_calc_sample_muts_on_subclonal_scna = function(mut.cn.dat, mode_info, all
 
 ## put together mutually exclusive hypothoses:
   mut.log.ev.mat = cbind( som.clonal.log.ev, subclonal.exp.log.ev, subclonal.unif.log.ev, germline.log.ev, SSNV.on.CN0.log.ev )
-  mut.log.ev.mat[homdel.ix, c(1,2,3)] = -Inf 
+  mut.log.ev.mat[homdel.ix, c(1,2,3)] = -Inf
+  mut.log.ev.mat[is.nan(mut.log.ev.mat)] = -Inf
 
   LL = LogAdd(mut.log.ev.mat)
   mut.ev.mat = exp(mut.log.ev.mat - LL)
