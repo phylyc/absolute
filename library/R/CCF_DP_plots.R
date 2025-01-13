@@ -229,7 +229,8 @@ DP_post_K_plot= function( DP_res, N_burn )
    lines( c(1:length(k_post)), k_post, col=2 )
 
 
-   legend( x='topright', legend=c("P(k)", "P(k) approx", "P(k | D)", "sampled k values"), col=c(1,1,2,"grey"), bty="n", lty=c(1,2,1,1), lwd=2 )
+   legend( x='topright', legend=c("P(k)", "P(k) approx", "P(k | D)", "sampled k values"), col=c(1,1,2,"grey"), bty="n", lty=c(1,2,1,1), lwd=1.5, cex=.8 )
+   axis(1, at = seq(0, XMAX, 1), labels = FALSE, tck = -0.02)  # Minor ticks on x-axis
 
    mtext( text=paste("N=", N_mut,sep=""), cex=par("cex"), adj=0)
 

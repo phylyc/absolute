@@ -106,7 +106,7 @@ PlotModes <- function(segobj, chr.arms.dat, n.print = NA, called.mode.ix=NA, ver
     # New plot version with genome-plot and sideways hist summary
 # 2 and 3 - genome and seghist
       PlotHscrAndSeghist( allele.segs, clonal_seg_colors, chr.arms.dat, max_CR, plot.hist=TRUE, plot.abs.fit=TRUE, comb=comb, mode.info=mode.info, Wq0=Wq0, comb.ab=comb.ab, fit.color=mode.colors[i], plot.seg.sem=TRUE )
-
+      title("Seg clonality", line = 0.5, cex.main = 0.9)
 
   # 4 - SCNAs CCF
 #      SCNA_CCF_plot( segobj, mode.ix=i )
@@ -122,6 +122,8 @@ PlotModes <- function(segobj, chr.arms.dat, n.print = NA, called.mode.ix=NA, ver
       lines( gr, pred_95_CI[1,], col="blue", lwd=1 )
       lines( gr, pred_95_CI[2,], col="blue", lwd=1 )
       lines( gr, pred_median, col="blue", lwd=1, lty=2 )
+
+      title("DP predictive density", line = 0.5, cex.main = 0.9)
 
       nc = ncol(SCNA_model[["collapsed_CCF_dens"]])
       GRID = cumsum( c(0, rep(1/(nc-1),(nc-1))))
@@ -165,10 +167,12 @@ PlotModes <- function(segobj, chr.arms.dat, n.print = NA, called.mode.ix=NA, ver
       if( nrow(before_dens) > 0 ) 
       {
          sample_trans_ccf_plot( mut_cols[!nix], GRID, before_dens, SID, YMAX )
+        title("Before clustering", line = 0.5, cex.main = 0.9)
       } else{ frame() }
       if( nrow(after_dens) > 0 )
       {
          sample_trans_ccf_plot( mut_cols[!nix], GRID, after_dens, SID, YMAX )
+        title("After clustering", line = 0.5, cex.main = 0.9)
       } else{ frame() }
 
 ## new row
@@ -178,13 +182,15 @@ PlotModes <- function(segobj, chr.arms.dat, n.print = NA, called.mode.ix=NA, ver
 #      if( length(mut_cols) != nrow(allele.segs)) { stop("wrong # of cols/segs") }
 
       PlotHscrAndSeghist( allele.segs, mut_cols, chr.arms.dat, max_CR, plot.hist=TRUE, plot.abs.fit=TRUE, comb=comb, mode.info=NA, Wq0=Wq0, comb.ab=comb.ab, fit.color=mode.colors[i], plot.seg.sem=TRUE )
+      title("Seg clusters", line = 0.5, cex.main = 0.9)
 
       seg_LL = SCNA_model[["seg_LL"]] 
-      seg_CN_LL = SCNA_model[["seg_CN_LL"]]  
+      # seg_CN_LL = SCNA_model[["seg_CN_LL"]]
       use.pal = (colorRampPalette(c("red", "yellow", "green")))  (1000)
 # color by seg LL
       seg_LL_cols = get_seg_colors(seg_LL, use.pal=use.pal)
-      PlotHscrAndSeghist(allele.segs, seg_LL_cols, chr.arms.dat, max_CR=5.0, plot.genome=FALSE, plot.hist=TRUE, plot.abs.fit=TRUE, comb=comb, mode.info=NA, Wq0=Wq0, comb.ab=comb.ab, fit.color=mode.colors[i], plot.seg.sem=TRUE )
+      PlotHscrAndSeghist(allele.segs, seg_LL_cols, chr.arms.dat, max_CR=5.0, plot.genome=FALSE, plot.hist=TRUE, plot.abs.fit=TRUE, comb=comb, mode.info=NA, Wq0=Wq0, comb.ab=comb.ab, fit.color=mode.colors[i], plot.seg.sem=TRUE, )
+      title("Seg LL", line = 0.5, cex.main = 0.9)
 
 #  CCF of hard-clusters
       clust_dens = SCNA_model[["seg_CCF_DP"]][["tree_clust"]][["CCF_dens"]] 
@@ -237,7 +243,7 @@ PlotModes <- function(segobj, chr.arms.dat, n.print = NA, called.mode.ix=NA, ver
     d0.allele.segs[,"A1.Seg.CN"] = segs_d0[ AS.seg.ix[,1] ]
     d0.allele.segs[,"A2.Seg.CN"] = segs_d0[ AS.seg.ix[,2] ]
  
-    PlotHscrAndSeghist( d0.allele.segs, mut_cols, chr.arms.dat, max_CR=4.25, plot.hist=TRUE, plot.abs.fit=FALSE, comb=comb, plot.seg.sem=FALSE, y.lab="Copy number" )
+    PlotHscrAndSeghist( d0.allele.segs, mut_cols, chr.arms.dat, max_CR=4.25, plot.hist=TRUE, plot.abs.fit=FALSE, comb=comb, plot.seg.sem=FALSE, y.lab="Allelic copy number" )
 
     frame(); frame(); frame()
      
@@ -245,7 +251,7 @@ PlotModes <- function(segobj, chr.arms.dat, n.print = NA, called.mode.ix=NA, ver
 # new row
     frame()
   ## Genome plot
-    PlotHscrAndSeghist( d0.allele.segs, mut_cols, chr.arms.dat, max_CR=2.5, plot.abs.fit=FALSE, comb=comb, plot.seg.sem=FALSE, y.lab="Copy number" )
+    PlotHscrAndSeghist( d0.allele.segs, mut_cols, chr.arms.dat, max_CR=2.5, plot.abs.fit=FALSE, comb=comb, plot.seg.sem=FALSE, y.lab="Allelic copy number" )
 
     if(!is.null(segobj[["mode.res"]][["modeled.muts"]][[i]]) && !all(is.na(segobj[["mode.res"]][["modeled.muts"]][[i]][,"ccf_hat"])) )  ## protect against edge case of all muts on homozygously del SCNAs
     {
@@ -406,13 +412,13 @@ PpModeScorerBarplot <- function(mode.tab, mode.colors, obs, n.print) {
 
 
 
-plot_ABS_seg_hist = function(d, W, copy_ratio_label, seg_colors, min_CR=0, max_CR=Inf, bin.w=0.025, sideways=FALSE, label.genomic.fraction.axis=TRUE )
+plot_ABS_seg_hist = function(d, W, copy_ratio_label, seg_colors, min_CR=0, max_CR=Inf, bin.w=0.025, sideways=FALSE, label.genomic.fraction.axis=TRUE, genomic_fraction_label="Genomic fraction" )
 {
   ix <- (d >= min_CR) & (d < max_CR)
 
   PlotSeglenHist(d[ix], W[ix], seg_colors[ix], 
                  bin.w = bin.w, x.max = max_CR, x.min=min_CR,
-                 data.whiskers = FALSE, xlab = copy_ratio_label, xlim=c(min_CR, max_CR), x.axis=FALSE,
+                 data.whiskers = FALSE, xlab = copy_ratio_label, ylab = genomic_fraction_label, xlim=c(min_CR, max_CR), x.axis=FALSE,
                  sideways = sideways, y.ax.labs=label.genomic.fraction.axis )
 }
 

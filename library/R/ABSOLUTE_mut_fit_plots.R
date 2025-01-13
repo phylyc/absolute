@@ -263,7 +263,7 @@ multiplicity_plot = function( seg.dat, mut.dat, af_post_pr, grid_mat, SSNV_cols,
 draw_grid_mut_densities = function(mut_pr, grid, col, mut_colors, scale_total, draw_total=TRUE, draw_indv=TRUE, add=FALSE, y_lim=NA, lty=1) 
 {  
   if (!add) {
-    plot( 0, type="n", bty="n", main="", xlab="CCF", ylab="Density", xlim=c(0,1), ylim=c(0, y_lim), las=1)
+    plot( 0, type="n", bty="n", main="", xlab="Fraction of cancer cells with alteration", ylab="Density", xlim=c(0,1), ylim=c(0, y_lim), las=1)
   }
   
   if (draw_indv) {
@@ -350,12 +350,13 @@ SSNV_CCF_plot = function( mut.dat, SSNV_ccf_dens, mode.ix, SSNV_cols, max_SSNVs_
   H123.SSNV_mut_cols = get_mut_cols( H123_SSNV_cols, SSNV_pr_clonal[H123.SSNV.ix], SSNV.amp.ix )
 
 ## SSNVs on clonal and subclonal SCNAs
-  draw_grid_mut_densities( clonal_SCNA_SSNV_ccf_dens, ccf_grid, col=SSNV_cols[2], mut_colors=SSNV_mut_cols, scale_total, draw_total=TRUE, draw_indv=TRUE, add=FALSE, y_lim=y_lim )
+  draw_grid_mut_densities( clonal_SCNA_SSNV_ccf_dens, ccf_grid, col=SSNV_cols[3], mut_colors=SSNV_mut_cols, scale_total, draw_total=TRUE, draw_indv=TRUE, add=FALSE, y_lim=y_lim )
 
-  draw_grid_mut_densities( H123.SSNV_ccf_dens, ccf_grid, col=H123_SSNV_cols[2], mut_colors=H123.SSNV_mut_cols, scale_total, draw_total=TRUE, draw_indv=TRUE, add=TRUE, y_lim=y_lim )
+  draw_grid_mut_densities( H123.SSNV_ccf_dens, ccf_grid, col=H123_SSNV_cols[3], mut_colors=H123.SSNV_mut_cols, scale_total, draw_total=TRUE, draw_indv=TRUE, add=TRUE, y_lim=y_lim )
 
 
   legend( x='topleft', legend=c("Clonal SSNVs", "Subclonal SSNVs", "Clonal SSNVs on subclonal SCNAs", "Subclonal SSNVs on subclonal SCNAs"), col=c( rev(SSNV_cols), rev(H123_SSNV_cols) ), lty=1, lwd=1.5, bty="n", cex=.6 )
+  title("SSNV clonality", line = 0.5, cex.main = 0.9)
 }
 
 
@@ -392,8 +393,9 @@ SSNV_on_subclonal_SCNA_CCF_plot = function( mut.dat, SSNV_ccf_dens, mode.ix, max
 
   draw_grid_mut_densities( SSNV_ccf_dens[loss.ix,,drop=FALSE], ccf_grid, col=NA, mut_colors=rep("black", sum(loss.ix)), scale_total, draw_total=FALSE, draw_indv=TRUE, add=TRUE, y_lim=y_lim, lty=3 )
 
-  mtext( text="SSNVs on subclonal SCNAs", side=3, line=0, adj=0, cex=0.7)
+  # mtext( text="SSNVs on subclonal SCNAs", side=3, line=0, adj=0, cex=0.7)
   legend( x='topleft', legend=c("H1: Ancestral SSNV in trans", "H2: Ancestral SSNV in cis", "H3: Derived SSNV", "Subclonal deletion SCNA"), col=c(H_cols,"black"), lty=c(1,1,1,3), lwd=1.5, bty="n", cex=.7 )
+  title("SSNVs on subclonal SCNAs", line = 0.5, cex.main = 0.9)
 }
 
 

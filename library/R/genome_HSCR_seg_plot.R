@@ -214,12 +214,15 @@ PlotHscrAndSeghist <- function(allele.segs, seg_colors, chr.arms.dat, max_CR, mi
      if( !is.na(SID_label)) { 
         mtext( SID_label, side=3, line=0.5, adj=0, cex=par("cex")+0.1, font=2 )
      }
+    ## no left margin
+    par(mar = c(d.mar[1], 0, d.mar[3], d.mar[4]))
+  } else {
+    ## small left margin
+    par(mar = c(d.mar[1], 2, d.mar[3], d.mar[4]))
   }
   
   ##  seg hist plots
   bin.w = 0.04  ## for histograms
-  ## no left margin
-  par(mar = c(d.mar[1], 0, d.mar[3], d.mar[4]))
   
   if (plot.hist) 
   {
@@ -239,9 +242,9 @@ PlotHscrAndSeghist <- function(allele.segs, seg_colors, chr.arms.dat, max_CR, mi
     if( log2CR ) { seg_means = log(seg_means, 2) }
     if( log2CR ) { comb = log(comb, 2) }
 
-    plot_ABS_seg_hist(seg_means, seg_W, copy_ratio_label="", seg_colors, min_CR, max_CR, bin.w, sideways=TRUE, label.genomic.fraction.axis=label.genomic.fraction.axis )
+    plot_ABS_seg_hist(seg_means, seg_W, copy_ratio_label="", genomic_fraction_label="", seg_colors, min_CR, max_CR, bin.w, sideways=TRUE, label.genomic.fraction.axis=label.genomic.fraction.axis )
 
-#    mtext(text = "Fraction of reference genome", line=par("mgp")[1], side = 1, cex=par("cex.axis")*par("cex") )
+   mtext(text = "Genomic fraction", line=par("mgp")[1], side = 1, cex=par("cex.axis")*par("cex") )
 #    abline(h = 0, lty = 3, lwd = 2)
 #    mtext("Summary histogram", side = 3, line = 0, adj = 0, cex = par("cex.axis"))
 
