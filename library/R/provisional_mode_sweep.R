@@ -137,10 +137,13 @@ MargModeFinder <- function(obs, mut.cn.dat, SSNV_model, SCNA_model, b.res=0.1, d
   # b.grid <- seq( SCNA_model[["kDom1"]][1], SCNA_model[["kDom1"]][2], b.res)  # b.res=0.125
   # d.grid <- seq( SCNA_model[["kDom2"]][1], SCNA_model[["kDom2"]][2], d.res)  # d.res = 0.125
 
-  b.grid <- log( seq( exp(SCNA_model[["kDom1"]][1]), exp(SCNA_model[["kDom1"]][2]), b.res) )
-  d.grid <- log( seq( exp(SCNA_model[["kDom2"]][1]), exp(SCNA_model[["kDom2"]][2]), d.res) )
+  b.grid <- log( seq(from=exp(SCNA_model[["kDom1"]][1]), to=exp(SCNA_model[["kDom1"]][2]), by=b.res) )
+  d.grid <- log( seq(from=exp(SCNA_model[["kDom2"]][1]), to=exp(SCNA_model[["kDom2"]][2]), by=d.res) )
+
   n.b <- length(b.grid)
   n.d <- length(d.grid)
+
+  if (verbose) {print(paste("Provisional mode sweep across", n.b * n.d, "b-delta grid points:"))}
   
   mode.tab <- array(NA, dim = c(n.b * n.d, 3))
   #  for (i in seq_len(n.b)) 

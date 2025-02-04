@@ -152,7 +152,7 @@ SCNA_model_setup = function( SCNA.argv, verbose=FALSE )
 
 # for provisional sweep
   SCNA_model[["kDom1"]] <- c(0, 1)
-  SCNA_model[["kDom2"]] <- log(c(0.01, 1.05))
+  SCNA_model[["kDom2"]] <- log(c(0.01, 0.99))
 
 
   SCNA_model[["N_DP_iter"]] = 100
