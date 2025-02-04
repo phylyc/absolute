@@ -26,6 +26,8 @@ option_list <- list(
   make_option("--ssnv_skew", type = "double", default = 0.9883274, help = "skew", metavar = "number"),
   make_option("--min_ploidy", type = "double", default = 1.1, help = "minimum ploidy [default= %default]", metavar = "number"),
   make_option("--max_ploidy", type = "double", default = 6, help = "maximum ploidy [default= %default]", metavar = "number"),
+  make_option("--b_res", type = "double", default = 0.05, help="resolution of b", metavar = "number"),
+  make_option("--delta_res", type = "double", default = 0.01, help="exp(resolution) of delta", metavar = "number"),
   make_option("--copy_num_type", type = "character", default = "allelic", help = "type: allelic or total [default= %default]", metavar = "string"),
   make_option("--primary_disease", type = "character", default = NA, help = "Disease type of the primary tumor [default= %default]", metavar = "string"),
   make_option("--genome_build", type = "character", default = "hg19", help = "build of the genome: hg18, hg19, mm9 [default= %default]", metavar = "string"),
@@ -70,6 +72,8 @@ min_probes <- 1
 max_sd <- 100
 sigma.h <- 0.01
 SSNV_skew <- opt$ssnv_skew
+b.res <- opt$b_res
+d.res <- opt$delta_res
 filter_segs <- TRUE
 force.alpha <- opt$alpha
 force.tau <- opt$tau
@@ -93,6 +97,6 @@ for( i in 1:length(rr) ) {
 RunAbsolute(
   seg.dat.fn, primary.disease, platform, sample.name, results.dir, copy_num_type, genome_build, gender,
   min.ploidy, max.ploidy, max.as.seg.count, max.non.clonal, max.neg.genome, maf.fn, indel.maf.fn, min.mut.af,
-  output.fn.base, min_probes, max_sd, sigma.h, SSNV_skew, filter_segs, force.alpha, force.tau,
+  output.fn.base, min_probes, max_sd, sigma.h, SSNV_skew, b.res, d.res, filter_segs, force.alpha, force.tau,
   allelic_capseg_rds, N_threads, verbose
 )

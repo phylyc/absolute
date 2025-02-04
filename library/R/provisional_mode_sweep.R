@@ -9,11 +9,11 @@
 ## use, misuse, or functionality.
 
 
-ProvisionalModeSweep <- function(seg.obj, SCNA_model, mut.cn.dat, SSNV_model, force.alpha, force.tau, chr.arms.dat, verbose=FALSE)
+ProvisionalModeSweep <- function(seg.obj, SCNA_model, mut.cn.dat, SSNV_model, force.alpha, force.tau, b.res=0.1, d.res=0.01, chr.arms.dat, verbose=FALSE)
 {
   Q = SCNA_model[["kQ"]]
   obs <- seg.obj[["obs.scna"]]
-  res <- FindLocationModes(obs, force.alpha, force.tau, SCNA_model, mut.cn.dat, SSNV_model, verbose=verbose)
+  res <- FindLocationModes(obs, force.alpha, force.tau, SCNA_model, mut.cn.dat, SSNV_model, b.res=b.res, d.res=d.res, verbose=verbose)
   
   if (!is.null(res[["mode.flag"]])) { 
       return(list("mode.flag"=res[["mode.flag"]]))
@@ -39,7 +39,7 @@ ProvisionalModeSweep <- function(seg.obj, SCNA_model, mut.cn.dat, SSNV_model, fo
 
 
 
-FindLocationModes <- function(obs, force.alpha, force.tau, SCNA_model, mut.cn.dat, SSNV_model, verbose=FALSE) {
+FindLocationModes <- function(obs, force.alpha, force.tau, SCNA_model, mut.cn.dat, SSNV_model, b.res=0.1, d.res=0.01, verbose=FALSE) {
 
   kAlphaDom <- c(0, 1)
   
@@ -59,7 +59,7 @@ FindLocationModes <- function(obs, force.alpha, force.tau, SCNA_model, mut.cn.da
   }
   else
   {
-     mode.tab <- MargModeFinder(obs, mut.cn.dat, SSNV_model, SCNA_model, verbose=verbose)
+     mode.tab <- MargModeFinder(obs, mut.cn.dat, SSNV_model, SCNA_model, b.res=b.res, d.res=d.res, verbose=verbose)
   }
   
   if (nrow(mode.tab) == 0) {
@@ -124,7 +124,7 @@ FindLocationModes <- function(obs, force.alpha, force.tau, SCNA_model, mut.cn.da
   return(list(mode.tab = mode.tab))
 }
 
-MargModeFinder <- function(obs, mut.cn.dat, SSNV_model, SCNA_model, b.res=0.125, d.res=0.125, verbose=FALSE) 
+MargModeFinder <- function(obs, mut.cn.dat, SSNV_model, SCNA_model, b.res=0.1, d.res=0.01, verbose=FALSE)
 {
    fit_func = function(b.grid, d.grid, i, j, obs, SCNA_model)
    {
@@ -134,10 +134,11 @@ MargModeFinder <- function(obs, mut.cn.dat, SSNV_model, SCNA_model, b.res=0.125,
       return(res)
    }
 
-  b.grid <- seq( SCNA_model[["kDom1"]][1], SCNA_model[["kDom1"]][2], b.res)
-#  d.grid <- seq( SCNA_model[["kDom2"]][1], SCNA_model[["kDom2"]][2], d.res)
+  # b.grid <- seq( SCNA_model[["kDom1"]][1], SCNA_model[["kDom1"]][2], b.res)  # b.res=0.125
+  # d.grid <- seq( SCNA_model[["kDom2"]][1], SCNA_model[["kDom2"]][2], d.res)  # d.res = 0.125
 
-  d.grid <- log( seq( exp(SCNA_model[["kDom2"]][1]), exp(SCNA_model[["kDom2"]][2]), 0.01) )
+  b.grid <- log( seq( exp(SCNA_model[["kDom1"]][1]), exp(SCNA_model[["kDom1"]][2]), b.res) )
+  d.grid <- log( seq( exp(SCNA_model[["kDom2"]][1]), exp(SCNA_model[["kDom2"]][2]), d.res) )
   n.b <- length(b.grid)
   n.d <- length(d.grid)
   
@@ -172,7 +173,7 @@ MargModeFinder <- function(obs, mut.cn.dat, SSNV_model, SCNA_model, b.res=0.125,
 
   ## Try 1d opt for pure tumors
   delta_dom = log(c(1 / SCNA_model[["kTauDom"]][2] - 0.05, 1))
-  res_1d = run_1d_opt(obs, SCNA_model, delta_dom, d.res, verbose=verbose)  
+  res_1d = run_1d_opt(obs, SCNA_model, delta_dom, d_res=d.res, verbose=verbose)
   if (verbose) {
     print("1d mode opt: ")
     print(res_1d)

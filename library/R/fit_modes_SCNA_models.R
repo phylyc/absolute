@@ -44,6 +44,10 @@ fit_modes_SCNA_models = function( seg.obj, mode.tab, SCNA_model, mut.cn.dat, chr
      modes_DP_res = list()
      for( i in 1:n.modes )
      {
+       if(verbose) {
+         cat("\n")
+          print( paste("Optimizing PP mode #", i, sep=""))
+       }
         modes_DP_res[[i]] = SCNA_model_calc_CCF_DP_loglik( obs, mode.tab[i, "b"], mode.tab[i, "delta"], init, verbose=verbose )
      }
   }
@@ -73,19 +77,23 @@ fit_modes_SCNA_models = function( seg.obj, mode.tab, SCNA_model, mut.cn.dat, chr
 
 ## Annotate SCNA clonality summary for SSNV models
 ## Note - these functions only use the mut.cn.dat to disallow clonal homozygous calls if there is 1 > alt SSNV read in the seg
-    if( !identical(mut.cn.dat, NA))
-    {
-       missing.AS.seg.ix = apply( is.na(mut.cn.dat[,c("A1.ix", "A2.ix")]), 1, any )
-       if( any(!missing.AS.seg.ix))
-       {
-          allelic_res = allelic_get_subclonal_SCNA_info( obs, b, delta, mode_SCNA_models[[i]], mut.cn.dat[!missing.AS.seg.ix,, drop=FALSE] )
-       }
-    }
-    else
-    { 
-       allelic_res = allelic_get_subclonal_SCNA_info( obs, b, delta, mode_SCNA_models[[i]], mut.cn.dat )
+    if (seg.obj[["copy_num_type"]] == "allelic") {
+      if( !identical(mut.cn.dat, NA))
+      {
+         missing.AS.seg.ix = apply( is.na(mut.cn.dat[,c("A1.ix", "A2.ix")]), 1, any )
+         if( any(!missing.AS.seg.ix))
+         {
+            allelic_res = allelic_get_subclonal_SCNA_info( obs, b, delta, mode_SCNA_models[[i]], mut.cn.dat[!missing.AS.seg.ix,, drop=FALSE] )
+         }
+      }
+      else
+      {
+         allelic_res = allelic_get_subclonal_SCNA_info( obs, b, delta, mode_SCNA_models[[i]], mut.cn.dat )
+      }
     }
 
+    # allelic_get_subclonal_SCNA_info sets "tot.xxx" states which are needed going forward.
+    # How should they be set for the total CR mode?
     total_res = total_get_subclonal_SCNA_info( seg.obj[["obs.total.scna"]], b, delta, mode_SCNA_models[[i]], mut.cn.dat )
 
 #    res = get_subclonal_SCNA_info( obs, b, delta, mode_SCNA_models[[i]], mut.cn.dat )
@@ -104,7 +112,10 @@ fit_modes_SCNA_models = function( seg.obj, mode.tab, SCNA_model, mut.cn.dat, chr
     mode.tab = fill_mode.tab_row( seg.obj, mode_SCNA_models[[i]], obs, b, delta, mode.tab, i )
   }
 
-  subclonal_SCNA_res = list(subclonal_SCNA_tab = subclonal_scna_tab, log_CCF_dens = log_ccf_dens, total_subclonal_scna_tab=total_subclonal_scna_tab, total_log_ccf_dens=total_log_ccf_dens )
+  subclonal_SCNA_res = list(
+    subclonal_SCNA_tab = subclonal_scna_tab, log_CCF_dens = log_ccf_dens,
+    total_subclonal_scna_tab = total_subclonal_scna_tab, total_log_ccf_dens = total_log_ccf_dens
+  )
 
   return( list(mode.tab=mode.tab, mode_SCNA_models=mode_SCNA_models, subclonal_SCNA_res=subclonal_SCNA_res, mode.flag=NA ) )
 }
