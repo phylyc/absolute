@@ -352,12 +352,15 @@ aggregate_sample_MAF_list = function( MAF_list )
    if (length(MAF_list) > 0)
    {
       cols = colnames(MAF_list[[1]])
-      for( i in 2:length(MAF_list))
+      if (length(MAF_list) > 1)
       {
-         cols = intersect(cols, colnames(MAF_list[[i]]))
+         for (i in 2:length(MAF_list))
+         {
+            cols = intersect(cols, colnames(MAF_list[[i]]))
+         }
       }
 
-      for( i in 1:length(MAF_list))
+      for (i in 1:length(MAF_list))
       {
          combined_MAF = rbind( MAF_list[[i]][,cols], combined_MAF )
       }
