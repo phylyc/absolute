@@ -9,30 +9,16 @@
 ## use, misuse, or functionality.
 
 run_PP_calls_liftover_from_num = function(solution_num, analyst.id, modes.fn, out.dir.base, obj.name, chr.arms.dat, pp.calls_ploidy_colname = "ploidy", ploidy_colname="genome mass", verbose=FALSE) {
-  ## provides segobj.list
-  if( verbose ) { cat("Loading ABS multi-sample object...") }
+  ## provides seg.dat
+  if( verbose ) { cat("Loading ABS object...") }
   load(modes.fn)
   if( verbose ) { cat(" Done.\n") }
 
   review.dir = paste(file.path(out.dir.base, "reviewed"))
   dir.create(review.dir, recursive=TRUE, showWarnings = FALSE)
-  call_override = list(solution_num)
   cat(paste("Solution num:", solution_num, "\n"))
 
-  # TRANSPOSE seg.dat
-  n <- length(seg.dat[["mode.res"]][["mode.tab"]])
-  new.seg.dat <- vector("list", n)
-  for (i in seq_len(n)) {
-    new.seg.dat[[i]] <- lapply(seg.dat, function(x) {
-      if (is.list(x) && length(x) == n) {
-        return(x[[i]])
-      } else {
-        return(x)
-      }
-    })
-  }
-
-  called.segobj.list = override_absolute_calls(new.seg.dat, call_override)
+  called.segobj.list = override_absolute_calls(list(seg.dat), list(solution_num))
 
   ## PP tab
   out.fn = file.path(out.dir.base, "reviewed", paste(obj.name, ".", analyst.id, ".ABSOLUTE.table.txt", sep=""))
