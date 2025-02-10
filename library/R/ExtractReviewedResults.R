@@ -44,15 +44,15 @@ ExtractReviewedResults = function( called.segobj.list, analyst.id, out.dir.base,
   cat("done\n")
  ##
 
+## This is useless because it does not include sample names in the plot!
+if( FALSE )
+{
  ## Called summary plot
   pdf.fn = file.path(out.dir.base, "reviewed", 
                      paste(obj.name, ".called.ABSOLUTE.plots.pdf", sep=""))
   
 #  PlotModes(called.segobj.list, chr.arms.dat, pdf.fn, n.print=1)
 
-## This is useless because it does not include sample names in the plot!
-if( FALSE )
-{
   cat("Plotting called mode for matched samples")
   pdf( pdf.fn, 17.5, 18.5 )
   PlotModes_layout()
@@ -66,7 +66,7 @@ if( FALSE )
 }
 
   ## Called indv. RData files
-   cat("Extracting RData called mode files for matched samples")
+   cat("Extracting RData called mode files for matched samples:")
    indv.called.dir = file.path(out.dir.base, "reviewed", "samples")
    dir.create(indv.called.dir, recursive=TRUE, showWarnings = FALSE)
 
@@ -91,15 +91,15 @@ if( FALSE )
 
    # out.dir.base = file.path( "ABSOLUTE_results", obj.name )
    transcript_GRs = get_GENCODE_transcript_GRs(verbose=FALSE)
-   gene_SCNA_calls = genotype_transcript_SCNAs_in_called_ABS_files( indv.called.dir, transcript_GRs, SCNA_thresholds, analyst_id = analyst.id )
-   saveRDS( gene_SCNA_calls, file.path(out.dir.base, "reviewed", paste(obj.name, "_gene_SCNA_data.Rds", sep="")) )
+   gene_SCNA_calls = genotype_transcript_SCNAs_in_called_ABS_files( indv.called.dir, transcript_GRs, SCNA_thresholds, analyst_id = analyst.id, sample_ids = c(obj.name), sample_names = c(obj.name) )
+   saveRDS( gene_SCNA_calls, file.path(out.dir.base, "reviewed", paste(obj.name, ".gene_SCNA_data.Rds", sep="")) )
 
    CN_dat = gene_SCNA_calls[["SCNA_event_dat"]][["amp.gene.data"]][,,"rescaled_total_cn"]
-   write.table( round(CN_dat,2), file=file.path(out.dir.base, "reviewed", paste(obj.name, "_gene_corrected_CN.txt", sep="")), quote=FALSE, sep="\t" )
+   write.table( round(CN_dat,2), file=file.path(out.dir.base, "reviewed", paste(obj.name, ".gene_corrected_CN.txt", sep="")), quote=FALSE, sep="\t" )
 
+  # moved to writing of segtab
 # write a merged-sample IGV file with log2 corrected copy-ratios
-   write_IGV_segfile( seg.maf.dir, file.path( out.dir.base, "reviewed", paste( obj.name, "_rescaled_total_cn.IGV.seg.txt", sep="")) )
-
+#    write_IGV_segfile( seg.maf.dir, file.path( out.dir.base, "reviewed", paste( obj.name, "_rescaled_total_cn.IGV.seg.txt", sep="")) )
 }
 
 apply_review_and_extract = function( pp.review.fn=NA, pp.solution.num=NA, results.dir, rdata=NA, obj.name, analyst.id, pp.calls_ploidy_colname = "ploidy", ploidy_colname="genome mass",
