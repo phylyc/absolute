@@ -210,11 +210,11 @@ get_total_abs_CN_seg_dat_from_allelic_CAPSEG_obj = function(segobj)
 ## rescale amps (off comb) by purity / ploidy 
     if( amp[i] )
     {
-       corrected_total_cn[i] = (copy_ratio[i] - use_b) / delta
+       corrected_total_cn[i] = max(0, (copy_ratio[i] - use_b) / delta)
     }
     else{ corrected_total_cn[i] = expected_cn[i] }
 
-    rescaled_total_cn[i] = (copy_ratio[i] - use_b) / delta
+    rescaled_total_cn[i] = max(0, (copy_ratio[i] - use_b) / delta)
 #    subclonal[i] = subclonal_ix[i]
 #    cancer_cell_frac[i] = ccf_hat[i]
 #    ccf_ci95_low[i] = ccf_ci95[i, 1]
@@ -334,13 +334,13 @@ get_allelic_abs_CN_seg_dat_from_allelic_CAPSEG_obj <- function(segobj) {
 ## rescale amps (off comb) by purity / ploidy 
     if( amp.a1[i] )
     {
-       rescaled.cn.a1[i] = (hscr.a1[i] - b) / (2*delta)
+       rescaled.cn.a1[i] = max(0, (hscr.a1[i] - b) / (2*delta))
     }
     else{ rescaled.cn.a1[i] = expected.a1[i] }
 
     if( amp.a2[i] )
     {
-       rescaled.cn.a2[i] = (hscr.a2[i] - b) / (2*delta)
+       rescaled.cn.a2[i] = max(0, (hscr.a2[i] - b) / (2*delta))
     }
     else{ rescaled.cn.a2[i] = expected.a2[i] }
 
