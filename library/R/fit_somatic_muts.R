@@ -23,12 +23,16 @@ ApplySSNVModel <- function(mode.res, mut.cn.dat, SSNV_model, verbose=FALSE)
     subclonal_scna_tab = mode.res[["subclonal_SCNA_res"]][["subclonal_SCNA_tab"]][j, , ]
     SCNA_log_ccf_dens = mode.res[["subclonal_SCNA_res"]][["log_CCF_dens"]][j, , ]
 
-    tot.seg.q.tab =  mode.res[["mode_SCNA_models"]][[j]] [["tot.seg.q.tab"]]
-    total_subclonal_scna_tab = mode.res[["subclonal_SCNA_res"]][["total_subclonal_scna_tab"]][j, , ]
-    total_scna_log_ccf_dens = mode.res[["subclonal_SCNA_res"]][["total_log_ccf_dens"]][j, , ]
+    # tot.seg.q.tab =  mode.res[["mode_SCNA_models"]][[j]] [["tot.seg.q.tab"]]
+    # total_subclonal_scna_tab = mode.res[["subclonal_SCNA_res"]][["total_subclonal_scna_tab"]][j, , ]
+    # total_scna_log_ccf_dens = mode.res[["subclonal_SCNA_res"]][["total_log_ccf_dens"]][j, , ]
 
     
-    res = FitPPModeSomaticMuts(SSNV_model, mode.res[["mode_SCNA_models"]][[j]], mut.cn.dat, mode.res$mode.tab[j, ], subclonal_scna_tab, SCNA_log_ccf_dens, seg.q.tab, total_subclonal_scna_tab, total_scna_log_ccf_dens, tot.seg.q.tab, verbose=verbose)
+    res = FitPPModeSomaticMuts(
+      SSNV_model, mode.res[["mode_SCNA_models"]][[j]], mut.cn.dat, mode.res$mode.tab[j, ],
+      subclonal_scna_tab, SCNA_log_ccf_dens, seg.q.tab,
+      # total_subclonal_scna_tab, total_scna_log_ccf_dens, tot.seg.q.tab, verbose=verbose
+    )
         
     res[["modeled.muts"]][["purity"]] = alpha
     res[["modeled.muts"]][["SSNV_skew"]] = SSNV_skew
@@ -61,9 +65,10 @@ ApplySSNVModel <- function(mode.res, mut.cn.dat, SSNV_model, verbose=FALSE)
 
 
 
-FitPPModeSomaticMuts <- function(SSNV_model, SCNA_model, mut.cn.dat, mode_info,
-				 subclonal_scna_tab, scna_log_ccf_dens, seg.q.tab, 
-     			   	 total_subclonal_scna_tab, total_SCNA_log_ccf_dens, tot.seg.q.tab, verbose=FALSE) 
+FitPPModeSomaticMuts <- function(
+  SSNV_model, SCNA_model, mut.cn.dat, mode_info,
+  subclonal_scna_tab, scna_log_ccf_dens, seg.q.tab,
+  total_subclonal_scna_tab, total_SCNA_log_ccf_dens, tot.seg.q.tab, verbose=FALSE)
 {
   clonal_scna_mut_ix = !get_subclonal_scna_mut_ix(mut.cn.dat, subclonal_scna_tab)
 
@@ -77,12 +82,12 @@ FitPPModeSomaticMuts <- function(SSNV_model, SCNA_model, mut.cn.dat, mode_info,
 
   N_SSNV = nrow(mut.cn.dat)
 
-  missing.AS.seg.ix = apply( is.na(mut.cn.dat[,c("A1.ix", "A2.ix")]), 1, any )
   total.clonal.mut.tab = total_get_muts_nearest_clonal_scna(mut.cn.dat, SCNA_model[["tot.seg.q.tab"]], SCNA_model[["kQ"]])
   colnames(total.clonal.mut.tab) = c("total_q_hat")
   allelic.clonal.mut.tab = matrix(NA, nrow=N_SSNV, ncol=3)
   colnames(allelic.clonal.mut.tab) = c("q_hat", "HS_q_hat_1", "HS_q_hat_2")
 
+  missing.AS.seg.ix = apply( is.na(mut.cn.dat[,c("A1.ix", "A2.ix")]), 1, any )
   if( any(!missing.AS.seg.ix))
   {
      allelic.clonal.mut.tab[!missing.AS.seg.ix,] = allelic_get_muts_nearest_clonal_scna(mut.cn.dat[!missing.AS.seg.ix,, drop=FALSE], SCNA_model[["seg.q.tab"]], SCNA_model[["kQ"]])
