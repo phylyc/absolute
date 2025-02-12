@@ -113,8 +113,10 @@ RunAbsolute = function(seg.dat.fn, primary.disease, platform, sample.name, resul
       if( !is.na(seg.dat.fn) && !file.exists(seg.dat.fn)) { stop("seg.dat.fn does not exist") }
 
       segtab = read.delim( seg.dat.fn, row.names=NULL, stringsAsFactors=FALSE, check.names=FALSE)
-      message("Removing segs with NA sigma")
-      segtab = na.omit(segtab)
+
+      nix= is.na(segtab[,"f"])
+      print( paste( "Removing ", sum(nix), " of ", length(nix), " segs with NA f", sep="") )
+      segtab = segtab[!nix,]
 
       seg.dat = MakeSegObj(segtab, gender, min_probes=min_probes, max_sd=max_sd,
                            filter_segs=filter_segs, verbose=verbose)
