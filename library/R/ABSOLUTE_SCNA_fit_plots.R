@@ -62,7 +62,6 @@ PlotModes <- function(segobj, chr.arms.dat, n.print = NA, called.mode.ix=NA, ver
 ## 1- alpha vs tau
       modes_purity_ploidy_plot(mode.tab, mode.colors, alpha.dom, tau.dom, SN, segobj, called.mode.ix,
                                call.status=segobj[["mode.res"]][["call.status"]], model.id=model.id, mode.focus.ix=i)
-      mtext( SN, side=3, adj=0, cex=par("cex") )
 
 
       res = get_b_and_delta(  mode.tab[i, "alpha"], mode.tab[i, "tau"] )
@@ -334,9 +333,9 @@ modes_purity_ploidy_plot <- function(mode.tab, mode.colors, alpha.dom, tau.dom, 
   
   if (debug.info) {
     title(paste("Solution", mode.focus.ix), line = 3, col.main = pp.grid.col, cex.main = 2)
-    # title(sample.name, line = 3)
     # mtext(call.status, line = 0, adj = 0)
-    # mtext(model.id, line = 0, adj = 1)
+    mtext(sample.name, side=3, line=1, adj=0, cex=par("cex") )
+    mtext(paste("Disease:", model.id), side=3, line=0, adj=0, cex=par("cex"))
   }
   
   if ((seg.dat[["platform"]] == "SNP_6.0") && debug.info) {

@@ -8,14 +8,13 @@
 ## whatsoever. Neither the Broad Institute nor MIT can be responsible for its
 ## use, misuse, or functionality.
 
-ApplyKaryotypeModel <- function(mode.res, model.id, train.obj, verbose=FALSE) {
+ApplyKaryotypeModel <- function(mode.res, model.id, train.obj, apply_karyotype_model=FALSE, verbose=FALSE) {
     clust.res <- train.obj[[model.id]]$clust_res
     q <- dim(mode.res[["theta.q.tab"]])[2]
     m <- nrow(mode.res[["mode.tab"]])
     max.q <- dim(clust.res[["M_clust"]])[3]
     
-    mode.res[["mode.clust.p"]] <- array(NA,
-                                        dim = c(m, dim(clust.res[["M_clust"]])[1]))
+    mode.res[["mode.clust.p"]] <- array(NA, dim = c(m, dim(clust.res[["M_clust"]])[1]))
     
 ## loop over modes of SCNA model
     for (j in seq_len(m)) {
@@ -27,10 +26,13 @@ ApplyKaryotypeModel <- function(mode.res, model.id, train.obj, verbose=FALSE) {
                                                        clust.res, max.q,
                                                        verbose=verbose)
     }
-    
-#    new.ll <- mode.res[["mode.tab"]][, "Kar_LL"] +
-#              mode.res[["mode.tab"]][, "combined_LL"]
-#    mode.res[["mode.tab"]][, "combined_LL"] <- new.ll
+
+  if (apply_karyotype_model) {
+    print(paste("Applying karyotype priors for disease type:", model.id))
+    new.ll <- mode.res[["mode.tab"]][, "Kar_LL"] +
+              mode.res[["mode.tab"]][, "combined_LL"]
+    mode.res[["mode.tab"]][, "combined_LL"] <- new.ll
+  }
     
     return(mode.res)
 }
@@ -72,7 +74,7 @@ DMultmix <- function(theta, clust.res, max.q, log.p=FALSE, verbose=FALSE) {
   
   if (nrow(theta) == dim(m.clust)[2] / 2) {
     if (verbose) {
-#      print("Switching to total copy Karyotype model...")
+     print("Switching to total copy Karyotype model...")
     }
     m.clust <- CollapseChrarmModelsToTcn(m.clust)
   } else {

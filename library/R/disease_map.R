@@ -16,6 +16,7 @@ DetermineGroup <- function(primary.disease) {
   if(is.na(primary.disease)) { return(NA) }
 
   group <- try(get(primary.disease, disease_map))
+  print(paste("Disease type mapped:", primary.disease, "->", group))
   if (inherits(group, "try-error")) {
     ## It doesn't exist, just return the primary disease, it'll
     ## fall through

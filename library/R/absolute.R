@@ -39,7 +39,7 @@
   }
 
 
-RunAbsolute = function(seg.dat.fn, primary.disease, platform, sample.name, results.dir, copy_num_type, genome_build, gender=NA, min.ploidy=1, max.ploidy=8, max.as.seg.count=1500, max.non.clonal=0.8, max.neg.genome=0.005, maf.fn = NULL, indel.maf.fn = NULL, min.mut.af = NULL, output.fn.base=NULL, min_probes=10, max_sd=100, sigma.h=0.01, SSNV_skew=1, b.res=0.1, d.res=0.01, filter_segs=TRUE, force.alpha=NA, force.tau=NA, allelic_capseg_rds=NA, N_threads=1, verbose = FALSE)
+RunAbsolute = function(seg.dat.fn, primary.disease, platform, sample.name, results.dir, copy_num_type, genome_build, gender=NA, min.ploidy=1, max.ploidy=8, max.as.seg.count=1500, max.non.clonal=0.8, max.neg.genome=0.005, maf.fn = NULL, indel.maf.fn = NULL, min.mut.af = NULL, output.fn.base=NULL, min_probes=10, max_sd=100, sigma.h=0.01, SSNV_skew=1, b.res=0.1, d.res=0.01, filter_segs=TRUE, force.alpha=NA, force.tau=NA, allelic_capseg_rds=NA, apply_karyotype_model=FALSE, N_threads=1, verbose = FALSE)
 {  
   print( paste("Registering ", N_threads, " threads.", sep=""))
   registerDoMC(N_threads)
@@ -231,17 +231,22 @@ RunAbsolute = function(seg.dat.fn, primary.disease, platform, sample.name, resul
   {
     ## 1 - apply karyotype model
     ## Kar model only defined for human cancers
-    if( genome_build %in% c("hg18", "hg19", "hg38") )
+    if (genome_build %in% c("hg18", "hg19", "hg38"))
     {
        # data(ChrArmPriorDb, package="ABSOLUTE")
       load(file.path(pkg_dir, "data", "ChrArmPriorDb.RData"))
 
-       model.id = ifelse(seg.dat[["group"]] %in% names(train.obj),
-                         seg.dat[["group"]], "Primary")
-       mode.res = ApplyKaryotypeModel(mode.res, model.id, train.obj, verbose=verbose)
+      if (seg.dat[["group"]] %in% names(train.obj)) {
+        model.id = seg.dat[["group"]]
+      } else {
+        model.id = "Primary"
+        print(paste("Disease type", seg.dat[["group"]], "not in ChrArmPriorDb.RData, set to default model:", model.id))
+      }
+      mode.res = ApplyKaryotypeModel(mode.res, model.id, train.obj, apply_karyotype_model=apply_karyotype_model,verbose=verbose)
+    } else {
+      seg.dat[["group"]] = ""
     }
-    else{ seg.dat[["group"]]="" }
- 
+
     ## 2 - apply mutation model
     if ((!is.null(maf)) && (nrow(maf) > 0)) 
     {

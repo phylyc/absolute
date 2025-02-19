@@ -30,7 +30,8 @@ option_list <- list(
   make_option("--delta_res", type = "double", default = 0.01, help="resolution of delta grid during provisional mode sweep", metavar = "number"),
   make_option("--copy_num_type", type = "character", default = "allelic", help = "type: allelic or total [default= %default]", metavar = "string"),
   make_option("--primary_disease", type = "character", default = NA, help = "Disease type of the primary tumor [default= %default]", metavar = "string"),
-  make_option("--genome_build", type = "character", default = "hg19", help = "build of the genome: hg18, hg19, mm9 [default= %default]", metavar = "string"),
+  make_option("--apply_karyotype_model", type = "logical", action = "store_true", default = FALSE, help = "Apply chromosome arm-level SCNA priors based on disease type [default= %default]", metavar = "string"),
+  make_option("--genome_build", type = "character", default = "hg19", help = "build of the genome: hg18, hg19, hg38, mm9 [default= %default]", metavar = "string"),
   make_option("--pkg_dir", type = "character", default = ".", help = "package directory", metavar = "string")
 )
 
@@ -54,6 +55,7 @@ if (is.null(opt$results_dir)) {
 }
 
 primary.disease <- opt$primary_disease
+apply_karyotype_model <- opt$apply_karyotype_model
 platform <- "Illumina_WES"
 copy_num_type <- opt$copy_num_type
 genome_build <- opt$genome_build
@@ -98,5 +100,5 @@ RunAbsolute(
   seg.dat.fn, primary.disease, platform, sample.name, results.dir, copy_num_type, genome_build, gender,
   min.ploidy, max.ploidy, max.as.seg.count, max.non.clonal, max.neg.genome, maf.fn, indel.maf.fn, min.mut.af,
   output.fn.base, min_probes, max_sd, sigma.h, SSNV_skew, b.res, d.res, filter_segs, force.alpha, force.tau,
-  allelic_capseg_rds, N_threads, verbose
+  allelic_capseg_rds, apply_karyotype_model, N_threads, verbose
 )
