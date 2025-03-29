@@ -114,8 +114,12 @@ RunAbsolute = function(seg.dat.fn, primary.disease, platform, sample.name, resul
 
       segtab = read.delim( seg.dat.fn, row.names=NULL, stringsAsFactors=FALSE, check.names=FALSE)
 
-      nix= is.na(segtab[,"f"])
+      nix = is.na(segtab[,"f"])
       print( paste( "Removing ", sum(nix), " of ", length(nix), " segs with NA f", sep="") )
+      if (all(nix)) {
+        print("No segments left. Aborting.")
+        return(TRUE)
+      }
       segtab = segtab[!nix,]
 
       seg.dat = MakeSegObj(segtab, gender, min_probes=min_probes, max_sd=max_sd,
