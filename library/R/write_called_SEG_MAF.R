@@ -84,6 +84,10 @@ WriteMAF <- function(called_segobj, seg, out_fn) {
   maf_dt <- as.data.table(maf)
   seg_dt <- as.data.table(seg[, c("Chromosome", "Start.bp", "End.bp", "rescaled.cn.a1", "rescaled.cn.a2")])
 
+  # Ensure Chromosome is character in both tables
+  maf_dt[, Chromosome := as.character(Chromosome)]
+  seg_dt[, Chromosome := as.character(Chromosome)]
+
   # Set keys for fast binary search join
   setkey(maf_dt, Chromosome, Start_position, End_position)
   setkey(seg_dt, Chromosome, Start.bp, End.bp)
