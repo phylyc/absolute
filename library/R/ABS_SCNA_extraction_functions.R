@@ -453,10 +453,12 @@ get_refgene_transcript_GRs = function( genelist=NA )
 }
 
 
-get_GENCODE_transcript_GRs = function( genelist=NA, dropY=TRUE, verbose=FALSE )
+get_GENCODE_transcript_GRs = function( genelist=NA, dropY=TRUE, genome_build="hg19", verbose=FALSE )
 {
    # data( "gencode.hg19.genes", package="ABSOLUTE" )   # provides GENCODE
-  load(file.path(pkg_dir, "data", "gencode.hg19.genes.RData"))
+   if ( genome_build == "hg19") { load(file.path(pkg_dir, "data", "gencode.hg19.genes.RData")) }
+   else if ( genome_build == "hg38") { load(file.path(pkg_dir, "data", "gencode.hg38.genes.RData")) }
+   else {}
    txdb = gencode
 
    if( is.na(genelist) ) { genelist = unique(txdb[,"HGNC"]) }

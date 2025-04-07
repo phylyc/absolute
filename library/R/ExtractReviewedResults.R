@@ -8,7 +8,7 @@
 ## whatsoever. Neither the Broad Institute nor MIT can be responsible for its
 ## use, misuse, or functionality.
 
-ExtractReviewedResults = function( called.segobj.list, analyst.id, out.dir.base, obj.name, verbose=FALSE) 
+ExtractReviewedResults = function( called.segobj.list, analyst.id, out.dir.base, obj.name, genome_build, verbose=FALSE)
 {
  ## agg MAF
   cat("Outputting aggregate MAF...")
@@ -90,7 +90,7 @@ if( FALSE )
    SCNA_thresholds = get_SCNA_thresholds( amp.CN.threshold = 7, H.amp.CN.threshold = 10 )
 
    # out.dir.base = file.path( "ABSOLUTE_results", obj.name )
-   transcript_GRs = get_GENCODE_transcript_GRs(verbose=FALSE)
+   transcript_GRs = get_GENCODE_transcript_GRs(genome_build=genome_build, verbose=FALSE)
    gene_SCNA_calls = genotype_transcript_SCNAs_in_called_ABS_files( indv.called.dir, transcript_GRs, SCNA_thresholds, analyst_id = analyst.id, sample_ids = c(obj.name), sample_names = c(obj.name) )
    saveRDS( gene_SCNA_calls, file.path(out.dir.base, "reviewed", paste(obj.name, ".gene_SCNA_data.Rds", sep="")) )
 
@@ -144,7 +144,7 @@ apply_review_and_extract = function( pp.review.fn=NA, pp.solution.num=NA, result
 
    if( length(called.segobj.list) > 0 )
    {
-      ExtractReviewedResults( called.segobj.list, analyst.id , out.dir.base, obj.name, verbose=TRUE )
+      ExtractReviewedResults( called.segobj.list, analyst.id , out.dir.base, obj.name, genome_build=genome_build, verbose=TRUE )
    }
    else{ stop("called.segobj.list has length 0!") }
 }

@@ -62,5 +62,5 @@ registerDoMC(N_threads)
 
 
 apply_review_and_extract(
-  pp.solution.num=solution_num, results.dir=results.dir, rdata=rdata, obj.name=sample.name, analyst.id=analyst.id, copy_num_type=copy_num_type
+  pp.solution.num=solution_num, results.dir=results.dir, rdata=rdata, obj.name=sample.name, analyst.id=analyst.id, copy_num_type=copy_num_type, genome_build=genome_build
 )
