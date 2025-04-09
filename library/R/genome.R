@@ -1,16 +1,16 @@
 
-GetChrLens <- function(x=FALSE) {
-  lens <- c(247249719, 242951149, 199501827, 191273063,
-            180857866, 170899992, 158821424, 
-            146274826, 140273252, 135374737, 134452384,
-            132349534, 114142980, 106368585, 
-            100338915, 88827254, 78774742, 76117153, 63811651,
-            62435964, 46944323, 49691432, 154913754)
-    
+GetChrLens <- function(chr.arms.dat, x=FALSE) {
+  agg = aggregate(End.bp ~ chr, data = chr.arms.dat, FUN = max)
+  chr_order <- unique(chr.arms.dat$chr)
+  agg$chr <- factor(agg$chr, levels = chr_order)
+  lens <- agg[order(agg$chr), "End.bp"]
+
   if (x == FALSE) {
     lens <- lens[c(1:22)]
+  } else {
+    lens <- lens[c(1:23)]
   }
-    
+
   return(lens)
 }
 
@@ -22,6 +22,11 @@ GetCentromerePos <- function(chr.arms.dat, x=FALSE) {
   }
   
   cent_pos <- chr.arms.dat[chrarm_names, "Start.bp"]
+
+  if (length(cent_pos) == 0) {
+    chrarm_names <- paste0("chr", chrarm_names)
+    cent_pos <- chr.arms.dat[chrarm_names, "Start.bp"]
+  }
   
   return(cent_pos)
 }
@@ -36,12 +41,13 @@ chromosome_labels = function(x=FALSE)
 
 chr2int = function(chr)
 {
-   labs = as.character( c(1:22) )
-   labs = c(labs, "X") 
-   ints = c(1:23)
-   names(ints)=labs  
-   res = ints[chr]
+  labs = as.character( c(1:22) )
+  labs = c(labs, "X", "Y")
+  ints = c(1:24)
+  names(ints) = labs
+  name = sub("^chr", "", chr)
+  res = ints[name]
 
-   names(res)=NULL
-   return(res)
+  names(res)=NULL
+  return(res)
 }

@@ -18,7 +18,7 @@ get_genome_coords = function( chrpos )  ## chrs must be integer
 
 GenomeHscrSegPlot <- function(allele.segs, seg_colors, y.lab, y.min, y.max, chr.arms.dat, plot.model.fit=FALSE, plot.comb.fit=FALSE, mode.info=NA, comb=NA, comb.color=NA, plot.seg.sem=FALSE, plot.total.CN=FALSE, total.seg.dat=NA, tot.seg.colors=NA, log2CR = FALSE, label.chrs=TRUE, seg.width=0.025, min.sem.width=0.015, yaxt="s" )
 {
-  chr.lens <- GetChrLens(x=TRUE)
+  chr.lens <- GetChrLens(chr.arms.dat, x=TRUE)
   chr.lens <- as.numeric(chr.lens)
   chr.w <- chr.lens / sum(chr.lens)
   
@@ -40,7 +40,7 @@ GenomeHscrSegPlot <- function(allele.segs, seg_colors, y.lab, y.min, y.max, chr.
            las = 1, cex = par("cex.axis") * par("cex") * 0.9)
      mtext(text = lab.vals[!odd.ix], side = 1, line = 0, at = chr.mids[!odd.ix],
            las = 1, cex = par("cex.axis") * par("cex") * 0.9)
-   }
+  }
     
   chr.offsets <- c(0, cumsum(chr.w[c(1:(length(chr.w) - 1))]), 1)
   cent.pos <- (GetCentromerePos(chr.arms.dat, x=TRUE))/sum(chr.lens) +
@@ -67,7 +67,7 @@ GenomeHscrSegPlot <- function(allele.segs, seg_colors, y.lab, y.min, y.max, chr.
   } else
   {
      y.fn = function( y ) { y }
-  } 
+  }
 
   for (s in seq_len(nrow(allele.segs))) 
   {
@@ -112,7 +112,8 @@ GenomeHscrSegPlot <- function(allele.segs, seg_colors, y.lab, y.min, y.max, chr.
      for (s in seq_len(nrow(total.seg.dat))) 
      {
         seg.crds <- as.numeric(c(total.seg.dat[s, "Start.bp"], total.seg.dat[s, "End.bp"]))
-        chr <- as.integer(total.seg.dat[s, "Chromosome"])
+        # chr <- as.integer(total.seg.dat[s, "Chromosome"])
+        chr = chr2int(allele.segs[s, "Chromosome"])
         genome.crds <- chr.offsets[chr] + seg.crds / chr.lens[chr] * chr.w[chr]
         tot.CR = total.seg.dat[s, "copy_num"]/2
 
