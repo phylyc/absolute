@@ -430,12 +430,12 @@ get_grid_dens_95CI = function( dens, grid )
 
 
 ## External called function
-plot_SSNVs_on_genome = function( SSNV_model, SSNV_colors, mut.dat, seg.dat, i, mode.color, max_SSNVs_plot = 500, verbose=FALSE )
+plot_SSNVs_on_genome = function( SSNV_model, SSNV_colors, mut.dat, seg.dat, i, mode.color, chr.arms.dat, max_SSNVs_plot = 500, verbose=FALSE )
 {
    orig_plot_SSNV_genome_vs_CI95 = function( mut.dat, colors, CI95 )
    {
       chrpos = cbind( chr2int(mut.dat[,"Chromosome"]), mut.dat[,"Start_position"] )
-      genome_coords = get_genome_coords( chrpos )
+      genome_coords = get_genome_coords(chr.arms.dat, chrpos)
       ycrd = CI95[,3]  ## modal point est
       points( genome_coords, ycrd, pch=16, col=colors, cex=0.65 )
       segments( x0=genome_coords, y0=CI95[,1], y1=CI95[,2], col=colors, lwd=0.5 )
@@ -454,7 +454,7 @@ plot_SSNVs_on_genome = function( SSNV_model, SSNV_colors, mut.dat, seg.dat, i, m
       CI95 = CI95[ix, ,drop=FALSE]
 
       chrpos = cbind( chr2int(mut.dat[,"Chromosome"]), mut.dat[,"Start_position"] )
-      genome_coords = get_genome_coords( chrpos )
+      genome_coords = get_genome_coords(chr.arms.dat, chrpos)
       ycrd = CI95[,3]  ## modal point est
       points( genome_coords, ycrd, pch=16, col=colors, cex=0.65 )
       segments( x0=genome_coords, y0=CI95[,1], y1=CI95[,2], col=colors, lwd=0.5 )

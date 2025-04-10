@@ -263,7 +263,7 @@ PlotModes <- function(segobj, chr.arms.dat, n.print = NA, called.mode.ix=NA, ver
      ## plot SSNVs on genome
        # SSNV_cols = c("dodgerblue", "darkgrey", "seagreen3")   ## SC, clonal, mult>1
        SSNV_cols = c("magenta", "olivedrab", "dodgerblue")   ## SC, clonal, mult>1
-       plot_SSNVs_on_genome( SSNV_model, SSNV_cols, modeled.mut.dat, segobj, i, mode.colors[i], max_SSNVs_plot=max_SSNVs_plot, verbose=verbose)
+       plot_SSNVs_on_genome( SSNV_model, SSNV_cols, modeled.mut.dat, segobj, i, mode.colors[i], chr.arms.dat, max_SSNVs_plot=max_SSNVs_plot, verbose=verbose)
 
   ## Now plot SSNVs densities ... 2 plots 
         PlotSomaticMutDensities(modeled.mut.dat, segobj, i,

@@ -15,20 +15,18 @@ GetChrLens <- function(chr.arms.dat, x=FALSE) {
 }
 
 GetCentromerePos <- function(chr.arms.dat, x=FALSE) {
-  chrarm_names <- paste(c(1:22), "q", sep = "")
-  
-  if (x) {
-    chrarm_names <- c(chrarm_names, "Xq")
-  }
-  
-  cent_pos <- chr.arms.dat[chrarm_names, "Start.bp"]
+  agg = aggregate(Start.bp ~ chr, data = chr.arms.dat, FUN = max)
+  chr_order <- unique(chr.arms.dat$chr)
+  agg$chr <- factor(agg$chr, levels = chr_order)
+  pos <- agg[order(agg$chr), "Start.bp"]
 
-  if (length(cent_pos) == 0) {
-    chrarm_names <- paste0("chr", chrarm_names)
-    cent_pos <- chr.arms.dat[chrarm_names, "Start.bp"]
+  if (x == FALSE) {
+    pos <- pos[c(1:22)]
+  } else {
+    pos <- pos[c(1:23)]
   }
-  
-  return(cent_pos)
+
+  return(pos)
 }
 
 

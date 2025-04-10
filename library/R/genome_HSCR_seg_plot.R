@@ -1,7 +1,7 @@
 
-get_genome_coords = function( chrpos )  ## chrs must be integer
+get_genome_coords = function(chr.arms.dat, chrpos)  ## chrs must be integer
 { 
-  chr.lens <- GetChrLens(x=TRUE)
+  chr.lens <- GetChrLens(chr.arms.dat, x=TRUE)
   chr.lens <- as.numeric(chr.lens)
   chr.w <- chr.lens / sum(chr.lens)
   chr.offsets <- c(0, cumsum(chr.w[c(1:(length(chr.w) - 1))]), 1)
