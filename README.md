@@ -13,22 +13,30 @@ Create a virtual environment and use the `install.sh` script to install all depe
 
 ### Input for library/scripts/run_absolute.R
 
+#### Required
+
+```--sample```: Sample name
+
 ```--seg_dat_fn```:
 File path to segmentation table, which is assumed to be in AllelicCapSeg format (column order does not matter):
 ```
 Chromosome	Start.bp	End.bp	n_probes	length	n_hets	f	tau	sigma.tau	mu.minor	sigma.minor	mu.major	sigma.major	SegLabelCNLOH
 ```
 - Columns:
-  - `n_probes`: Number of target intervals in each segment
-  - `n_hets`: Number of heterozygous SNPs in each segment
-  - `f`: minor allele fraction
-  - `tau`: total copy number
-  - `mu.minor`: minor allelic copy number (f * tau)
-  - `mu.major`: major allelic copy number ((1 - f) * tau)
-  - `sigma.xxx`: standard error of `xxx`
-  - `SegLabelCNLOH`: copy-neutral loss of heterozygosity label: 0 is flanked on both sides, 1 is one side, 2 is no cn.loh
+  1. `n_probes`: Number of target intervals in each segment
+  2. `n_hets`: Number of heterozygous SNPs in each segment
+  3. `f`: minor allele fraction
+  4. `tau`: total copy number
+  5. `mu.minor`: minor allelic copy number (f * tau)
+  6. `mu.major`: major allelic copy number ((1 - f) * tau)
+  7. `sigma.xxx`: standard error of `xxx`
+  8. `SegLabelCNLOH`: copy-neutral loss of heterozygosity label: 0 is flanked on both sides, 1 is one side, 2 is no cn.loh
 
 See [this script](https://github.com/phylyc/somatic_workflow/blob/master/python/acs_conversion.py) on how to convert GATK ModelSegments output to that format.
+
+#### Optional
+
+```--results_dir```: Directory into which the result files will be written
 
 ```--ssnv_skew```: ~ 2 / (1 + ref_bias), where the reference bias skews the observed distribution of alternate allele read counts towards f / (f + (1 - f) * ref_bias) for true minor allele fraction f. 
 
@@ -44,10 +52,6 @@ See [this script](https://github.com/phylyc/somatic_workflow/blob/master/python/
 
 ```--copy_num_type```: {"allelic", "total"}; determines purity/ploidy based on allelic or total copy ratios. Note: "total" is currently not supported.
 
-```--results_dir```: Directory into which the result files will be written
-
-```--sample```: Sample name
-
 ```--genome_build```: This package currently supports {hg18, hg19, hg38}
 
 ```--pkg_dir```: path to folder in which the library folder lies.
@@ -62,19 +66,23 @@ See [this script](https://github.com/phylyc/somatic_workflow/blob/master/python/
 
 ### Input for library/scripts/extract_solution.R
 
+#### Required
+
+```--sample```: Sample name
+
 ```--rdata```: RData object from first step.
 
 ```--solution_num```: Ordinal number of the picked solution.
 
+```--results_dir```: Directory into which a `results` folder will be created
+
+```--analyst_id```: Initials of the analyst who picked the solution (for future blame :P)
+
+#### Optional
+
 ```--copy_num_type```: {"allelic", "total"}; determines purity/ploidy based on allelic or total copy ratios. Note: "total" is currently not supported.
 
 ```--genome_build```: This package currently supports {hg18, hg19, hg38}
-
-```--results_dir```: Directory into which a `results` folder will be created
-
-```--sample```: Sample name
-
-```--analyst_id```: Initials of the analyst who picked the solution (for future blame :P)
 
 ```--pkg_dir```: path to folder in which the library folder lies.
 
