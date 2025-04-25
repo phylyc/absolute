@@ -44,6 +44,14 @@ See [this script](https://github.com/phylyc/somatic_workflow/blob/master/python/
 
 ```--copy_num_type```: {"allelic", "total"}; determines purity/ploidy based on allelic or total copy ratios. Note: "total" is currently not supported.
 
+```--results_dir```: Directory into which the result files will be written
+
+```--sample```: Sample name
+
+```--genome_build```: This package currently supports {hg18, hg19, hg38}
+
+```--pkg_dir```: path to folder in which the library folder lies.
+
 
 
 ### Output of library/scripts/run_absolute.R
@@ -57,6 +65,18 @@ See [this script](https://github.com/phylyc/somatic_workflow/blob/master/python/
 ```--rdata```: RData object from first step.
 
 ```--solution_num```: Ordinal number of the picked solution.
+
+```--copy_num_type```: {"allelic", "total"}; determines purity/ploidy based on allelic or total copy ratios. Note: "total" is currently not supported.
+
+```--genome_build```: This package currently supports {hg18, hg19, hg38}
+
+```--results_dir```: Directory into which a `results` folder will be created
+
+```--sample```: Sample name
+
+```--analyst_id```: Initials of the analyst who picked the solution (for future blame :P)
+
+```--pkg_dir```: path to folder in which the library folder lies.
 
 
 ### Output of library/scripts/extract_solution.R
