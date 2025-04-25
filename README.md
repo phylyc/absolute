@@ -6,9 +6,9 @@ Create a virtual environment and use the `install.sh` script to install all depe
 
 ## Usage
 
-1) Run library/scripts/run_absolute.R on your segmented copy ratio (and SNV/INDEL) data.
-2) Inspect the generated output plots and write down the best-matching solution.
-3) Run library/scripts/extract_solution.R on the output from the first step and specify the solution number.
+1. Run library/scripts/run_absolute.R on your segmented copy ratio (and SNV/INDEL) data. 
+2. Inspect the generated output plots and write down the best-matching solution.
+3. Run library/scripts/extract_solution.R on the output from the first step and specify the solution number.
 
 
 ### Input for library/scripts/run_absolute.R
@@ -18,14 +18,14 @@ File path to segmentation table, which is assumed to be in AllelicCapSeg format 
 ```
 Chromosome	Start.bp	End.bp	n_probes	length	n_hets	f	tau	sigma.tau	mu.minor	sigma.minor	mu.major	sigma.major	SegLabelCNLOH
 ```
-- `n_probes`: Number of target intervals in each segment
-- `n_hets`: Number of heterozygous SNPs in each segment
-- `f`: minor allele fraction
-- `tau`: total copy number
-- `mu.minor`: minor allelic copy number (f * tau)
-- `mu.major`: major allelic copy number ((1 - f) * tau)
-- `sigma.xxx`: standard error of `xxx`
-- `SegLabelCNLOH`: copy-neutral loss of heterozygosity label: 0 is flanked on both sides, 1 is one side, 2 is no cn.loh
+  - `n_probes`: Number of target intervals in each segment
+  - `n_hets`: Number of heterozygous SNPs in each segment
+  - `f`: minor allele fraction
+  - `tau`: total copy number
+  - `mu.minor`: minor allelic copy number (f * tau)
+  - `mu.major`: major allelic copy number ((1 - f) * tau)
+  - `sigma.xxx`: standard error of `xxx`
+  - `SegLabelCNLOH`: copy-neutral loss of heterozygosity label: 0 is flanked on both sides, 1 is one side, 2 is no cn.loh
 
 See [this script](https://github.com/phylyc/somatic_workflow/blob/master/python/acs_conversion.py) on how to convert GATK ModelSegments output to that format.
 
