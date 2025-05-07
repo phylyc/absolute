@@ -89,7 +89,7 @@ PlotModes <- function(segobj, chr.arms.dat, n.print = NA, called.mode.ix=NA, ver
 
       Wq0 = get_comb_Wq0( obs[["e.cr"]], comb, log(mode.info["theta.Q.hat"]), mode.info["theta.0"] )
 
-      if( segobj[["copy_num_type"]] == "allelic" ) { copy_ratio_label="Allelic copy ratio" }
+      if( segobj[["copy_num_type"]] == "allelic" ) { copy_ratio_label="Allelic copy number" }
       if( segobj[["copy_num_type"]] == "total" ) { copy_ratio_label="Total copy ratio" }
 
 

@@ -197,16 +197,16 @@ PlotHscrAndSeghist <- function(allele.segs, seg_colors, chr.arms.dat, max_CR, mi
   {
      if( is.na(y.lab)) 
      { 
-        y.lab = ifelse( plot.total.CN, "copy ratio", "allelic copy ratio") 
+        y.lab = ifelse( plot.total.CN, "total copy ratio", "allelic copy number")
         if( log2CR ) 
         {          
            if( plot.total.CN ) { y.lab = expression( paste( Log[2], " copy ratio", sep="") )  }
-           else{ y.lab = expression( paste( Log[2], " allelic copy ratio", sep="")  ) }
+           else{ y.lab = expression( paste( Log[2], " allelic copy number", sep="")  ) }
         }
         else 
         {
-           if( plot.total.CN ) { y.lab = "Copy ratio" }
-           else{ y.lab = "Allelic copy ratio" }
+           if( plot.total.CN ) { y.lab = "Total copy ratio" }
+           else{ y.lab = "Allelic copy number" }
         }
      }
 
