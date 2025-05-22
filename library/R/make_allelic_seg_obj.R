@@ -2,15 +2,15 @@ filter_sex_chromosomes = function( seg.dat, gender, verbose )
 {
   if( !is.na(gender) && gender %in% c( "Male", "Female") )
   {
-     nix = seg.dat[,"Chromosome"] %in% c("Y", "M", "chrY", "chrM")
+     nix = seg.dat[,"Chromosome"] %in% c("Y", "M", "MT", "chrY", "chrM", "chrMT")
 #     nix = !(seg.dat[,"Chromosome"] %in% c(c(1:22),"X") )
   }
   else
   {
      if( verbose ) {
-       print("No or invalid gender specified - dropping X chromosome segs")
+       print("No or invalid gender specified - dropping X,Y,MT chromosome segs")
      }
-     nix = seg.dat[,"Chromosome"] %in% c("X", "Y", "M", "chrX", "chrY", "chrM")
+     nix = seg.dat[,"Chromosome"] %in% c("X", "Y", "M", "MT", "chrX", "chrY", "chrM", "chrMT")
   }
   seg.dat = seg.dat[!nix, ]
 
@@ -23,8 +23,10 @@ AllelicMakeSegObj <- function(seg.dat, gender, filter_segs=FALSE, min_probes=NA,
 #  print("Gender not supported yet!!")
 #  gender = NA
 
-  X.ix = seg.dat[,"Chromosome"]==23
+  X.ix = seg.dat[,"Chromosome"] == 23
   seg.dat[X.ix, "Chromosome"] = "X"
+  Y.ix = seg.dat[,"Chromosome"] == 24
+  seg.dat[Y.ix, "Chromosome"] = "Y"
 
 ## normalize gender col
   is.M = gender %in% c("M", "male", "Male", "XY")
@@ -36,9 +38,19 @@ AllelicMakeSegObj <- function(seg.dat, gender, filter_segs=FALSE, min_probes=NA,
   if( verbose ) { print(paste("Detected ", gender, " gender.", sep="")) }
   
 
-
 ## Filter out sex-appropriate chromosomes
   seg.dat = filter_sex_chromosomes( seg.dat, gender, verbose=verbose )
+
+  if ( !is.na(gender) & gender == "Male" )
+  {
+     sex.ix = seg.dat[,"Chromosome"] %in% c("X", "Y", "chrX", "chrY")
+     print( paste( "Setting ", sum(sex.ix), " of ", length(sex.ix), " allelic seg data to NA in male", sep=""))
+     seg.dat[sex.ix, c("mu.minor","mu.major")] = NA
+  } else if ( !is.na(gender) & gender == "Female" ) {
+     sex.ix = seg.dat[,"Chromosome"] %in% c("Y", "chrY")
+     print( paste( "Setting ", sum(sex.ix), " of ", length(sex.ix), " allelic seg data to NA in female", sep=""))
+     seg.dat[sex.ix, c("mu.minor","mu.major")] = NA
+  }
 
   nix= is.na(seg.dat[,"tau"]) | is.na(seg.dat[,"sigma.tau"])
   print( paste( "Removing ", sum(nix), " of ", length(nix), " segs with NA tCR or tCR sem", sep="") )
@@ -64,25 +76,10 @@ AllelicMakeSegObj <- function(seg.dat, gender, filter_segs=FALSE, min_probes=NA,
 ## Before active seg.dat filter triggered by NA allelic seg.dat fields
   hom.seg.pair.tab = matrix( NA, nrow=nrow(seg.dat), ncol=2 )
 
-
-  if( !is.na(gender) & gender == "Male" )
-  {
-     print( paste( "Setting ", sum(X.ix), " of ", length(X.ix), " allelic seg data to NA in male", sep=""))
-     X.ix = seg.dat[,"Chromosome"]=="X"
-     seg.dat[X.ix,c("mu.minor","mu.major")] = NA
-  }
-
 ## Remove segs with NA allelic CN
   as.nix= is.na(seg.dat[,"mu.minor"]) | is.na(seg.dat[,"mu.major"])
   print( paste( "Removing ", sum(as.nix), " of ", length(as.nix), " segs with NA minor or major allelic CN", sep="") )
   seg.dat = seg.dat[!as.nix,]
-
-
-# don't remember what this does
-#  if (filter_segs) {
-#    as.seg.dat = FilterSegs(as.seg.dat, min_probes=min_probes, max_sd=max_sd,
-#                                verbose=verbose)$seg.info
-#  }
 
 
 # TODO: get rid of allele.segs
@@ -99,11 +96,8 @@ AllelicMakeSegObj <- function(seg.dat, gender, filter_segs=FALSE, min_probes=NA,
      seg.dat = cbind( seg.dat, "bi.allelic"=FALSE )
   }
 
-  as.1 <- seg.dat[, c("Chromosome", "Start.bp", "End.bp",
-                                       "n_probes", "length", "mu.minor", "sigma.minor", "bi.allelic")]
-
-  as.2 <- seg.dat[, c("Chromosome", "Start.bp", "End.bp",
-                                       "n_probes", "length", "mu.major", "sigma.major", "bi.allelic")]
+  as.1 <- seg.dat[, c("Chromosome", "Start.bp", "End.bp", "n_probes", "length", "mu.minor", "sigma.minor", "bi.allelic")]
+  as.2 <- seg.dat[, c("Chromosome", "Start.bp", "End.bp", "n_probes", "length", "mu.major", "sigma.major", "bi.allelic")]
   
   colnames(as.1)[6] <- "copy_num"
   colnames(as.2)[6] <- "copy_num"
@@ -282,11 +276,13 @@ AllelicExtractSampleObs <- function(seg.obj)
   }
 
 ## TODO: purge error.model from all obs.   Get it from the parent seg.dat instead
-  obs <- list(d=d, d.tx=d, d.stderr=stderr, W=W, seg.ix=seg.ix, AS.seg.ix=AS.seg.ix, bi.allelic=bi.allelic,
-              error.model=list(), n_probes=seg.dat[,"n_probes"], e.cr=e.cr,
-	      platform=seg.obj[["platform"]], "normal_allele_count"=normal_allele_count )
-  
-  
+  obs <- list(
+    d=d, d.tx=d, d.stderr=stderr, W=W, seg.ix=seg.ix, AS.seg.ix=AS.seg.ix, bi.allelic=bi.allelic,
+    n_probes=seg.dat[,"n_probes"],
+    error.model=list(), e.cr=e.cr,
+    platform=seg.obj[["platform"]], "normal_allele_count"=normal_allele_count
+  )
+
   return(obs)
 }
 
@@ -321,9 +317,12 @@ extract_total_copy_ratios_from_allelic_CAPSEG <- function(seg.obj)
 
 
 ## TODO: purge error.model from all obs.   Get it from the parent seg.dat instead
-  obs <- list(d=d, d.tx=d, d.stderr=stderr, W=W, hom.seg.pair.tab=seg.obj[["hom.seg.pair.tab"]],
-              error.model=list(), n_probes=seg.dat[,"n_probes"], e.cr=e.cr,
-	      platform=seg.obj[["platform"]], "normal_allele_count"=normal_allele_count )
+  obs <- list(
+    d=d, d.tx=d, d.stderr=stderr, W=W, hom.seg.pair.tab=seg.obj[["hom.seg.pair.tab"]],
+    n_probes=seg.dat[,"n_probes"],
+    error.model=list(), e.cr=e.cr,
+    platform=seg.obj[["platform"]], "normal_allele_count"=normal_allele_count
+  )
   
   return(obs)
 }
