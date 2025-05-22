@@ -200,7 +200,7 @@ get_total_abs_CN_seg_dat_from_allelic_CAPSEG_obj = function(segobj)
     expected_cn[i] = round(exp_mat[i] - 1, 5)
     amp[i] = seg.amp[i]   
 
-    if(segobj[["gender"]] == "Male" & Chromosome[i] == "X" ) 
+    if(segobj[["gender"]] == "Male" & Chromosome[i] %in% c("X", "Y", "chrX", "chrY") )
     {
        use_b = b/2 
        copy_ratio[i] = copy_ratio[i]/2
