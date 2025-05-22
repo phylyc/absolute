@@ -1,39 +1,36 @@
 
-GetChrLens <- function(chr.arms.dat, x=FALSE) {
+GetChrLens <- function(chr.arms.dat, x=FALSE, y=FALSE) {
   agg = aggregate(End.bp ~ chr, data = chr.arms.dat, FUN = max)
   chr_order <- unique(chr.arms.dat$chr)
   agg$chr <- factor(agg$chr, levels = chr_order)
   lens <- agg[order(agg$chr), "End.bp"]
 
-  if (x == FALSE) {
-    lens <- lens[c(1:22)]
-  } else {
-    lens <- lens[c(1:23)]
-  }
+  if (x) { lens <- lens[c(1:23)] }
+  else if (y) { lens <- lens[c(1:24)] }
+  else { lens <- lens[c(1:22)] }
 
   return(lens)
 }
 
-GetCentromerePos <- function(chr.arms.dat, x=FALSE) {
+GetCentromerePos <- function(chr.arms.dat, x=FALSE, y=FALSE) {
   agg = aggregate(Start.bp ~ chr, data = chr.arms.dat, FUN = max)
   chr_order <- unique(chr.arms.dat$chr)
   agg$chr <- factor(agg$chr, levels = chr_order)
   pos <- agg[order(agg$chr), "Start.bp"]
 
-  if (x == FALSE) {
-    pos <- pos[c(1:22)]
-  } else {
-    pos <- pos[c(1:23)]
-  }
+  if (x) { pos <- pos[c(1:23)] }
+  else if (y) { pos <- pos[c(1:24)] }
+  else { pos <- pos[c(1:22)] }
 
   return(pos)
 }
 
 
-chromosome_labels = function(x=FALSE) 
+chromosome_labels = function(x=FALSE, y=FALSE)
 {
    labs = as.character( c(1:22) )
    if(x) { labs = c(labs, "X") }
+   if(y) { labs = c(labs, "Y") }
    return(labs)
 }
 
