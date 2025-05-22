@@ -1,7 +1,7 @@
 
 get_genome_coords = function(chr.arms.dat, chrpos)  ## chrs must be integer
 { 
-  chr.lens <- GetChrLens(chr.arms.dat, x=TRUE)
+  chr.lens <- GetChrLens(chr.arms.dat, x=TRUE, y=TRUE)
   chr.lens <- as.numeric(chr.lens)
   chr.w <- chr.lens / sum(chr.lens)
   chr.offsets <- c(0, cumsum(chr.w[c(1:(length(chr.w) - 1))]), 1)
@@ -18,7 +18,7 @@ get_genome_coords = function(chr.arms.dat, chrpos)  ## chrs must be integer
 
 GenomeHscrSegPlot <- function(allele.segs, seg_colors, y.lab, y.min, y.max, chr.arms.dat, plot.model.fit=FALSE, plot.comb.fit=FALSE, mode.info=NA, comb=NA, comb.color=NA, plot.seg.sem=FALSE, plot.total.CN=FALSE, total.seg.dat=NA, tot.seg.colors=NA, log2CR = FALSE, label.chrs=TRUE, seg.width=0.025, min.sem.width=0.015, yaxt="s" )
 {
-  chr.lens <- GetChrLens(chr.arms.dat, x=TRUE)
+  chr.lens <- GetChrLens(chr.arms.dat, x=TRUE, y=TRUE)
   chr.lens <- as.numeric(chr.lens)
   chr.w <- chr.lens / sum(chr.lens)
   
@@ -29,11 +29,10 @@ GenomeHscrSegPlot <- function(allele.segs, seg_colors, y.lab, y.min, y.max, chr.
   
   if( label.chrs )
   {
-     lab.vals = chromosome_labels(x=TRUE)
+     lab.vals = chromosome_labels(x=TRUE, y=TRUE)
      ww <- as.vector(rbind(chr.w, chr.w)) / 2
      chr.mids <- cumsum(ww)[(c(1:length(ww)) - 1) %% 2 == 0]
-    
-#     lab.vals <- (c(1:length(chr.w)))
+
      odd.ix <- (c(1:length(chr.w))) %% 2 == 1
     
      mtext(text = lab.vals[odd.ix], side = 1, line = -0.55, at = chr.mids[odd.ix], 
@@ -43,8 +42,7 @@ GenomeHscrSegPlot <- function(allele.segs, seg_colors, y.lab, y.min, y.max, chr.
   }
     
   chr.offsets <- c(0, cumsum(chr.w[c(1:(length(chr.w) - 1))]), 1)
-  cent.pos <- (GetCentromerePos(chr.arms.dat, x=TRUE))/sum(chr.lens) +
-    chr.offsets[c(1:(length(chr.offsets) - 1))]
+  cent.pos <- GetCentromerePos(chr.arms.dat, x=TRUE, y=TRUE)/sum(chr.lens) + chr.offsets[c(1:(length(chr.offsets) - 1))]
     
   for (i in 1:(length(chr.offsets) - 1)) {
     use.col <- ifelse(i%%2 == 1, "grey90", "white")
