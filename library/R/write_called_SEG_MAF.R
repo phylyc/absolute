@@ -48,7 +48,7 @@ WriteIGVSegtab <- function(segobj, seg, s_name, out_dir) {
   # Write IGV segtab:
   ploidy = segobj[["mode.res"]][["mode.tab"]][1, "genome mass"]
   seg[, "sample"] = s_name
-  seg[, "Segment_Mean"] = log2(seg[, "rescaled_total_cn"] + 1e-4) - log2(ploidy)
+  seg[, "Segment_Mean"] = log2(pmax(seg[, "rescaled_total_cn"], 1e-4)) - log2(ploidy)
 
   X.ix = (seg[,"Chromosome"] == "X")
   Y.ix = (seg[,"Chromosome"] == "Y")
