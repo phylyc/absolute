@@ -114,13 +114,15 @@ RunAbsolute = function(seg.dat.fn, primary.disease, platform, sample.name, resul
 
       segtab = read.delim( seg.dat.fn, row.names=NULL, stringsAsFactors=FALSE, check.names=FALSE)
 
-      nix = is.na(segtab[,"f"])
-      print( paste( "Removing ", sum(nix), " of ", length(nix), " segs with NA f", sep="") )
-      if (all(nix)) {
-        print("No segments left. Aborting.")
-        return(TRUE)
+      if (copy_num_type == "allelic") {
+        nix = is.na(segtab[,"f"])
+        print( paste( "Removing ", sum(nix), " of ", length(nix), " segs with NA f", sep="") )
+        if (all(nix)) {
+          print("No segments left. Aborting.")
+          return(TRUE)
+        }
+        segtab = segtab[!nix,]
       }
-      segtab = segtab[!nix,]
 
       seg.dat = MakeSegObj(segtab, gender, min_probes=min_probes, max_sd=max_sd,
                            filter_segs=filter_segs, verbose=verbose)
@@ -158,16 +160,27 @@ RunAbsolute = function(seg.dat.fn, primary.disease, platform, sample.name, resul
   if (verbose) {
     print(paste("Expected copy-ratio = ", round( seg.dat[["obs.scna"]][["e.cr"]], 5), sep=""))
   }
-  
+
   mode.res = list(mode.flag = NA)
   
   if ( length(seg.dat[["obs.scna"]][["W"]] ) > max.as.seg.count) {
     mode.res[["mode.flag"]] = "OVERSEG"
   }
-  
   if ((seg.dat[["obs.scna"]][["e.cr"]] < 0.5) || (seg.dat[["obs.scna"]][["e.cr"]] > 1.5)) {
     mode.res[["mode.flag"]] = "E_CR_SCALE"
   }
+
+  # ## check for QC failure modes
+  # if (copy_num_type == "allelic") {
+  #   if ((seg.dat[["obs.scna"]][["e.cr"]] < 0.5) || (seg.dat[["obs.scna"]][["e.cr"]] > 1.5)) {
+  #     mode.res[["mode.flag"]] = "E_CR_SCALE"
+  #   }
+  # }
+  # if (copy_num_type == "total") {
+  #   if ((seg.dat[["obs.scna"]][["e.cr"]] < 1.5) || (seg.dat[["obs.scna"]][["e.cr"]] > 2.5)) {
+  #     mode.res[["mode.flag"]] = "E_CR_SCALE"
+  #   }
+  # }
   
   if (is.na(mode.res[["mode.flag"]])) {
     ## check for MAF describing somatic mutations
@@ -246,13 +259,13 @@ RunAbsolute = function(seg.dat.fn, primary.disease, platform, sample.name, resul
         model.id = "Primary"
         print(paste("Disease type", seg.dat[["group"]], "not in ChrArmPriorDb.RData, set to default model:", model.id))
       }
-      mode.res = ApplyKaryotypeModel(mode.res, model.id, train.obj, apply_karyotype_model=apply_karyotype_model,verbose=verbose)
+      mode.res = ApplyKaryotypeModel(mode.res, model.id, train.obj, apply_karyotype_model=apply_karyotype_model)
     } else {
       seg.dat[["group"]] = ""
     }
 
     ## 2 - apply mutation model
-    if ((!is.null(maf)) && (nrow(maf) > 0)) 
+    if ((!is.null(maf)) && (nrow(maf) > 0) && (copy_num_type == "allelic"))
     {
       seg.dat[["mut.cn.dat"]] = mut.cn.dat
 
@@ -268,12 +281,12 @@ RunAbsolute = function(seg.dat.fn, primary.disease, platform, sample.name, resul
       # }
     }
 
-    bad.ix = RealAlphaFilter(mode.res)
-    if (sum(bad.ix) == nrow(mode.res[["mode.tab"]])) {
-      mode.res = list(mode.flag="ALPHA_TAU_DOM")
-    } else {
-      mode.res = ReorderModeRes(mode.res, !bad.ix)
-    }
+    # bad.ix = RealAlphaFilter(mode.res)
+    # if (sum(bad.ix) == nrow(mode.res[["mode.tab"]])) {
+    #   mode.res = list(mode.flag="ALPHA_TAU_DOM")
+    # } else {
+    #   mode.res = ReorderModeRes(mode.res, !bad.ix)
+    # }
 
     mode.res = WeighSampleModes(mode.res)
     mode.res[["call.status"]] = GetCallStatus(mode.res, seg.dat[["obs.scna"]][["W"]])

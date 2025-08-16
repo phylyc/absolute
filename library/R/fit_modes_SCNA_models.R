@@ -90,6 +90,19 @@ fit_modes_SCNA_models = function( seg.obj, mode.tab, SCNA_model, mut.cn.dat, chr
       {
          allelic_res = allelic_get_subclonal_SCNA_info( obs, b, delta, mode_SCNA_models[[i]], mut.cn.dat )
       }
+
+      subclonal_scna_tab[i,,] = allelic_res[["subclonal_scna_tab"]]
+      log_ccf_dens[i,,] = allelic_res[["log_ccf_dens"]]
+
+    ## compute ev score/data
+      mode_SCNA_models[[i]][["DP_CN_chrarm_states"]] = get_post_DP_chrarm_states( seg.obj, mode_SCNA_models[[i]], subclonal_scna_tab[i,,], chr.arms.dat )
+      mode_SCNA_models[[i]][["SCNA_minev_chrarm_result"]] = compute_chrarm_ev_score( mode_SCNA_models[[i]][["DP_CN_chrarm_states"]], mode_SCNA_models[[i]],  WGD0_Prs, WGD1_Prs, )
+    }
+    else
+    {
+      subclonal_scna_tab[i,,] = NA
+      log_ccf_dens[i,,] = NA
+      mode_SCNA_models[[i]][["SCNA_minev_chrarm_result"]][["score"]] = NA
     }
 
     # allelic_get_subclonal_SCNA_info sets "tot.xxx" states which are needed going forward.
@@ -97,18 +110,11 @@ fit_modes_SCNA_models = function( seg.obj, mode.tab, SCNA_model, mut.cn.dat, chr
     total_res = total_get_subclonal_SCNA_info( seg.obj[["obs.total.scna"]], b, delta, mode_SCNA_models[[i]], mut.cn.dat )
 
 #    res = get_subclonal_SCNA_info( obs, b, delta, mode_SCNA_models[[i]], mut.cn.dat )
-    subclonal_scna_tab[i,,] = allelic_res[["subclonal_scna_tab"]]
-    log_ccf_dens[i,,] = allelic_res[["log_ccf_dens"]]
 
     total_subclonal_scna_tab[i,,] = total_res[["subclonal_scna_tab"]]
     total_log_ccf_dens[i,,] = total_res[["log_ccf_dens"]]
- 
 
-  ## compute ev score/data
-    mode_SCNA_models[[i]][["DP_CN_chrarm_states"]] = get_post_DP_chrarm_states( seg.obj, mode_SCNA_models[[i]], subclonal_scna_tab[i,,], chr.arms.dat )
-    mode_SCNA_models[[i]][["SCNA_minev_chrarm_result"]] = compute_chrarm_ev_score( mode_SCNA_models[[i]][["DP_CN_chrarm_states"]], mode_SCNA_models[[i]],  WGD0_Prs, WGD1_Prs, )
     SCNA_model[["WGD"]] =  SCNA_model[["SCNA_minev_chrarm_result"]][["WGD"]]  ## override provisional estimate
-
     mode.tab = fill_mode.tab_row( seg.obj, mode_SCNA_models[[i]], obs, b, delta, mode.tab, i )
   }
 
@@ -128,11 +134,13 @@ WeighSampleModes <- function(mode.res)
 ## combined various scores
   mode.tab = mode.res[["mode.tab"]]
 
-## Only use SCNA LL score 
-#  mode.res[["mode.tab"]][, "combined_LL"] = mode.tab[,"SCNA_LL"] # + mode.tab[,"Kar_LL"] + mode.tab[,"SSNV_LL"]
-
-## Only use SCNA ev score 
-  mode.res[["mode.tab"]][, "combined_LL"] = mode.tab[,"SCNA_min_chrarm_events"]
+  if (!is.na(mode.tab[,"SCNA_min_chrarm_events"])) {
+    ## Only use SCNA ev score
+    mode.res[["mode.tab"]][, "combined_LL"] = mode.tab[,"SCNA_min_chrarm_events"]
+  } else {
+    ## Only use SCNA LL score
+    mode.res[["mode.tab"]][, "combined_LL"] = mode.tab[,"SCNA_LL"] # + mode.tab[,"Kar_LL"] + mode.tab[,"SSNV_LL"]
+  }
 
   LL = mode.res[["mode.tab"]][, "combined_LL"]
   if( !all( is.finite(LL)) ) { stop("Non-finite mode combined_LL!") }

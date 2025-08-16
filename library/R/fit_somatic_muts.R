@@ -82,15 +82,17 @@ FitPPModeSomaticMuts <- function(
 
   N_SSNV = nrow(mut.cn.dat)
 
-  total.clonal.mut.tab = total_get_muts_nearest_clonal_scna(mut.cn.dat, SCNA_model[["tot.seg.q.tab"]], SCNA_model[["kQ"]])
+  total.clonal.mut.tab = total_get_muts_nearest_clonal_scna(mut.cn.dat, SCNA_model[["seg.q.tab"]], SCNA_model[["kQ"]])
   colnames(total.clonal.mut.tab) = c("total_q_hat")
   allelic.clonal.mut.tab = matrix(NA, nrow=N_SSNV, ncol=3)
   colnames(allelic.clonal.mut.tab) = c("q_hat", "HS_q_hat_1", "HS_q_hat_2")
 
-  missing.AS.seg.ix = apply( is.na(mut.cn.dat[,c("A1.ix", "A2.ix")]), 1, any )
-  if( any(!missing.AS.seg.ix))
-  {
-     allelic.clonal.mut.tab[!missing.AS.seg.ix,] = allelic_get_muts_nearest_clonal_scna(mut.cn.dat[!missing.AS.seg.ix,, drop=FALSE], SCNA_model[["seg.q.tab"]], SCNA_model[["kQ"]])
+  if (("A1.ix" %in% colnames(mut.cn.dat)) && ("A2.ix" %in% colnames(mut.cn.dat))) {
+    missing.AS.seg.ix = apply( is.na(mut.cn.dat[,c("A1.ix", "A2.ix")]), 1, any )
+    if( any(!missing.AS.seg.ix))
+    {
+       allelic.clonal.mut.tab[!missing.AS.seg.ix,] = allelic_get_muts_nearest_clonal_scna(mut.cn.dat[!missing.AS.seg.ix,, drop=FALSE], SCNA_model[["seg.q.tab"]], SCNA_model[["kQ"]])
+    }
   }
 
 #  clonal.mut.tab = get_muts_nearest_clonal_scna(mut.cn.dat, seg.q.tab, SSNV_model[["kQ"]])

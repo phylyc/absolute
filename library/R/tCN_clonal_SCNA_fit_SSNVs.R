@@ -2,7 +2,8 @@
 total_get_mut_seg_ix = function(maf, segtab) {
   ## compute lookup table for each mutation into seg_Q_tab
   N = nrow(maf)
-  mut.seg.ix = rep(NA, N)
+  mut.seg.ix <- matrix(NA, nrow=N, ncol=1)
+  colnames(mut.seg.ix) <- c("T.seg.ix")
   
   ##  This is Dan-Avi's fault.
   if (!("End_position" %in% colnames(maf))) {
@@ -20,11 +21,11 @@ total_get_mut_seg_ix = function(maf, segtab) {
     }
     
     seg_id = which(seg.ix)
-    mut.seg.ix[i] = seg_id
+    mut.seg.ix[i, 1] = seg_id
   }
 ## TODO: map missing SSNVs to closest adjacent seg
 ## try to map missing muts
-   nix <- which(is.na(mut.seg.ix))
+   nix <- which(apply(is.na(mut.seg.ix), 1, sum) > 0)
    if( length(nix) > 0 )
    {
       for( i in 1:length(nix))
@@ -58,11 +59,11 @@ total_get_mut_seg_ix = function(maf, segtab) {
 
 ##  unique mapping?
          if (sum(seg.ix) != 1) { stop("non-unique seg-map?") }
-         mut.seg.ix[m.ix] = which(seg.ix) 
+         mut.seg.ix[m.ix, 1] = which(seg.ix)
       }
    }
 
-  n.ix = is.na(mut.seg.ix)
+  # n.ix = is.na(mut.seg.ix)
 #  if( any(n.ix) ) { print(maf[n.ix,c("Chromosome", "Start_position", "End_position")]); stop("unmapped mut-seg") }
 
   return(mut.seg.ix)

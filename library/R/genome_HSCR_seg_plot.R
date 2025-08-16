@@ -50,14 +50,6 @@ GenomeHscrSegPlot <- function(allele.segs, seg_colors, y.lab, y.min, y.max, chr.
          ytop = y.max, col = use.col, border = NA)
     lines(y = c(y.min, y.max), x = rep(cent.pos[i], 2), lty = 3, lwd = 0.5)
   }
-
-  AS.seg.ix = allele.segs[, c("seg.ix.1", "seg.ix.2")]
-  AS_seg_cols = cbind( seg_colors[AS.seg.ix[,1]], seg_colors[AS.seg.ix[,2]] )
-
-  if( plot.seg.sem ) 
-  {
-     AS_seg_sem = allele.segs[ , c("A1.Seg.sem", "A2.Seg.sem") ]
-  }
   
   if( log2CR )
   {
@@ -67,51 +59,57 @@ GenomeHscrSegPlot <- function(allele.segs, seg_colors, y.lab, y.min, y.max, chr.
      y.fn = function( y ) { y }
   }
 
-  for (s in seq_len(nrow(allele.segs))) 
-  {
-    seg.crds <- as.numeric(c(allele.segs[s, "Start.bp"],
-                             allele.segs[s, "End.bp"]))
-#    chr <- as.integer(allele.segs[s, "Chromosome"])
-    chr = chr2int(allele.segs[s, "Chromosome"])
-    genome.crds <- chr.offsets[chr] + seg.crds / chr.lens[chr] * chr.w[chr]
-    means <- c(allele.segs[s, "A1.Seg.CN"],
-               allele.segs[s, "A2.Seg.CN"], NA)
-    
-    het.seg.col.1 <- AS_seg_cols[s, 1]
-    het.seg.col.2 <- AS_seg_cols[s, 2]
+  if (!plot.total.CN) {
+    AS.seg.ix = allele.segs[, c("seg.ix.1", "seg.ix.2")]
+    AS_seg_cols = cbind( seg_colors[AS.seg.ix[,1]], seg_colors[AS.seg.ix[,2]] )
 
-## make seg widths 95% CI for seg-mean
-    min.w.d = min.sem.width / 2  ## minimum possible width - make sure segs stay visible
     if( plot.seg.sem )
     {
-       w.d_1 = max( AS_seg_sem[s,1] * 1.96, min.w.d )
-       w.d_2 = max( AS_seg_sem[s,2] * 1.96, min.w.d )
+       AS_seg_sem = allele.segs[ , c("A1.Seg.sem", "A2.Seg.sem") ]
     }
-    else {  w.d_1 = w.d_2 = seg.width/2 }
 
-    ybottom_1 =  means[1] - w.d_1
-    ytop_1 = means[1] + w.d_1
-
-    ybottom_2 = means[2] - w.d_2
-    ytop_2 = means[2] + w.d_2
-
-    if( !plot.total.CN )
+    for (s in seq_len(nrow(allele.segs)))
     {
-         rect(xleft = genome.crds[1], ybottom=y.fn(ybottom_1), xright = genome.crds[2],      ## minor CN
-             ytop=y.fn(ytop_1) , border = NA, col = het.seg.col.1)
+      seg.crds <- as.numeric(c(allele.segs[s, "Start.bp"], allele.segs[s, "End.bp"]))
+  #    chr <- as.integer(allele.segs[s, "Chromosome"])
+      chr = chr2int(allele.segs[s, "Chromosome"])
+      genome.crds <- chr.offsets[chr] + seg.crds / chr.lens[chr] * chr.w[chr]
+      means <- c(allele.segs[s, "A1.Seg.CN"],
+                 allele.segs[s, "A2.Seg.CN"], NA)
 
-         rect(xleft = genome.crds[1], ybottom=y.fn(ybottom_2) , xright = genome.crds[2],     ## major CN
-            ytop=y.fn(ytop_2), border = NA, col = het.seg.col.2)
+      het.seg.col.1 <- AS_seg_cols[s, 1]
+      het.seg.col.2 <- AS_seg_cols[s, 2]
+
+  ## make seg widths 95% CI for seg-mean
+      min.w.d = min.sem.width / 2  ## minimum possible width - make sure segs stay visible
+      if( plot.seg.sem )
+      {
+         w.d_1 = max( AS_seg_sem[s,1] * 1.96, min.w.d )
+         w.d_2 = max( AS_seg_sem[s,2] * 1.96, min.w.d )
+      }
+      else {  w.d_1 = w.d_2 = seg.width/2 }
+
+      ybottom_1 =  means[1] - w.d_1
+      ytop_1 = means[1] + w.d_1
+
+      ybottom_2 = means[2] - w.d_2
+      ytop_2 = means[2] + w.d_2
+
+      if( !plot.total.CN )
+      {
+           rect(xleft = genome.crds[1], ybottom=y.fn(ybottom_1), xright = genome.crds[2],      ## minor CN
+               ytop=y.fn(ytop_1) , border = NA, col = het.seg.col.1)
+
+           rect(xleft = genome.crds[1], ybottom=y.fn(ybottom_2) , xright = genome.crds[2],     ## major CN
+              ytop=y.fn(ytop_2), border = NA, col = het.seg.col.2)
+      }
     }
-  }
-
-  if( plot.total.CN )
-  {
+  } else {
      for (s in seq_len(nrow(total.seg.dat))) 
      {
         seg.crds <- as.numeric(c(total.seg.dat[s, "Start.bp"], total.seg.dat[s, "End.bp"]))
         # chr <- as.integer(total.seg.dat[s, "Chromosome"])
-        chr = chr2int(allele.segs[s, "Chromosome"])
+        chr = chr2int(total.seg.dat[s, "Chromosome"])
         genome.crds <- chr.offsets[chr] + seg.crds / chr.lens[chr] * chr.w[chr]
         tot.CR = total.seg.dat[s, "copy_num"]/2
 
@@ -186,6 +184,10 @@ PlotHscrAndSeghist <- function(allele.segs, seg_colors, chr.arms.dat, max_CR, mi
 {
 #  obs = seg.dat[["obs.scna"]]
 #  allele.segs = get_hom_pairs_segtab( seg.dat )
+  if (plot.total.CN) {
+    tot.seg.colors = rep( 1, nrow(allele.segs) )
+    seg_colors = tot.seg.colors
+  }
 
   d.mar <- par("mar")
   ## eliminate right margins

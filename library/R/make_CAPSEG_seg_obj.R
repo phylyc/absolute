@@ -9,6 +9,8 @@ total_make_seg_obj = function(segs_tab, gender, filter_segs=FALSE, min_probes=NA
 
   X.ix = segs_tab[,"Chromosome"]==23
   segs_tab[X.ix, "Chromosome"] = "X"
+  Y.ix = segs_tab[,"Chromosome"]==24
+  segs_tab[Y.ix, "Chromosome"] = "Y"
 
 
 ## normalize gender col
@@ -19,7 +21,6 @@ total_make_seg_obj = function(segs_tab, gender, filter_segs=FALSE, min_probes=NA
   if(is.F) { gender = "Female" }
 
   if( verbose ) { print(paste("Detected ", gender, " gender.", sep="")) }
-
   segs_tab = filter_sex_chromosomes( segs_tab, gender, verbose=verbose )
 
   # if( !is.na(gender) && gender %in% c( "Male", "Female") )
@@ -51,19 +52,22 @@ total_make_seg_obj = function(segs_tab, gender, filter_segs=FALSE, min_probes=NA
   
   length = segtab[, "End.bp"] - segtab[, "Start.bp"]
   ## Convert from base 2 log
-  copy_num = 2^(segs_tab[, "tau"] )
+  # copy_num = 2^(segs_tab[, "tau"] )
+  copy_num = segs_tab[, "tau"] / 2
   
-  ix = copy_num > 5.0
-  if (verbose) {
-    print( paste( "Capping ", sum(ix), " segs at tCR = 5.0", sep=""))
-  }
-  copy_num[ix] = 5.0
+  # ix = copy_num > 5.0
+  # if (verbose) {
+  #   print( paste( "Capping ", sum(ix), " segs at tau = 5.0", sep=""))
+  # }
+  # copy_num[ix] = 5.0
   
   seg_sigma_num = 0.1  ## TODO - get rid of this - not used in downstream model - but crashes filtering code if missing
   seg_sigma =  seg_sigma_num / sqrt(as.numeric(segs_tab[,"n_probes"]))
 #  seg_sigma = rep(NA, nrow(segs_tab))  ## calculate later in SCNA_model
+  seg.ix <- cbind(c(1:nrow(segtab)))
+  colnames(seg.ix) = c("seg.ix")
   
-  segtab = cbind(segtab, length, copy_num, seg_sigma )
+  segtab = cbind(segtab, length, copy_num, seg_sigma, seg.ix)
 
   if (filter_segs) {
     seg_dat$segtab = FilterSegs(segtab, min_probes=min_probes, max_sd=max_sd)$seg.info
@@ -76,21 +80,38 @@ total_make_seg_obj = function(segs_tab, gender, filter_segs=FALSE, min_probes=NA
 
   seg_dat$error_model = list()
 
+## create an object for total CN analysis
+  total.seg.dat =  segtab[, c("Chromosome", "Start.bp", "End.bp", "n_probes", "length", "tau", "seg_sigma", "seg.ix")]
+  colnames(total.seg.dat) = c("Chromosome", "Start.bp", "End.bp", "n_probes", "length", "copy_num", "seg_sigma", "seg.ix")
+
+  W <- as.numeric(total.seg.dat[, "length"])
+  W <- W / sum(W)
+  total.seg.dat <- cbind(total.seg.dat, W)
+  seg_dat$total.seg.dat = total.seg.dat
+
   return(seg_dat)  
 }
 
-total_extract_sample_obs = function(seg.dat) 
+total_extract_sample_obs = function(seg.obj)
 {
-  seg = seg.dat[["segtab"]]
-  d = seg[, "copy_num"]
+  seg.tab = seg.obj[["segtab"]]
+  d = seg.tab[, "copy_num"]
+  stderr <- seg.tab[, "seg_sigma"]
+  W <- seg.tab[, "W"]
+
+  if( "bi.allelic" %in% colnames(seg.tab) ) {
+     bi.allelic = seg.tab[, "bi.allelic"]
+  } else {
+     bi.allelic = rep( FALSE, nrow(seg.tab))
+  }
 
   ## expected copy-number, should be 1.0
-  e.cr = sum(seg[, "W"] * d )
-  gender=seg.dat$gender
+  e.cr = sum(W * d )
+  gender=seg.obj$gender
 
-  X.ix = (seg.dat[,"Chromosome"]=="X")
-  Y.ix = (seg.dat[,"Chromosome"]=="Y")
-  normal_allele_count = rep(NA, nrow(seg.dat))
+  X.ix = (seg.tab[,"Chromosome"]=="X")
+  Y.ix = (seg.tab[,"Chromosome"]=="Y")
+  normal_allele_count = rep(2, nrow(seg.tab))
 
   if( !is.na(gender) && gender == "Male" ) 
   {
@@ -103,9 +124,13 @@ total_extract_sample_obs = function(seg.dat)
      normal_allele_count[Y.ix] = 0
   }
 
-
   ## FIXME: "error.model" was originally named "HSCN_params" - double check this
-  obs = list(d=d, d.tx=d, W=seg[,"W"], n_probes=seg[,"n_probes"], seg.ix=seq_along(d), error.model=seg.dat$error_model, e.cr=e.cr, data.type="TOTAL", platform=seg.dat[["platform"]], "normal_allele_count"=normal_allele_count )
+  obs = list(
+    d=d, d.tx=d, d.stderr=stderr, W=W, seg.ix=seq_along(d), bi.allelic=bi.allelic,
+    n_probes=seg.tab[,"n_probes"],
+    error.model=seg.obj$error_model, e.cr=e.cr, data.type="TOTAL",
+    platform=seg.obj[["platform"]], "normal_allele_count"=normal_allele_count
+  )
   
   return(obs)
 }

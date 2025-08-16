@@ -245,6 +245,11 @@ GetScnaStderrGridDensity <- function(obs, grid, SCNA_model, i=NA) {
 reconcile_clonal_homdels_with_obs_SSNVs = function( mut.cn.dat, subclonal_ix, seg.q.tab, seg.post.subclonal, SCNA_model )
 {
    clonal.mut.tab = get_muts_nearest_clonal_scna(mut.cn.dat, seg.q.tab, SCNA_model[["kQ"]])
+
+  if (!("HS_q_hat_1" %in% colnames(clonal.mut.tab)) || !("HS_q_hat_2" %in% colnames(clonal.mut.tab))) {
+    return(subclonal_ix)
+  }
+
 ## don't allow clonal homozygous deletions over regions with SSNVs having > 0 alt reads.
    homdel.ix = clonal.mut.tab[,"HS_q_hat_1"] == 0  &  clonal.mut.tab[,"HS_q_hat_2"] == 0 & mut.cn.dat[,"alt"] > 0
 
@@ -306,20 +311,20 @@ allelic_get_subclonal_SCNA_info = function(  obs, b, delta, SCNA_model, mut.cn.d
 ## Create SCNA clonality summary for SSNV models
 total_get_subclonal_SCNA_info = function(  obs, b, delta, SCNA_model, mut.cn.dat )
 {
-   seg.post_mix.w = SCNA_model[["tot.seg.post_mix.w"]]
+   seg.post_mix.w = SCNA_model[["seg.post_mix.w"]]
    seg.post.subclonal = rowSums(seg.post_mix.w[, c("unif", "exp")]) 
    subclonal_ix = seg.post.subclonal > 0.1    ## used to select model for SSNVs
 
 
 
 #   CN_states = get_subclonal_copy_states( obs, b, delta, SCNA_model )
-   CN_states = SCNA_model[["tot.CN_states"]]
+   CN_states = SCNA_model[["CN_states"]]
    log_ccf_dens = calc_SCNA_CCF_dens( obs, CN_states, b, delta, SCNA_model  )
    ccf_sum = calc_ccf_summary( exp(log_ccf_dens) )
 
    if( !identical(mut.cn.dat, NA))
    {
-      clonal.mut.tab = total_get_muts_nearest_clonal_scna(mut.cn.dat, SCNA_model[["tot.seg.q.tab"]], SCNA_model[["kQ"]])
+      clonal.mut.tab = total_get_muts_nearest_clonal_scna(mut.cn.dat, SCNA_model[["seg.q.tab"]], SCNA_model[["kQ"]])
 ## don't allow clonal homozygous deletions over regions with SSNVs having > 0 alt reads.
       homdel.ix = clonal.mut.tab[,"q_hat"] == 0  & mut.cn.dat[,"alt"] > 0
 

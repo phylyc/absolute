@@ -544,6 +544,8 @@ calc_mode_seg_tabs = function( seg.obj, SCNA_model, b, delta, chr.arms.dat )
      SCNA_model[["ab.tab"]] <- CalcAbDistr(obs, SCNA_model[["seg.qz.tab"]] )
 
      SCNA_model[["WGD"]] = ClassifySamplesWgdByProfile( seg.obj[["as.seg.dat"]], SCNA_model )
+   } else {
+     SCNA_model[["WGD"]] = ClassifySamplesWgdByProfile( seg.obj[["seg.dat"]], SCNA_model )
    }
 
    SCNA_model[["chr.arm.tab"]] <- CalcChrArmDistr(seg.obj, SCNA_model[["seg.q.tab"]], chr.arms.dat)
