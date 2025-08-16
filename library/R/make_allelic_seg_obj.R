@@ -1,14 +1,19 @@
 filter_sex_chromosomes = function( seg.dat, gender, verbose )
 {
-  if( !is.na(gender) && gender %in% c( "Male", "Female") )
-  {
-     nix = seg.dat[,"Chromosome"] %in% c("Y", "M", "MT", "chrY", "chrM", "chrMT")
-#     nix = !(seg.dat[,"Chromosome"] %in% c(c(1:22),"X") )
-  }
-  else
+  if( !is.na(gender) && gender %in% c( "Male" ) )
   {
      if( verbose ) {
-       print("No or invalid gender specified - dropping X,Y,MT chromosome segs")
+       print("Dropping any MT chromosome segs.")
+     }
+     nix = seg.dat[,"Chromosome"] %in% c("M", "MT", "chrM", "chrMT")
+  } else if( !is.na(gender) && gender %in% c( "Female" ) ) {
+     if( verbose ) {
+       print("Dropping any Y,MT chromosome segs.")
+     }
+     nix = seg.dat[,"Chromosome"] %in% c("Y", "M", "MT", "chrY", "chrM", "chrMT")
+  } else {
+     if( verbose ) {
+       print("No or invalid gender specified - dropping any X,Y,MT chromosome segs.")
      }
      nix = seg.dat[,"Chromosome"] %in% c("X", "Y", "M", "MT", "chrX", "chrY", "chrM", "chrMT")
   }

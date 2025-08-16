@@ -9,6 +9,8 @@ total_make_seg_obj = function(segs_tab, gender, filter_segs=FALSE, min_probes=NA
 
   X.ix = segs_tab[,"Chromosome"]==23
   segs_tab[X.ix, "Chromosome"] = "X"
+  Y.ix = segs_tab[,"Chromosome"]==24
+  segs_tab[Y.ix, "Chromosome"] = "Y"
 
 
 ## normalize gender col
@@ -51,13 +53,14 @@ total_make_seg_obj = function(segs_tab, gender, filter_segs=FALSE, min_probes=NA
   
   length = segtab[, "End.bp"] - segtab[, "Start.bp"]
   ## Convert from base 2 log
-  copy_num = 2^(segs_tab[, "tau"] )
+  # copy_num = 2^(segs_tab[, "tau"] )
+  copy_num = segs_tab[, "tau"] / 2
   
-  ix = copy_num > 5.0
+  ix = copy_num > 25.0
   if (verbose) {
     print( paste( "Capping ", sum(ix), " segs at tCR = 5.0", sep=""))
   }
-  copy_num[ix] = 5.0
+  copy_num[ix] = 25.0
   
   seg_sigma_num = 0.1  ## TODO - get rid of this - not used in downstream model - but crashes filtering code if missing
   seg_sigma =  seg_sigma_num / sqrt(as.numeric(segs_tab[,"n_probes"]))
