@@ -26,6 +26,7 @@ option_list <- list(
   make_option("--ssnv_skew", type = "double", default = 0.9883274, help = "skew", metavar = "number"),
   make_option("--min_ploidy", type = "double", default = 1.1, help = "minimum ploidy [default= %default]", metavar = "number"),
   make_option("--max_ploidy", type = "double", default = 6, help = "maximum ploidy [default= %default]", metavar = "number"),
+  make_option("--max_seg_count", type = "integer", default = 10000, help = "maximum number of segments [default= %default]", metavar = "number"),
   make_option("--b_res", type = "double", default = 0.025, help="resolution of b grid during provisional mode sweep", metavar = "number"),
   make_option("--delta_res", type = "double", default = 0.01, help="resolution of delta grid during provisional mode sweep", metavar = "number"),
   make_option("--copy_num_type", type = "character", default = "allelic", help = "type: allelic or total [default= %default]", metavar = "string"),
@@ -63,7 +64,7 @@ N_threads <- 1
 results.dir <- opt$results_dir
 min.ploidy <- opt$min_ploidy
 max.ploidy <- opt$max_ploidy
-max.as.seg.count <- 5000
+max.as.seg.count <- opt$max_seg_count
 max.non.clonal <- 0.99
 max.neg.genome <- 0.05
 maf.fn <- opt$maf

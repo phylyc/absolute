@@ -268,12 +268,12 @@ RunAbsolute = function(seg.dat.fn, primary.disease, platform, sample.name, resul
       # }
     }
 
-    bad.ix = RealAlphaFilter(mode.res)
-    if (sum(bad.ix) == nrow(mode.res[["mode.tab"]])) {
-      mode.res = list(mode.flag="ALPHA_TAU_DOM")
-    } else {
-      mode.res = ReorderModeRes(mode.res, !bad.ix)
-    }
+    # bad.ix = RealAlphaFilter(mode.res)
+    # if (sum(bad.ix) == nrow(mode.res[["mode.tab"]])) {
+    #   mode.res = list(mode.flag="ALPHA_TAU_DOM")
+    # } else {
+    #   mode.res = ReorderModeRes(mode.res, !bad.ix)
+    # }
 
     mode.res = WeighSampleModes(mode.res)
     mode.res[["call.status"]] = GetCallStatus(mode.res, seg.dat[["obs.scna"]][["W"]])
@@ -296,7 +296,7 @@ RunAbsolute = function(seg.dat.fn, primary.disease, platform, sample.name, resul
     AbsoluteResultPlot(sample.pdf.fn, seg.dat, chr.arms.dat)
   } else {
     if (verbose) {
-      print("Mode flag is NA, not generating plots. Sample has failed ABSOLUTE")
+      print(paste0("Mode flag is ", seg.dat[["mode.res"]][["mode.flag"]], ". Sample has failed ABSOLUTE"))
     }    
   }
   
