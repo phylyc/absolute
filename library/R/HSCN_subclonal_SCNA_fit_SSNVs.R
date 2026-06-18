@@ -187,11 +187,18 @@ allelic_calc_sample_muts_on_subclonal_scna = function(mut.cn.dat, mode_info, all
 #  H2.log.ev = LogAdd( cbind( H.123_qm_ll[2,,,drop=FALSE], H.123.ssnv.log.Z[,2,drop=FALSE]) )
 #  H3.log.ev = LogAdd( cbind( H.123_qm_ll[3,,,drop=FALSE], H.123.ssnv.log.Z[,3,drop=FALSE]) )
 #SLC 4/28/2017:
-  H1.log.ev = LogAdd( cbind( H.123_qm_ll[1,,,drop=TRUE], H.123.ssnv.log.Z[,1,drop=TRUE]) )
-  H2.log.ev = LogAdd( cbind( H.123_qm_ll[2,,,drop=TRUE], H.123.ssnv.log.Z[,2,drop=TRUE]) )
-  H3.log.ev = LogAdd( cbind( H.123_qm_ll[3,,,drop=TRUE], H.123.ssnv.log.Z[,3,drop=TRUE]) )
+  ## Each hypothesis slice must stay an N_mut x kQ matrix so the row-wise LogAdd yields one
+  ## value per mutation. With a bare drop=TRUE a single SSNV on a subclonal SCNA (N_mut==1)
+  ## collapsed the mutation dimension to a length-kQ vector, so H1/H2/H3 came out length kQ;
+  ## the H.log.ev cbind below then recycled ("number of rows of result is not a multiple of
+  ## vector length") and produced wrong per-mutation evidence. matrix(..., nrow=N_mut) keeps
+  ## the shape correct for any N_mut/kQ; for N_mut>1 it is a no-op (results unchanged).
+  N_mut = nrow(mut.cn.dat)
+  H1.log.ev = LogAdd( cbind( matrix(H.123_qm_ll[1,,], nrow=N_mut), H.123.ssnv.log.Z[,1]) )
+  H2.log.ev = LogAdd( cbind( matrix(H.123_qm_ll[2,,], nrow=N_mut), H.123.ssnv.log.Z[,2]) )
+  H3.log.ev = LogAdd( cbind( matrix(H.123_qm_ll[3,,], nrow=N_mut), H.123.ssnv.log.Z[,3]) )
 
-  H4.log.ev = H.123.ssnv.log.Z[,4,drop=FALSE]
+  H4.log.ev = H.123.ssnv.log.Z[,4]
 
   H.log.ev = cbind(H1.log.ev, H2.log.ev, H3.log.ev, H4.log.ev) + log(1/4)
   colnames(H.log.ev) = c("H1", "H2", "H3", "H4")
