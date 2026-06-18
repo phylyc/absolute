@@ -171,8 +171,8 @@ PlotModes <- function(segobj, chr.arms.dat, n.print = NA, called.mode.ix=NA, ver
       } else{ frame() }
 
 ## new row
-      # PpModeScorerBarplot(mode.tab, mode.colors, obs, n.plot)
-      frame()
+      PpModeScorerBarplot(mode.tab, mode.colors, obs, n.plot)
+      # frame()
 ## color genome by seg clust
 #      if( length(mut_cols) != nrow(allele.segs)) { stop("wrong # of cols/segs") }
 
@@ -453,7 +453,20 @@ plot_ABS_seg_hist = function(d, W, copy_ratio_label, seg_colors, min_CR=0, max_C
 }
 
 
-plot_ABS_comb_fit = function( sideways, col, max_CR, comb, mode.info, Wq0, comb.ab, plot.model.fit=FALSE )
+## Comb-level tick label. In total CR mode the axis is the total copy ratio, so a comb line at
+## absolute integer copy number `cn` sits at copy ratio cn/2 (germline diploid CN2 = CR 1; this
+## also makes the single genome-wide comb read correctly over male X/Y, where germline CN1 = CR 1).
+## Integers are shown plainly; half-integers as a compact nicefrac-style super/subscript fraction
+## (base-R plotmath has no \nicefrac, so emulate it as {}^num "/" {}[den]). Allelic mode is
+## unchanged: it keeps the raw integer copy number.
+comb_level_label = function( cn, cr.labels )
+{
+  if (!cr.labels) { return(cn) }
+  if (cn %% 2 == 0) { return(cn %/% 2) }
+  return( bquote( "  " * {}^.(cn) * "/" * {}[2] ) )
+}
+
+plot_ABS_comb_fit = function( sideways, col, max_CR, comb, mode.info, Wq0, comb.ab, plot.model.fit=FALSE, cr.labels=FALSE )
 {
   if (plot.model.fit)
   {
@@ -494,7 +507,7 @@ plot_ABS_comb_fit = function( sideways, col, max_CR, comb, mode.info, Wq0, comb.
     side <- ifelse(!sideways, 3, 4)
     
     if ((q - 1 < 10 | (q - 1)%%2 == 1) & comb[q] < max_CR ) {
-      mtext(text = (q - 1), side = side, at = comb[q], col = col, line = 0.2, cex = par("cex") * par("cex.axis"))
+      mtext(text = comb_level_label(q - 1, cr.labels), side = side, at = comb[q], col = col, line = 0.2, cex = par("cex") * par("cex.axis"))
     }
     
     ## % AB in each level

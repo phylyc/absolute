@@ -252,7 +252,7 @@ PlotHscrAndSeghist <- function(allele.segs, seg_colors, chr.arms.dat, max_CR, mi
 
     if (plot.abs.fit) 
     {
-       plot_ABS_comb_fit( sideways=TRUE, col=fit.color, max_CR=max_CR, plot.model.fit=FALSE, comb=comb, mode.info=mode.info, Wq0=Wq0, comb.ab=comb.ab )
+       plot_ABS_comb_fit( sideways=TRUE, col=fit.color, max_CR=max_CR, plot.model.fit=FALSE, comb=comb, mode.info=mode.info, Wq0=Wq0, comb.ab=comb.ab, cr.labels=plot.total.CN )
     }
 
     if( !plot.genome & !is.na(SID_label)) { 
