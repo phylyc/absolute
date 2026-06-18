@@ -22,15 +22,16 @@ File path to segmentation table, which is assumed to be in AllelicCapSeg format 
 ```
 Chromosome	Start.bp	End.bp	n_probes	length	n_hets	f	tau	sigma.tau	mu.minor	sigma.minor	mu.major	sigma.major	SegLabelCNLOH
 ```
+
 - Columns:
-  1. `n_probes`: Number of target intervals in each segment
-  2. `n_hets`: Number of heterozygous SNPs in each segment
-  3. `f`: minor allele fraction
-  4. `tau`: total copy number
-  5. `mu.minor`: minor allelic copy number (f * tau)
-  6. `mu.major`: major allelic copy number ((1 - f) * tau)
-  7. `sigma.xxx`: standard error of `xxx`
-  8. `SegLabelCNLOH`: copy-neutral loss of heterozygosity label: 0 is flanked on both sides, 1 is one side, 2 is no cn.loh
+  - `n_probes`: Number of target intervals in each segment
+  - `n_hets`: Number of heterozygous SNPs in each segment
+  - `f`: minor allele fraction
+  - `tau`: total copy number
+  - `mu.minor`: minor allelic copy number (f * tau)
+  - `mu.major`: major allelic copy number ((1 - f) * tau)
+  - `sigma.xxx`: standard error of `xxx`
+  - `SegLabelCNLOH`: copy-neutral loss of heterozygosity label: 0 is flanked on both sides, 1 is one side, 2 is no cn.loh
 
 See [this script](https://github.com/phylyc/somatic_workflow/blob/master/python/acs_conversion.py) on how to convert GATK ModelSegments output to that format.
 

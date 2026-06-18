@@ -25,9 +25,26 @@ AbsoluteResultPlot <- function(sample.pdf.fn, seg.dat, chr.arms.dat, called.mode
 #  if (!is.null(seg.dat[["allele.segs"]])) 
   if( TRUE )
   {
-    allele.segs = get_hom_pairs_segtab(seg.dat)
-    seg_colors = GetSegColsByAllelicBalance(seg.dat[["obs.scna"]], allele.segs  ) 
-    PlotHscrAndSeghist(allele.segs, seg_colors, chr.arms.dat, max_CR=2, plot.hist=TRUE )
+    segs = get_hom_pairs_segtab(seg.dat)
+    if (seg.dat[["copy_num_type"]] == "allelic") {
+      seg_colors = GetSegColsByAllelicBalance(seg.dat[["obs.scna"]], segs)
+      plot.total.CN = FALSE
+    } else {
+      seg_colors = NA
+      tcols = rep( 1, nrow(segs) )
+      plot.total.CN = TRUE
+    }
+
+    PlotHscrAndSeghist(
+      allele.segs = segs,
+      total.seg.dat = segs,
+      seg_colors,
+      tot.seg.colors = tcols,
+      chr.arms.dat,
+      max_CR=2,
+      plot.hist=TRUE,
+      plot.total.CN=plot.total.CN
+    )
     frame()
     frame()
   }
@@ -49,7 +66,7 @@ AbsoluteResultPlot <- function(sample.pdf.fn, seg.dat, chr.arms.dat, called.mode
 # short axis ticks
 
   PlotModes( seg.dat, chr.arms.dat, n.print=nrow(seg.dat[["mode.res"]][["mode.tab"]]),
-             called.mode.ix=called.mode.ix, verbose=verbose)
+             called.mode.ix=called.mode.ix, verbose=verbose, plot.total.CN=plot.total.CN)
 
   dev.off()
 }

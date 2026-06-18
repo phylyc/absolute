@@ -23,7 +23,14 @@ calc_muts_ccf_postrior_LL_grid = function( mut.cn.dat, alpha, SSNV_model )
 fit_SSNV_model = function(mut.cn.dat, mode_info, SSNV_model, allelic_subclonal_scna_tab, scna_log_ccf_dens, tol=0.001, max.iter=25, verbose=FALSE )
 {
   clonal_scna_mut_ix = mut.cn.dat[,"clonal_scna_mut_ix"]
-  missing.AS.seg.ix = apply( is.na(mut.cn.dat[,c("A1.ix", "A2.ix")]), 1, any )
+  ## Allelic muts carry A1.ix/A2.ix (homologous seg indices). Total-CR muts have neither
+  ## column, so every mut is "missing allele-specific seg" and is routed to the total-CN
+  ## clonal SSNV model (total_eval_SNV_models_evidence) below.
+  if (all(c("A1.ix", "A2.ix") %in% colnames(mut.cn.dat))) {
+    missing.AS.seg.ix = apply( is.na(mut.cn.dat[,c("A1.ix", "A2.ix")]), 1, any )
+  } else {
+    missing.AS.seg.ix = rep(TRUE, nrow(mut.cn.dat))
+  }
 
   if( any( missing.AS.seg.ix & !clonal_scna_mut_ix)) { stop("Only muts on segs w. allelic CN can use the subclonal SCNA model currently...")}
  ## assume clonal SCNA initially

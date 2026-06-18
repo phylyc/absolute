@@ -14,7 +14,7 @@
 #   packageStartupMessage("ABSOLUTE v1.2 [BETA] succesfully loaded.")
 #    packageStartupMessage("ABSOLUTE v1.4 [ALPHA] succesfully loaded.")
    packageStartupMessage("ABSOLUTE v1.6 [ALPHA] succesfully loaded.")
-   options(error = recover)
+   if (interactive()) { options(error = recover) }
 }
 
  compute_cached = function( results.dir, file.base, file.ext, fn, verbose, ... )
@@ -44,7 +44,7 @@ RunAbsolute = function(seg.dat.fn, primary.disease, platform, sample.name, resul
   print( paste("Registering ", N_threads, " threads.", sep=""))
   registerDoMC(N_threads)
   
-  genome_build = match.arg(genome_build, c("mm9", "hg18", "hg19", "hg38") )
+  genome_build = match.arg(genome_build, c("mm9", "mm10", "hg18", "hg19", "hg38") )
   
  ##	   3) genome_HSCR_seg_plot.R is currently fixed to hg18 data (in genome.R)
 
@@ -57,6 +57,7 @@ RunAbsolute = function(seg.dat.fn, primary.disease, platform, sample.name, resul
   else if ( genome_build == "hg19") { chr.arms.dat.file = file.path(pkg_dir, "data", "hg19_ChrArmsDat.RData") }
   else if ( genome_build == "hg38") { chr.arms.dat.file = file.path(pkg_dir, "data", "hg38_ChrArmsDat.RData") }
   else if ( genome_build == "mm9" ) { chr.arms.dat.file = file.path(pkg_dir, "data", "mm9_ChrArmsDat.RData") }
+  else if ( genome_build == "mm10" ) { chr.arms.dat.file = file.path(pkg_dir, "data", "mm10_ChrArmsDat.RData") }
   else {}
 
   print(paste("Loading", chr.arms.dat.file))
@@ -87,11 +88,13 @@ RunAbsolute = function(seg.dat.fn, primary.disease, platform, sample.name, resul
   
 
 ## Note - soon we will switch to ASCII HAPSEG output for 6.0, then the HAPSEG functions below will be deprecated and replaced by the Allelic versions   The code block below can then be replaced by platform_funcs.R
-  if( platform == "SNP_6.0" ) 
+  if( platform == "SNP_6.0" )
   {
 ## extract segtab form .RData binary
-    segtab = extract_HAPSEG_segtab(seg.dat.fn, verbose=verbose) 
-    MakeSegObj <<- AllelicMakeSegObj
+    segtab = extract_HAPSEG_segtab(seg.dat.fn, verbose=verbose)
+    if (copy_num_type == "allelic") {
+      MakeSegObj <<- AllelicMakeSegObj
+    }
 
 #    MakeSegObj <<- HAPSEGMakeSegObj
   }
@@ -114,13 +117,15 @@ RunAbsolute = function(seg.dat.fn, primary.disease, platform, sample.name, resul
 
       segtab = read.delim( seg.dat.fn, row.names=NULL, stringsAsFactors=FALSE, check.names=FALSE)
 
-      nix = is.na(segtab[,"f"])
-      print( paste( "Removing ", sum(nix), " of ", length(nix), " segs with NA f", sep="") )
-      if (all(nix)) {
-        print("No segments left. Aborting.")
-        return(TRUE)
+      if (copy_num_type == "allelic") {
+        nix = is.na(segtab[,"f"])
+        print( paste( "Removing ", sum(nix), " of ", length(nix), " segs with NA f", sep="") )
+        if (all(nix)) {
+          print("No segments left. Aborting.")
+          return(TRUE)
+        }
+        segtab = segtab[!nix,]
       }
-      segtab = segtab[!nix,]
 
       seg.dat = MakeSegObj(segtab, gender, min_probes=min_probes, max_sd=max_sd,
                            filter_segs=filter_segs, verbose=verbose)
@@ -158,16 +163,27 @@ RunAbsolute = function(seg.dat.fn, primary.disease, platform, sample.name, resul
   if (verbose) {
     print(paste("Expected copy-ratio = ", round( seg.dat[["obs.scna"]][["e.cr"]], 5), sep=""))
   }
-  
+
   mode.res = list(mode.flag = NA)
   
   if ( length(seg.dat[["obs.scna"]][["W"]] ) > max.as.seg.count) {
     mode.res[["mode.flag"]] = "OVERSEG"
   }
-  
   if ((seg.dat[["obs.scna"]][["e.cr"]] < 0.5) || (seg.dat[["obs.scna"]][["e.cr"]] > 1.5)) {
     mode.res[["mode.flag"]] = "E_CR_SCALE"
   }
+
+  # ## check for QC failure modes
+  # if (copy_num_type == "allelic") {
+  #   if ((seg.dat[["obs.scna"]][["e.cr"]] < 0.5) || (seg.dat[["obs.scna"]][["e.cr"]] > 1.5)) {
+  #     mode.res[["mode.flag"]] = "E_CR_SCALE"
+  #   }
+  # }
+  # if (copy_num_type == "total") {
+  #   if ((seg.dat[["obs.scna"]][["e.cr"]] < 1.5) || (seg.dat[["obs.scna"]][["e.cr"]] > 2.5)) {
+  #     mode.res[["mode.flag"]] = "E_CR_SCALE"
+  #   }
+  # }
   
   if (is.na(mode.res[["mode.flag"]])) {
     ## check for MAF describing somatic mutations
@@ -246,13 +262,17 @@ RunAbsolute = function(seg.dat.fn, primary.disease, platform, sample.name, resul
         model.id = "Primary"
         print(paste("Disease type", seg.dat[["group"]], "not in ChrArmPriorDb.RData, set to default model:", model.id))
       }
-      mode.res = ApplyKaryotypeModel(mode.res, model.id, train.obj, apply_karyotype_model=apply_karyotype_model,verbose=verbose)
+      mode.res = ApplyKaryotypeModel(mode.res, model.id, train.obj, apply_karyotype_model=apply_karyotype_model)
     } else {
       seg.dat[["group"]] = ""
     }
 
     ## 2 - apply mutation model
-    if ((!is.null(maf)) && (nrow(maf) > 0)) 
+    ## Runs for both allelic and total CR: the clonal SSNV likelihood is dispatched to the
+    ## total-CN model (total_eval_SNV_models_evidence) for muts lacking allele-specific seg
+    ## indices. This does NOT re-rank purity/ploidy modes (WeighSampleModes ignores SSNV_LL);
+    ## it populates per-mutation CCFs / multiplicity for the ABS MAF and the SSNV plot panels.
+    if ((!is.null(maf)) && (nrow(maf) > 0))
     {
       seg.dat[["mut.cn.dat"]] = mut.cn.dat
 

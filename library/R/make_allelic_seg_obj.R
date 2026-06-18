@@ -224,38 +224,40 @@ get_hom_seg_pair_map = function( seg.ix )
 
 get_hom_pairs_segtab = function( seg.dat )
 {
-   obs = AllelicExtractSampleObs(seg.dat)
-   segtab = seg.dat[["as.seg.dat"]]
-
-   return( get_hom_pairs_segtab_internal( obs, segtab )  )
-}
-
-get_hom_pairs_segtab_internal = function( obs, as.seg.dat )
-{
-   AS.seg.ix = obs[["AS.seg.ix"]]
-   segtab = as.seg.dat
-
-   allele.segs = cbind( segtab[AS.seg.ix[,1], c("Chromosome", "Start.bp", "End.bp", "n_probes", "length", "W") ],
+  obs <- AllelicExtractSampleObs(seg.dat)
+  if (seg.dat[["copy_num_type"]] == "allelic") {
+    segtab = seg.dat[["as.seg.dat"]]
+    AS.seg.ix = obs[["AS.seg.ix"]]
+    segs = cbind( segtab[AS.seg.ix[,1], c("Chromosome", "Start.bp", "End.bp", "n_probes", "length", "W") ],
                         "A1.Seg.CN"=obs[["d.tx"]][AS.seg.ix[,1]],
                         "A2.Seg.CN"=obs[["d.tx"]][AS.seg.ix[,2]],
-                        "A1.Seg.sem"=obs[["d.stderr"]][AS.seg.ix[,1]],   
+                        "A1.Seg.sem"=obs[["d.stderr"]][AS.seg.ix[,1]],
                         "A2.Seg.sem"=obs[["d.stderr"]][AS.seg.ix[,2]],
                         AS.seg.ix )
 
-   return(allele.segs)
+  } else {
+    segs = seg.dat[["total.seg.dat"]]
+  }
+
+   return( segs  )
 }
 
 
 AllelicExtractSampleObs <- function(seg.obj) 
 {
-  seg.dat <- seg.obj[["as.seg.dat"]]
+  if (seg.obj[["copy_num_type"]] == "allelic") {
+    seg.dat <- seg.obj[["as.seg.dat"]]
+  } else {
+    seg.dat <- seg.obj[["total.seg.dat"]]
+  }
+
   d <- seg.dat[, "copy_num"]
   stderr <- seg.dat[, "seg_sigma"]
   W <- seg.dat[, "W"]
 
   if( "bi.allelic" %in% colnames(seg.dat) ) {
      bi.allelic = seg.dat[, "bi.allelic"]
-  } else { 
+  } else {
      bi.allelic = rep( FALSE, nrow(seg.dat))
   }
 

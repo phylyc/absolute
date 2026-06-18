@@ -146,7 +146,7 @@ get_clonal_seg_LL_mat = function( obs, b, delta, SCNA_model )
 
   if( any(male_X))
   {
-    comb_X <- GetCopyRatioComb(Q, delta, b/2, obs[["error.model"]])
+    comb_X <- get_male_sex_chr_comb(Q, delta, b, obs)
     clonal_seg_LL_X = sapply(comb_X, comb_dens, d[male_X], use_sigma[male_X], log=TRUE)
 
     clonal_seg_LL = matrix( NA, nrow=length(d), ncol=Q )
@@ -195,7 +195,7 @@ get_comb_interval_gaussian_CDF_seg_mat = function( obs, b, delta, SCNA_model )
 
   if( any(male_X)) 
   {
-     comb_X <- GetCopyRatioComb(Q, delta, b/2, obs[["error.model"]])
+     comb_X <- get_male_sex_chr_comb(Q, delta, b, obs)
      seg_interval_dens_mat[ male_X, ] = get_int_mat( d[male_X], comb_X, use_sigma[male_X] )  
   }
 

@@ -75,6 +75,13 @@ grid_compose_LL = function( LL, log_pow_tab, log.ccf.post, dx )
    nc = ncol(log.ccf.post)
    nr = nrow(log.ccf.post)
 
+   ## Degenerate input (e.g. an empty segment subset -> zero rows): there is nothing to
+   ## compose. LogAdd() does a per-row rowLogSumExps, so the result is one -Inf per row.
+   ## Returning it directly avoids matrix() warning on a zero-extent matrix with non-empty LL.
+   if (nr == 0L || nc == 0L) {
+      return( rep(-Inf, nr) )
+   }
+
    r2 = matrix(LL, ncol=nc, nrow=nr, byrow=TRUE)
 #     r3 = r2 + log_pow_tab + log.ccf.post + log(dx)
    r3 = r2 + log.ccf.post  #  + log(dx)

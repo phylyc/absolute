@@ -328,31 +328,34 @@ SSNV_CCF_plot = function( mut.dat, SSNV_ccf_dens, mode.ix, SSNV_cols, max_SSNVs_
 
 
   H123.SSNV.ix = !is.na(mut.dat[,"H1"]) ## SSNVs on subclonal SCNAs
-  if( sum(!H123.SSNV.ix) == 0 ) { frame(); return() }
-  if( sum(H123.SSNV.ix) == 0 ) { frame(); return() }
+  if( sum(!H123.SSNV.ix) == 0 ) { frame(); return() }  ## no SSNVs on clonal SCNAs -> nothing to draw
+  has_H123 = sum(H123.SSNV.ix) > 0   ## allele-resolved subclonal-SCNA SSNVs; absent in total CR mode
 
   SSNV_pr_clonal <- mut.dat[, "Pr_somatic_clonal"]
   ccf_grid = as.numeric(colnames(SSNV_ccf_dens))
   H123_SSNV_cols = c("darkslateblue", "coral", "seagreen3")
 
   clonal_SCNA_SSNV_ccf_dens = SSNV_ccf_dens[ !H123.SSNV.ix, ,drop=FALSE ]
-  
+
   H123.SSNV_ccf_dens = (SSNV_ccf_dens)[ H123.SSNV.ix, , drop=FALSE ]
-  
+
   clonal_SCNA_SSNV_ymax = max(clonal_SCNA_SSNV_ccf_dens, na.rm=TRUE)
-  H123.SSNV_ymax = max( (H123.SSNV_ccf_dens))
+  H123.SSNV_ymax = if (has_H123) max( (H123.SSNV_ccf_dens), na.rm=TRUE ) else 0
 
   y_lim = max( clonal_SCNA_SSNV_ymax, H123.SSNV_ymax, na.rm=TRUE  )
   scale_total = y_lim/2
 
   SSNV.amp.ix = mut.dat[,"modal_q_s"] > 1
   SSNV_mut_cols = get_mut_cols( SSNV_cols, SSNV_pr_clonal[!H123.SSNV.ix], SSNV.amp.ix )
-  H123.SSNV_mut_cols = get_mut_cols( H123_SSNV_cols, SSNV_pr_clonal[H123.SSNV.ix], SSNV.amp.ix )
 
-## SSNVs on clonal and subclonal SCNAs
+## SSNVs on clonal SCNAs
   draw_grid_mut_densities( clonal_SCNA_SSNV_ccf_dens, ccf_grid, col=SSNV_cols[3], mut_colors=SSNV_mut_cols, scale_total, draw_total=TRUE, draw_indv=TRUE, add=FALSE, y_lim=y_lim )
 
-  draw_grid_mut_densities( H123.SSNV_ccf_dens, ccf_grid, col=H123_SSNV_cols[3], mut_colors=H123.SSNV_mut_cols, scale_total, draw_total=TRUE, draw_indv=TRUE, add=TRUE, y_lim=y_lim )
+## SSNVs on subclonal SCNAs (allele-resolved; none in total CR mode)
+  if (has_H123) {
+    H123.SSNV_mut_cols = get_mut_cols( H123_SSNV_cols, SSNV_pr_clonal[H123.SSNV.ix], SSNV.amp.ix )
+    draw_grid_mut_densities( H123.SSNV_ccf_dens, ccf_grid, col=H123_SSNV_cols[3], mut_colors=H123.SSNV_mut_cols, scale_total, draw_total=TRUE, draw_indv=TRUE, add=TRUE, y_lim=y_lim )
+  }
 
 
   legend( x='topleft', legend=c("Clonal SSNVs", "Subclonal SSNVs", "Clonal SSNVs on subclonal SCNAs", "Subclonal SSNVs on subclonal SCNAs"), col=c( rev(SSNV_cols), rev(H123_SSNV_cols) ), lty=1, lwd=1.5, bty="n", cex=.6 )

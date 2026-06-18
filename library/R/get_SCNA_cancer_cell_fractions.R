@@ -3,7 +3,7 @@ get_subclonal_copy_states = function( obs, b, delta, SCNA_model, neg.ix )
   Q = SCNA_model[["kQ"]]
 
   comb_A =  GetCopyRatioComb(Q, delta, b, obs$error.model)
-  comb_X =  GetCopyRatioComb(Q, delta, b/2, obs$error.model)
+  comb_X =  get_male_sex_chr_comb(Q, delta, b, obs)
   
   ## convert dist over CR to dist over CCF for subclonal SCNAs - not dependant on theta.Q
   seg_q_tab = SCNA_model_clonal_seg_Q_post( obs, b, delta, SCNA_model )
@@ -64,7 +64,7 @@ calc_SCNA_CCF_dens = function( obs, CN_states, b, delta, SCNA_model )
   cr_grid = matrix(NA, nrow=n_seg, ncol=length(ccf_grid))
   
   comb_A = GetCopyRatioComb(Q, delta, b, obs$error.model)
-  comb_X = GetCopyRatioComb(Q, delta, b/2, obs$error.model)
+  comb_X = get_male_sex_chr_comb(Q, delta, b, obs)
 
   qc = CN_states[,"qc"]
   qs = CN_states[,"qs"]
@@ -245,6 +245,11 @@ GetScnaStderrGridDensity <- function(obs, grid, SCNA_model, i=NA) {
 reconcile_clonal_homdels_with_obs_SSNVs = function( mut.cn.dat, subclonal_ix, seg.q.tab, seg.post.subclonal, SCNA_model )
 {
    clonal.mut.tab = get_muts_nearest_clonal_scna(mut.cn.dat, seg.q.tab, SCNA_model[["kQ"]])
+
+  if (!("HS_q_hat_1" %in% colnames(clonal.mut.tab)) || !("HS_q_hat_2" %in% colnames(clonal.mut.tab))) {
+    return(subclonal_ix)
+  }
+
 ## don't allow clonal homozygous deletions over regions with SSNVs having > 0 alt reads.
    homdel.ix = clonal.mut.tab[,"HS_q_hat_1"] == 0  &  clonal.mut.tab[,"HS_q_hat_2"] == 0 & mut.cn.dat[,"alt"] > 0
 
@@ -306,20 +311,29 @@ allelic_get_subclonal_SCNA_info = function(  obs, b, delta, SCNA_model, mut.cn.d
 ## Create SCNA clonality summary for SSNV models
 total_get_subclonal_SCNA_info = function(  obs, b, delta, SCNA_model, mut.cn.dat )
 {
-   seg.post_mix.w = SCNA_model[["tot.seg.post_mix.w"]]
-   seg.post.subclonal = rowSums(seg.post_mix.w[, c("unif", "exp")]) 
+## This is always called on obs.total.scna (one row per total segment). In ALLELIC mode,
+## apply_allelic_model_to_total_copy_ratios populates the "tot.*" fields with exactly that
+## dimension; the plain fields are allele-resolved (2x rows) and must NOT be used here.
+## In TOTAL CR mode the "tot.*" fields don't exist and the plain fields ARE the total fields.
+   if( !is.null(SCNA_model[["tot.CN_states"]]) ) {
+      seg.post_mix.w = SCNA_model[["tot.seg.post_mix.w"]]
+      CN_states      = SCNA_model[["tot.CN_states"]]
+      seg.q.tab      = SCNA_model[["tot.seg.q.tab"]]
+   } else {
+      seg.post_mix.w = SCNA_model[["seg.post_mix.w"]]
+      CN_states      = SCNA_model[["CN_states"]]
+      seg.q.tab      = SCNA_model[["seg.q.tab"]]
+   }
+
+   seg.post.subclonal = rowSums(seg.post_mix.w[, c("unif", "exp")])
    subclonal_ix = seg.post.subclonal > 0.1    ## used to select model for SSNVs
 
-
-
-#   CN_states = get_subclonal_copy_states( obs, b, delta, SCNA_model )
-   CN_states = SCNA_model[["tot.CN_states"]]
    log_ccf_dens = calc_SCNA_CCF_dens( obs, CN_states, b, delta, SCNA_model  )
    ccf_sum = calc_ccf_summary( exp(log_ccf_dens) )
 
    if( !identical(mut.cn.dat, NA))
    {
-      clonal.mut.tab = total_get_muts_nearest_clonal_scna(mut.cn.dat, SCNA_model[["tot.seg.q.tab"]], SCNA_model[["kQ"]])
+      clonal.mut.tab = total_get_muts_nearest_clonal_scna(mut.cn.dat, seg.q.tab, SCNA_model[["kQ"]])
 ## don't allow clonal homozygous deletions over regions with SSNVs having > 0 alt reads.
       homdel.ix = clonal.mut.tab[,"q_hat"] == 0  & mut.cn.dat[,"alt"] > 0
 

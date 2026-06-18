@@ -55,11 +55,9 @@ set_total_funcs = function() {
   get_cr_grid_from_ccf_grid <<- total_get_cr_grid_from_ccf_grid
   GetAbsSegDat <<- total_get_abs_seg_dat
 
-#  calc_sample_muts_on_subclonal_scna <<- total_calc_sample_muts_on_subclonal_scna  
+#  calc_sample_muts_on_subclonal_scna <<- total_calc_sample_muts_on_subclonal_scna
   get_subclonal_scna_mut_ix <<- total_get_subclonal_scna_mut_ix
   get_subclonal_SCNA_info <<- total_get_subclonal_SCNA_info
-
-  get_subclonal_scna_mut_ix <<- total_get_subclonal_scna_mut_ix 
   get_subclonal_scna_tab <<- get_total_subclonal_scna_tab
   annotate_SSNVs_on_clonal_SCNAs <<- total_annotate_SSNVs_on_clonal_SCNAs
   eval_SNV_models_evidence <<- total_eval_SNV_models_evidence

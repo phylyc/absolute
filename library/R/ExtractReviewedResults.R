@@ -113,7 +113,8 @@ apply_review_and_extract = function( pp.review.fn=NA, pp.solution.num=NA, result
   else if ( genome_build == "hg19") { chr.arms.dat.file = file.path(pkg_dir, "data", "hg19_ChrArmsDat.RData") }
   else if ( genome_build == "hg38") { chr.arms.dat.file = file.path(pkg_dir, "data", "hg38_ChrArmsDat.RData") }
   else if ( genome_build == "mm9" ) { chr.arms.dat.file = file.path(pkg_dir, "data", "mm9_ChrArmsDat.RData") }
-  else {}
+  else if ( genome_build == "mm10" ) { chr.arms.dat.file = file.path(pkg_dir, "data", "mm10_ChrArmsDat.RData") }
+  else { chr.arms.dat.file = "NO FILE"}
   print(paste("Loading", chr.arms.dat.file))
   load(chr.arms.dat.file)
 

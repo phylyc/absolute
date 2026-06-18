@@ -219,7 +219,14 @@ classic_CreateMutCnDat <- function(maf, indel.maf, seg.dat, min.mut.af=0, verbos
     stop("No mutations left")
   }
 
-  mut.cn.dat <- cbind(mut.cn.dat, mut.seg.ix, "T.seg.ix"=T.seg.ix )
+  ## In total CR mode the dispatched GetMutSegIx() IS total_get_mut_seg_ix(), so mut.seg.ix
+  ## already carries "T.seg.ix"; binding it again would duplicate the column. Only add the
+  ## explicit T.seg.ix when mut.seg.ix doesn't already provide it (i.e. the allelic path).
+  if ("T.seg.ix" %in% colnames(mut.seg.ix)) {
+    mut.cn.dat <- cbind(mut.cn.dat, mut.seg.ix)
+  } else {
+    mut.cn.dat <- cbind(mut.cn.dat, mut.seg.ix, "T.seg.ix"=T.seg.ix )
+  }
   mut.cn.dat <- mut.cn.dat[ix, , drop=FALSE]
 
   mut.cn.dat = select_protein_change_annot_using_COSMIC( mut.cn.dat, verbose=verbose )

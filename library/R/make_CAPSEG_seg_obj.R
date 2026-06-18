@@ -52,10 +52,18 @@ total_make_seg_obj = function(segs_tab, gender, filter_segs=FALSE, min_probes=NA
   colnames(segtab) = c("Chromosome", "Start.bp", "End.bp", "n_probes", "length", "tau", "seg_sigma")
   
   length = segtab[, "End.bp"] - segtab[, "Start.bp"]
-  ## Convert from base 2 log
-  # copy_num = 2^(segs_tab[, "tau"] )
-  copy_num = segs_tab[, "tau"] / 2
-  
+
+  ## Germline (normal) total copy number per segment: 2 for autosomes and female X, 1 for male
+  ## X/Y. (Female Y is already dropped by filter_sex_chromosomes.) The input "tau" is the total
+  ## copy NUMBER (tau = chr_ploidy * 2^log2CR; germline tau == chr_ploidy), so dividing by the
+  ## germline ploidy yields the TOTAL COPY RATIO -- ~1 across all chromosomes with no alteration,
+  ## including male X/Y. For autosomes / female X this is identical to the previous tau/2.
+  chr_ploidy = rep(2, nrow(segtab))
+  if (is.M) {
+    chr_ploidy[ segtab[, "Chromosome"] %in% c("X", "Y") ] = 1
+  }
+  copy_num = segs_tab[, "tau"] / chr_ploidy
+
   ix = copy_num > 25.0
   if (verbose) {
     print( paste( "Capping ", sum(ix), " segs at tCR = 5.0", sep=""))
@@ -65,11 +73,15 @@ total_make_seg_obj = function(segs_tab, gender, filter_segs=FALSE, min_probes=NA
   seg_sigma_num = 0.1  ## TODO - get rid of this - not used in downstream model - but crashes filtering code if missing
   seg_sigma =  seg_sigma_num / sqrt(as.numeric(segs_tab[,"n_probes"]))
 #  seg_sigma = rep(NA, nrow(segs_tab))  ## calculate later in SCNA_model
-  
-  segtab = cbind(segtab, length, copy_num, seg_sigma )
+  seg.ix <- cbind(c(1:nrow(segtab)))
+  colnames(seg.ix) = c("seg.ix")
+
+  segtab = cbind(segtab, length, copy_num, seg_sigma, seg.ix)
 
   if (filter_segs) {
     seg_dat$segtab = FilterSegs(segtab, min_probes=min_probes, max_sd=max_sd)$seg.info
+  } else {
+    seg_dat$segtab = segtab
   }
 
   W = as.numeric(seg_dat$segtab[,"length"])
@@ -79,21 +91,36 @@ total_make_seg_obj = function(segs_tab, gender, filter_segs=FALSE, min_probes=NA
 
   seg_dat$error_model = list()
 
-  return(seg_dat)  
+## create an object for total CN analysis.
+## Built from the (possibly filtered) seg_dat$segtab so its rows stay consistent with the
+## modeled segments. "copy_num" is the TOTAL COPY RATIO (tau / germline ploidy, ~1 at germline
+## for every chromosome), the same quantity the model fits; downstream plots show it directly.
+  total.seg.dat = seg_dat$segtab[, c("Chromosome", "Start.bp", "End.bp", "n_probes", "length", "copy_num", "seg_sigma", "seg.ix", "W")]
+  seg_dat$total.seg.dat = total.seg.dat
+
+  return(seg_dat)
 }
 
-total_extract_sample_obs = function(seg.dat) 
+total_extract_sample_obs = function(seg.obj)
 {
-  seg = seg.dat[["segtab"]]
-  d = seg[, "copy_num"]
+  seg.tab = seg.obj[["segtab"]]
+  d = seg.tab[, "copy_num"]
+  stderr <- seg.tab[, "seg_sigma"]
+  W <- seg.tab[, "W"]
+
+  if( "bi.allelic" %in% colnames(seg.tab) ) {
+     bi.allelic = seg.tab[, "bi.allelic"]
+  } else {
+     bi.allelic = rep( FALSE, nrow(seg.tab))
+  }
 
   ## expected copy-number, should be 1.0
-  e.cr = sum(seg[, "W"] * d )
-  gender=seg.dat$gender
+  e.cr = sum(W * d )
+  gender=seg.obj$gender
 
-  X.ix = (seg.dat[,"Chromosome"]=="X")
-  Y.ix = (seg.dat[,"Chromosome"]=="Y")
-  normal_allele_count = rep(NA, nrow(seg.dat))
+  X.ix = (seg.tab[,"Chromosome"]=="X")
+  Y.ix = (seg.tab[,"Chromosome"]=="Y")
+  normal_allele_count = rep(2, nrow(seg.tab))
 
   if( !is.na(gender) && gender == "Male" ) 
   {
@@ -106,9 +133,13 @@ total_extract_sample_obs = function(seg.dat)
      normal_allele_count[Y.ix] = 0
   }
 
-
   ## FIXME: "error.model" was originally named "HSCN_params" - double check this
-  obs = list(d=d, d.tx=d, W=seg[,"W"], n_probes=seg[,"n_probes"], seg.ix=seq_along(d), error.model=seg.dat$error_model, e.cr=e.cr, data.type="TOTAL", platform=seg.dat[["platform"]], "normal_allele_count"=normal_allele_count )
+  obs = list(
+    d=d, d.tx=d, d.stderr=stderr, W=W, seg.ix=seq_along(d), bi.allelic=bi.allelic,
+    n_probes=seg.tab[,"n_probes"],
+    error.model=seg.obj$error_model, e.cr=e.cr, data.type="TOTAL",
+    platform=seg.obj[["platform"]], "normal_allele_count"=normal_allele_count
+  )
   
   return(obs)
 }

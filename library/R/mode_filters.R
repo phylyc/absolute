@@ -81,7 +81,7 @@ NegGenomeFilter = function( obs, mode.tab, max.neg.genome, Q, verbose=FALSE)
     
 #    obs[["error.model"]][["fit.at"]] <- mode.tab[1, "AT"]
     comb_A <-  GetCopyRatioComb(Q, delta, b, obs[["error.model"]])
-    comb_X <-  GetCopyRatioComb(Q, delta, b/2, obs[["error.model"]])
+    comb_X <-  get_male_sex_chr_comb(Q, delta, b, obs)
 #    frac.neg.het[i] <- sum((obs[["W"]] * seg.z)[obs[["d.tx"]] < comb[1]])
 
     one_allele_ix = obs[["normal_allele_count"]] == 1

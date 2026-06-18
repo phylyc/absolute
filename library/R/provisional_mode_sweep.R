@@ -120,6 +120,16 @@ FindLocationModes <- function(obs, force.alpha, force.tau, SCNA_model, mut.cn.da
   if (nrow(mode.tab) == 0) {
     return(list(mode.flag = "ALPHA_TAU_DOM"))
   }
+
+  # mode.ix <- (mode.tab[, "alpha"] == 1)
+  # if (sum(!mode.ix) > 1) {
+  #   if (verbose) {
+  #     print(paste("removing ", sum(mode.ix), " / ",
+  #                 length(mode.ix), " modes with alpha == 1.",
+  #                 sep = ""))
+  #   }
+  #   mode.tab <- mode.tab[!mode.ix, , drop = FALSE]
+  # }
   
   return(list(mode.tab = mode.tab))
 }

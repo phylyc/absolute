@@ -15,13 +15,14 @@ DetermineGroup <- function(primary.disease) {
 
   if(is.na(primary.disease)) { return(NA) }
 
-  group <- try(get(primary.disease, disease_map))
-  print(paste("Disease type mapped:", primary.disease, "->", group))
+  group <- try(get(primary.disease, disease_map), silent=TRUE)
   if (inherits(group, "try-error")) {
     ## It doesn't exist, just return the primary disease, it'll
     ## fall through
+    print(paste("Disease type", primary.disease, "not in diseaseMap; falling through."))
     return(primary.disease)
   } else {
+    print(paste("Disease type mapped:", primary.disease, "->", group))
     return(group)
   }
 }

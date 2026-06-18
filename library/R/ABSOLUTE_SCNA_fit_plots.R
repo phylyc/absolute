@@ -16,7 +16,7 @@ PlotModes_layout = function()
 #  par( cex=0.6 )
 }
 
-PlotModes <- function(segobj, chr.arms.dat, n.print = NA, called.mode.ix=NA, verbose=FALSE)
+PlotModes <- function(segobj, chr.arms.dat, n.print = NA, called.mode.ix=NA, verbose=FALSE, plot.total.CN=FALSE)
 {
 #  Q = dim(segobj[["mode.res"]][["seg.q.tab"]])[3]
   Q = segobj[["mode.res"]][["mode_SCNA_models"]][[1]][["kQ"]] 
@@ -52,11 +52,7 @@ PlotModes <- function(segobj, chr.arms.dat, n.print = NA, called.mode.ix=NA, ver
       tree_clust = resort_tree_clusters( SCNA_model, SCNA_model[["seg_CCF_DP"]][["tree_clust"]] )
       SCNA_model[["seg_CCF_DP"]][["tree_clust"]] = tree_clust
       SCNA_model[["seg_CCF_DP"]][["seg_clust_tab"]] = get_seg_clust_tab( SCNA_model )
-      segs_d0 = deconstruct_SCNAs( SCNA_model, obs, allele.segs, b, delta )
 ##
-
-
-
 
 
 ## 1- alpha vs tau
@@ -104,7 +100,7 @@ PlotModes <- function(segobj, chr.arms.dat, n.print = NA, called.mode.ix=NA, ver
 
     # New plot version with genome-plot and sideways hist summary
 # 2 and 3 - genome and seghist
-      PlotHscrAndSeghist( allele.segs, clonal_seg_colors, chr.arms.dat, max_CR, plot.hist=TRUE, plot.abs.fit=TRUE, comb=comb, mode.info=mode.info, Wq0=Wq0, comb.ab=comb.ab, fit.color=mode.colors[i], plot.seg.sem=TRUE )
+      PlotHscrAndSeghist( allele.segs, total.seg.dat=allele.segs, clonal_seg_colors, chr.arms.dat, max_CR, plot.hist=TRUE, plot.abs.fit=TRUE, plot.total.CN=plot.total.CN, comb=comb, mode.info=mode.info, Wq0=Wq0, comb.ab=comb.ab, fit.color=mode.colors[i], plot.seg.sem=TRUE )
       title("Seg clonality", line = 0.5, cex.main = 0.9)
 
   # 4 - SCNAs CCF
@@ -175,12 +171,12 @@ PlotModes <- function(segobj, chr.arms.dat, n.print = NA, called.mode.ix=NA, ver
       } else{ frame() }
 
 ## new row
-      PpModeScorerBarplot(mode.tab, mode.colors, obs, n.plot)
-
+      # PpModeScorerBarplot(mode.tab, mode.colors, obs, n.plot)
+      frame()
 ## color genome by seg clust
 #      if( length(mut_cols) != nrow(allele.segs)) { stop("wrong # of cols/segs") }
 
-      PlotHscrAndSeghist( allele.segs, mut_cols, chr.arms.dat, max_CR, plot.hist=TRUE, plot.abs.fit=TRUE, comb=comb, mode.info=NA, Wq0=Wq0, comb.ab=comb.ab, fit.color=mode.colors[i], plot.seg.sem=TRUE )
+      PlotHscrAndSeghist( allele.segs, total.seg.dat=allele.segs, mut_cols, chr.arms.dat, max_CR, plot.hist=TRUE, plot.abs.fit=TRUE, plot.total.CN=plot.total.CN, comb=comb, mode.info=NA, Wq0=Wq0, comb.ab=comb.ab, fit.color=mode.colors[i], plot.seg.sem=TRUE )
       title("Seg clusters", line = 0.5, cex.main = 0.9)
 
       seg_LL = SCNA_model[["seg_LL"]] 
@@ -188,7 +184,7 @@ PlotModes <- function(segobj, chr.arms.dat, n.print = NA, called.mode.ix=NA, ver
       use.pal = (colorRampPalette(c("red", "yellow", "green")))  (1000)
 # color by seg LL
       seg_LL_cols = get_seg_colors(seg_LL, use.pal=use.pal)
-      PlotHscrAndSeghist(allele.segs, seg_LL_cols, chr.arms.dat, max_CR=5.0, plot.genome=FALSE, plot.hist=TRUE, plot.abs.fit=TRUE, comb=comb, mode.info=NA, Wq0=Wq0, comb.ab=comb.ab, fit.color=mode.colors[i], plot.seg.sem=TRUE, )
+      PlotHscrAndSeghist(allele.segs, total.seg.dat=allele.segs, seg_LL_cols, chr.arms.dat, max_CR=5.0, plot.genome=FALSE, plot.hist=TRUE, plot.abs.fit=TRUE, plot.total.CN=plot.total.CN, comb=comb, mode.info=NA, Wq0=Wq0, comb.ab=comb.ab, fit.color=mode.colors[i], plot.seg.sem=TRUE, )
       title("Seg LL", line = 0.5, cex.main = 0.9)
 
 #  CCF of hard-clusters
@@ -215,15 +211,28 @@ PlotModes <- function(segobj, chr.arms.dat, n.print = NA, called.mode.ix=NA, ver
     seg_ix_colors[ no.ix ] = 1     ## No flags
     seg_ix_colors[ !no.ix ] = apply( SCNA_model[["seg.ix.tab"]][ !no.ix , c("amp.ix", "neg.ix", "high.sem.ix"), drop=FALSE ], 1, which.max ) + 1
     seg_ix_colors[ SCNA_model[["seg.ix.tab"]][, 5] ] = max(seg_ix_colors, na.rm=TRUE)+1
-    PlotHscrAndSeghist( allele.segs, seg_ix_colors, chr.arms.dat, max_CR, plot.hist=TRUE, plot.abs.fit=TRUE, comb=comb, plot.seg.sem=TRUE )
+    PlotHscrAndSeghist( allele.segs, total.seg.dat=allele.segs, seg_ix_colors, chr.arms.dat, max_CR, plot.hist=TRUE, plot.abs.fit=TRUE, plot.total.CN=plot.total.CN, comb=comb, plot.seg.sem=TRUE )
 
    ## SCNA ev summary
-    arm_ev_result = SCNA_model[["SCNA_minev_chrarm_result"]]
-    barplot( arm_ev_result[["WGD_Pr"]], names=c("WGD0", "WGD1", "WGD2"), ylab="Probability", ylim=c(0,1) )
+    if (plot.total.CN) {
+      ## total CR: show the chr-arm minimum-event score per WGD hypothesis (lower = preferred).
+      arm_ev_result = SCNA_model[["SCNA_minev_chrarm_result"]]
+      e_wgd = arm_ev_result[["e_wgd"]]
+      if (!is.null(e_wgd) && all(is.finite(e_wgd))) {
+        bcols = rep("grey70", length(e_wgd)); bcols[which.min(e_wgd)] = "firebrick"
+        barplot( e_wgd, names=c("WGD0","WGD1","WGD2")[seq_along(e_wgd)],
+                 ylab="chr-arm events (lower=preferred)", col=bcols )
+        title(paste0("selected WGD", arm_ev_result[["WGD"]]), line=0.5, cex.main=0.9)
+      } else { frame() }
+      frame()
+    } else {
+      arm_ev_result = SCNA_model[["SCNA_minev_chrarm_result"]]
+      barplot( arm_ev_result[["WGD_Pr"]], names=c("WGD0", "WGD1", "WGD2"), ylab="Probability", ylim=c(0,1) )
 
-#    barplot( c(arm_ev_result[["ancestral_LL"]], arm_ev_result[["subclonal_LL"]],  arm_ev_result[["num_NA"]]), names=c("ancestral CN", "subclonal CN", "num_NA"), ylab="Log likelihood"  )
-    ev_plot_dat = arm_ev_result[ c("average_WGD_score", "log_multinom_coef", "SC_ev_steps_LL", "neg_arm_LL", "subclone_CCF_volume") ]
-    barplot( unlist(ev_plot_dat), names=names(ev_plot_dat), las=2, ylab="Log likelihood" )
+  #    barplot( c(arm_ev_result[["ancestral_LL"]], arm_ev_result[["subclonal_LL"]],  arm_ev_result[["num_NA"]]), names=c("ancestral CN", "subclonal CN", "num_NA"), ylab="Log likelihood"  )
+      ev_plot_dat = arm_ev_result[ c("average_WGD_score", "log_multinom_coef", "SC_ev_steps_LL", "neg_arm_LL", "subclone_CCF_volume") ]
+      barplot( unlist(ev_plot_dat), names=names(ev_plot_dat), las=2, ylab="Log likelihood" )
+    }
 
 #"WGD_Pr"=WGD_Pr, "ancestral_LL"=WGD_ev_result, "subclonal_LL"=log_multinom_coef, "num_NA"=num_NA_chrarms
     frame()
@@ -236,42 +245,64 @@ PlotModes <- function(segobj, chr.arms.dat, n.print = NA, called.mode.ix=NA, ver
 # plot.total.CN=TRUE, tot.seg.colors=tcols ) 
 
 ## plot d0_segs
-    AS.seg.ix = allele.segs[, c("seg.ix.1", "seg.ix.2")]
-    d0.allele.segs = allele.segs
+    if (!plot.total.CN) {
+      segs_d0 = deconstruct_SCNAs( SCNA_model, obs, allele.segs, b, delta )
+      AS.seg.ix = allele.segs[, c("seg.ix.1", "seg.ix.2")]
+      d0.allele.segs = allele.segs
 
-    d0.allele.segs[,"A1.Seg.CN"] = segs_d0[ AS.seg.ix[,1] ]
-    d0.allele.segs[,"A2.Seg.CN"] = segs_d0[ AS.seg.ix[,2] ]
- 
-    PlotHscrAndSeghist( d0.allele.segs, mut_cols, chr.arms.dat, max_CR=4.25, plot.hist=TRUE, plot.abs.fit=FALSE, comb=comb, plot.seg.sem=FALSE, y.lab="Allelic copy number" )
+      d0.allele.segs[,"A1.Seg.CN"] = segs_d0[ AS.seg.ix[,1] ]
+      d0.allele.segs[,"A2.Seg.CN"] = segs_d0[ AS.seg.ix[,2] ]
 
-    frame(); frame(); frame()
-     
+      PlotHscrAndSeghist( d0.allele.segs, total.seg.dat=allele.segs, mut_cols, chr.arms.dat, max_CR=4.25, plot.hist=TRUE, plot.abs.fit=FALSE, plot.total.CN=plot.total.CN, comb=comb, plot.seg.sem=FALSE, y.lab=copy_ratio_label )
 
-# new row
-    frame()
-  ## Genome plot
-    PlotHscrAndSeghist( d0.allele.segs, mut_cols, chr.arms.dat, max_CR=2.5, plot.abs.fit=FALSE, comb=comb, plot.seg.sem=FALSE, y.lab="Allelic copy number" )
+      frame(); frame(); frame()
 
-    if(!is.null(segobj[["mode.res"]][["modeled.muts"]][[i]]) && !all(is.na(segobj[["mode.res"]][["modeled.muts"]][[i]][,"ccf_hat"])) )  ## protect against edge case of all muts on homozygously del SCNAs
-    {
-       mut.cn.dat <- segobj[["mut.cn.dat"]]
-       modeled <- segobj[["mode.res"]][["modeled.muts"]][[i]]
-       modeled.mut.dat <- cbind(mut.cn.dat, modeled)
+  # new row
+      frame()
+    ## Genome plot
+      PlotHscrAndSeghist( d0.allele.segs, total.seg.dat=allele.segs, mut_cols, chr.arms.dat, max_CR=2.5, plot.abs.fit=FALSE, plot.total.CN=plot.total.CN, comb=comb, plot.seg.sem=FALSE, y.lab=copy_ratio_label )
 
-       max_SSNVs_plot = 500
+      if(!is.null(segobj[["mode.res"]][["modeled.muts"]][[i]]) && !all(is.na(segobj[["mode.res"]][["modeled.muts"]][[i]][,"ccf_hat"])) )  ## protect against edge case of all muts on homozygously del SCNAs
+      {
+         mut.cn.dat <- segobj[["mut.cn.dat"]]
+         modeled <- segobj[["mode.res"]][["modeled.muts"]][[i]]
+         modeled.mut.dat <- cbind(mut.cn.dat, modeled)
 
-     ## plot SSNVs on genome
-       # SSNV_cols = c("dodgerblue", "darkgrey", "seagreen3")   ## SC, clonal, mult>1
-       SSNV_cols = c("magenta", "olivedrab", "dodgerblue")   ## SC, clonal, mult>1
-       plot_SSNVs_on_genome( SSNV_model, SSNV_cols, modeled.mut.dat, segobj, i, mode.colors[i], chr.arms.dat, max_SSNVs_plot=max_SSNVs_plot, verbose=verbose)
+         max_SSNVs_plot = 500
 
-  ## Now plot SSNVs densities ... 2 plots 
-        PlotSomaticMutDensities(modeled.mut.dat, segobj, i,
-                                mode.colors[i], min.cov=3, max_SSNVs_plot=max_SSNVs_plot, verbose=verbose)
-#  2 plots
-        plot_SSNV_on_subclonal_SCNA_CCF_summaries(modeled.mut.dat, segobj, i, min.cov=3, max_SSNVs_plot=max_SSNVs_plot, verbose=verbose)
+       ## plot SSNVs on genome
+         # SSNV_cols = c("dodgerblue", "darkgrey", "seagreen3")   ## SC, clonal, mult>1
+         SSNV_cols = c("magenta", "olivedrab", "dodgerblue")   ## SC, clonal, mult>1
+         plot_SSNVs_on_genome( SSNV_model, SSNV_cols, modeled.mut.dat, segobj, i, mode.colors[i], chr.arms.dat, max_SSNVs_plot=max_SSNVs_plot, verbose=verbose)
+
+    ## Now plot SSNVs densities ... 2 plots
+          PlotSomaticMutDensities(modeled.mut.dat, segobj, i,
+                                  mode.colors[i], min.cov=3, max_SSNVs_plot=max_SSNVs_plot, verbose=verbose)
+  #  2 plots
+          plot_SSNV_on_subclonal_SCNA_CCF_summaries(modeled.mut.dat, segobj, i, min.cov=3, max_SSNVs_plot=max_SSNVs_plot, verbose=verbose)
+      }
+      else { for(i in 1:4){ frame() } }
+
+    } else {
+      ## total CR: no allele-specific SCNA deconstruction, but draw the SSNV density panels
+      ## (point-mutation VAF, multiplicity, and clonal-SSNV CCF) from the total-CN SSNV fit.
+      ## The "SSNVs on subclonal SCNAs" panel stays blank (no allele-resolved subclonal model).
+      ## Cell budget for this branch is 11 (the 5x6 mode grid); keep it balanced with frames.
+      if( !is.null(segobj[["mode.res"]][["modeled.muts"]][[i]]) && !all(is.na(segobj[["mode.res"]][["modeled.muts"]][[i]][,"ccf_hat"])) )
+      {
+         mut.cn.dat <- segobj[["mut.cn.dat"]]
+         modeled <- segobj[["mode.res"]][["modeled.muts"]][[i]]
+         modeled.mut.dat <- cbind(mut.cn.dat, modeled)
+         max_SSNVs_plot = 500
+
+         for(k in 1:7){ frame() }
+       ## 2 plots: point-mutation VAF + multiplicity
+         PlotSomaticMutDensities(modeled.mut.dat, segobj, i, mode.colors[i], min.cov=3, max_SSNVs_plot=max_SSNVs_plot, verbose=verbose)
+       ## 2 plots: clonal-SSNV CCF + (blank) SSNVs-on-subclonal-SCNA
+         plot_SSNV_on_subclonal_SCNA_CCF_summaries(modeled.mut.dat, segobj, i, min.cov=3, max_SSNVs_plot=max_SSNVs_plot, verbose=verbose)
+      }
+      else { for(k in 1:11){ frame() } }
     }
-    else { for(i in 1:4){ frame() } }
   }  ## modes
 
 }

@@ -98,7 +98,12 @@ PowerCalc <- function(n, eps, fdr, delta, SSNV_model)
 
    A = f_skew * delta * rho
    B = (1-f_skew * delta) * rho
-  
+   ## delta==0 gives A==0 (and rounding can give B<=0), which would make lbeta() NaN. Floor
+   ## to a tiny positive value: the beta-binomial then concentrates at 0 alt reads, i.e. power
+   ## ~0, which is the correct limit for an undetectable (zero allele-fraction) state.
+   A[A <= 0] = .Machine$double.eps
+   B[B <= 0] = .Machine$double.eps
+
    p1 <- d_beta_binom(c(0:n), A, B, n )
    pow <- 1 - sum(p1[c(1:(ks - 1))]) + cval * p1[ks - 1]
   
@@ -112,7 +117,9 @@ PowerCalc_for_single_read = function( n, delta, SSNV_model )
 
    A = f_skew * delta * rho
    B = (1-f_skew * delta) * rho
-  
+   A[A <= 0] = .Machine$double.eps   ## keep lbeta() finite at delta==0 (power -> 0)
+   B[B <= 0] = .Machine$double.eps
+
    p1 <- d_beta_binom(0, A, B, n ) ## prob of observing 0 reads
    pow <- 1 - p1
 #   if( pow < 0 ) { pow = 0 }  ## round error

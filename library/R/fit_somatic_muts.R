@@ -82,20 +82,31 @@ FitPPModeSomaticMuts <- function(
 
   N_SSNV = nrow(mut.cn.dat)
 
-  total.clonal.mut.tab = total_get_muts_nearest_clonal_scna(mut.cn.dat, SCNA_model[["tot.seg.q.tab"]], SCNA_model[["kQ"]])
+  total.clonal.mut.tab = total_get_muts_nearest_clonal_scna(mut.cn.dat, SCNA_model[["seg.q.tab"]], SCNA_model[["kQ"]])
   colnames(total.clonal.mut.tab) = c("total_q_hat")
   allelic.clonal.mut.tab = matrix(NA, nrow=N_SSNV, ncol=3)
   colnames(allelic.clonal.mut.tab) = c("q_hat", "HS_q_hat_1", "HS_q_hat_2")
 
-  missing.AS.seg.ix = apply( is.na(mut.cn.dat[,c("A1.ix", "A2.ix")]), 1, any )
-  if( any(!missing.AS.seg.ix))
-  {
-     allelic.clonal.mut.tab[!missing.AS.seg.ix,] = allelic_get_muts_nearest_clonal_scna(mut.cn.dat[!missing.AS.seg.ix,, drop=FALSE], SCNA_model[["seg.q.tab"]], SCNA_model[["kQ"]])
+  if (("A1.ix" %in% colnames(mut.cn.dat)) && ("A2.ix" %in% colnames(mut.cn.dat))) {
+    missing.AS.seg.ix = apply( is.na(mut.cn.dat[,c("A1.ix", "A2.ix")]), 1, any )
+    if( any(!missing.AS.seg.ix))
+    {
+       allelic.clonal.mut.tab[!missing.AS.seg.ix,] = allelic_get_muts_nearest_clonal_scna(mut.cn.dat[!missing.AS.seg.ix,, drop=FALSE], SCNA_model[["seg.q.tab"]], SCNA_model[["kQ"]])
+    }
   }
 
 #  clonal.mut.tab = get_muts_nearest_clonal_scna(mut.cn.dat, seg.q.tab, SSNV_model[["kQ"]])
 
   mut.modeled.cn = cbind(allelic.clonal.mut.tab, total.clonal.mut.tab, subclonal.mut.tab, "clonal_scna_mut_ix"=clonal_scna_mut_ix)
+
+  ## Total-CR muts have no allele-specific modal CN, so allelic.clonal.mut.tab leaves q_hat NA.
+  ## Use the total-CN modal call (total_q_hat) as q_hat so the modeled.muts carried into the
+  ## ABS MAF and the SSNV plot panels (VAF / multiplicity / CCF) treat q_hat uniformly across
+  ## modes. Gated on the absence of allele-specific seg indices => allelic runs are unchanged.
+  if (!all(c("A1.ix", "A2.ix") %in% colnames(mut.cn.dat))) {
+    na.q = is.na(mut.modeled.cn[, "q_hat"])
+    mut.modeled.cn[na.q, "q_hat"] = mut.modeled.cn[na.q, "total_q_hat"]
+  }
 
   fit_res = fit_SSNV_model( cbind(mut.cn.dat, mut.modeled.cn), mode_info, SSNV_model, subclonal_scna_tab, scna_log_ccf_dens )
   som_theta_q_map = fit_res$som_theta_Q_MAP

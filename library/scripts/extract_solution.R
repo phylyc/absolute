@@ -20,7 +20,7 @@ option_list <- list(
   make_option("--sample", type = "character", default = NULL, help = "sample name [required]", metavar = "string"),
   make_option("--rdata", type = "character", default = NULL, help = "Path to rdata file of Absolute output [required]", metavar = "string"),
   make_option("--copy_num_type", type = "character", default = "allelic", help = "type: allelic or total [default= %default]", metavar = "string"),
-  make_option("--genome_build", type = "character", default = "hg19", help = "build of the genome: hg18, hg19, hg38, mm9 [default= %default]", metavar = "string"),
+  make_option("--genome_build", type = "character", default = "hg19", help = "build of the genome: hg18, hg19, hg38, mm9, mm10 [default= %default]", metavar = "string"),
   make_option("--pkg_dir", type = "character", default = ".", help = "package directory", metavar = "string")
 )
 
