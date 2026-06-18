@@ -187,23 +187,37 @@ RunAbsolute = function(seg.dat.fn, primary.disease, platform, sample.name, resul
   # }
   
   if (is.na(mode.res[["mode.flag"]])) {
-    ## check for MAF describing somatic mutations
+    ## check for MAF (or VCF) describing somatic mutations
     maf = NULL
-    if ((!is.na(maf.fn)) && (file.exists(maf.fn))) {
-      maf = read.delim(maf.fn, row.names = NULL, stringsAsFactors = FALSE, 
-                        check.names = FALSE, na.strings = c("NA", "---"),
-                        blank.lines.skip=TRUE, comment.char="#")
-    } else {
-       print(paste("MAF file: ", maf.fn, " not found.", sep = ""))
-    }
-    
     indel.maf = NULL
-    if (!is.na(indel.maf.fn) && file.exists(indel.maf.fn)) {
-      indel.maf = read.delim(indel.maf.fn, row.names = NULL, stringsAsFactors = FALSE, 
-                        check.names = FALSE, na.strings = c("NA", "---"),
-                        blank.lines.skip=TRUE, comment.char="#")
+    if ((!is.na(maf.fn)) && (file.exists(maf.fn)) && is_vcf_file(maf.fn)) {
+      ## VCF input: parse into MAF-shaped SNV + indel frames. The indel frame
+      ## takes the place of the indel.maf.fn file so it flows through the same
+      ## indel-specific filtering in classic_CreateMutCnDat().
+      print(paste("Reading VCF input: ", maf.fn, sep = ""))
+      vcf.mafs = read_vcf_as_mafs(maf.fn, tumor.sample = sample.name, verbose = verbose)
+      maf = vcf.mafs[["snv"]]
+      indel.maf = vcf.mafs[["indel"]]
+      if ((!is.null(maf)) && nrow(maf) == 0) { maf = NULL }
+      if ((!is.null(indel.maf)) && nrow(indel.maf) == 0) { indel.maf = NULL }
+      ## If the VCF carries only indels, promote them so SSNV fitting still runs.
+      if (is.null(maf) && (!is.null(indel.maf))) { maf = indel.maf; indel.maf = NULL }
     } else {
-       print(paste("Indel MAF file: ", indel.maf.fn, " not found.", sep = ""))
+      if ((!is.na(maf.fn)) && (file.exists(maf.fn))) {
+        maf = read.delim(maf.fn, row.names = NULL, stringsAsFactors = FALSE,
+                          check.names = FALSE, na.strings = c("NA", "---"),
+                          blank.lines.skip=TRUE, comment.char="#")
+      } else {
+         print(paste("MAF file: ", maf.fn, " not found.", sep = ""))
+      }
+
+      if (!is.na(indel.maf.fn) && file.exists(indel.maf.fn)) {
+        indel.maf = read.delim(indel.maf.fn, row.names = NULL, stringsAsFactors = FALSE,
+                          check.names = FALSE, na.strings = c("NA", "---"),
+                          blank.lines.skip=TRUE, comment.char="#")
+      } else {
+         print(paste("Indel MAF file: ", indel.maf.fn, " not found.", sep = ""))
+      }
     }
 
 ## find initial purity/ploidy solutions for debugger
