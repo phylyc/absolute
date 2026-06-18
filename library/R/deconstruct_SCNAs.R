@@ -72,10 +72,16 @@ deconstruct_SCNAs = function( SCNA_model, obs, allele.segs, b, delta )
    s.qs = CN_states[subclonal.ix, "qs"]  
 
    s.CCF = tree_clust[["CCF_dens"]]  [ tree_clust[["assign"]][subclonal.ix], -1, drop=FALSE]   # remove clonal bin (1)
-# compute expectation on subclonal CCFs using collapsed CCF grid 
-   ccf_grid = SCNA_model[["ccf_grid"]] 
+# compute expectation on subclonal CCFs using collapsed CCF grid
+   ccf_grid = SCNA_model[["ccf_grid"]]
    sc_ccf_grid = ccf_grid[ - SCNA_model[["clonal_CCF_bins"]] ]
-   s.E.CCF = rowSums( s.CCF * matrix( sc_ccf_grid, nrow=nrow(s.CCF), ncol=length(sc_ccf_grid), byrow=TRUE) )
+   ## A mode with no subclonal segments gives a 0-row s.CCF; building the grid matrix then warns
+   ## ("non-empty data for zero-extent matrix"). The expectation is empty in that case anyway.
+   if (nrow(s.CCF) > 0) {
+      s.E.CCF = rowSums( s.CCF * matrix( sc_ccf_grid, nrow=nrow(s.CCF), ncol=length(sc_ccf_grid), byrow=TRUE) )
+   } else {
+      s.E.CCF = numeric(0)
+   }
 
    segs_d0[subclonal.ix] =  s.qc + s.E.CCF * (s.qs - s.qc)
 
