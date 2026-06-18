@@ -1,4 +1,4 @@
-# ABSOLUTE quantification of somatic DNA alterations in human cancer
+# ABSOLUTE quantification of somatic DNA alterations in cancer
 
 ## Installation
 
@@ -43,7 +43,16 @@ See [this script](https://github.com/phylyc/somatic_workflow/blob/master/python/
 
 ``--maf``: somatic SNV table with functional annotations (e.g. output of GATK Oncotator or Funcotator). Note that no entry in the table cells can be longer than ~1000 characters.
 
-```--indel_maf```: somatic INDEL table with functional annotations (output of GATK Oncotator or Funcotator)
+Alternatively, ``--maf`` accepts a **VCF file** (`.vcf`, `.vcf.gz`, or `.vcf.bgz`). The VCF is parsed directly into the internal mutation table, so a separate ``--indel_maf`` is not needed — SNVs and indels are detected automatically from the REF/ALT alleles. Requirements:
+- A `#CHROM` header line and a per-sample `FORMAT` genotype column.
+- Tumor allelic depths read from `FORMAT/AD` (`ref,alt`), with `RO`+`AO` (freebayes) and `AF`+`DP` as fallbacks.
+- Only `PASS` / unfiltered (`.`) records are kept.
+- For multi-sample VCFs (e.g. tumor/normal), the tumor genotype column is selected from the `##tumor_sample=` header (Mutect2) if present, otherwise from the ``--sample`` value; a single-sample VCF is used as-is.
+- Chromosome names must match the segmentation table (e.g. `1` vs `chr1`), otherwise mutations are silently dropped during segment mapping.
+
+Functional annotations (gene, variant classification, protein change, COSMIC counts) are not available from a bare VCF, so the affected report fields are left blank; the purity/ploidy/CCF fit is unaffected.
+
+```--indel_maf```: somatic INDEL table with functional annotations (output of GATK Oncotator or Funcotator). Ignored when ``--maf`` is a VCF.
 
 ```--gender```: biological sex for ploidy assumptions; {"F", "Female", "female", "XX", "M", "Male", "male", "XY"}
 
@@ -51,9 +60,9 @@ See [this script](https://github.com/phylyc/somatic_workflow/blob/master/python/
 
 ```--tau```: ploidy for force-calling
 
-```--copy_num_type```: {"allelic", "total"}; determines purity/ploidy based on allelic or total copy ratios. Note: "total" is currently not supported.
+```--copy_num_type```: {"allelic", "total"}; determines purity/ploidy based on allelic or total copy ratios. Both modes are supported.
 
-```--genome_build```: This package currently supports {hg18, hg19, hg38}
+```--genome_build```: This package currently supports human {hg18, hg19, hg38} and mouse {mm9, mm10, mm39}
 
 ```--pkg_dir```: path to folder in which the library folder lies.
 
@@ -81,9 +90,9 @@ See [this script](https://github.com/phylyc/somatic_workflow/blob/master/python/
 
 #### Optional
 
-```--copy_num_type```: {"allelic", "total"}; determines purity/ploidy based on allelic or total copy ratios. Note: "total" is currently not supported.
+```--copy_num_type```: {"allelic", "total"}; determines purity/ploidy based on allelic or total copy ratios. Both modes are supported.
 
-```--genome_build```: This package currently supports {hg18, hg19, hg38}
+```--genome_build```: This package currently supports human {hg18, hg19, hg38} and mouse {mm9, mm10, mm39}
 
 ```--pkg_dir```: path to folder in which the library folder lies.
 
