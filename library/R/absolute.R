@@ -309,7 +309,7 @@ RunAbsolute = function(seg.dat.fn, primary.disease, platform, sample.name, resul
     AbsoluteResultPlot(sample.pdf.fn, seg.dat, chr.arms.dat)
   } else {
     if (verbose) {
-      print("Mode flag is NA, not generating plots. Sample has failed ABSOLUTE")
+      print(paste0("Mode flag is ", seg.dat[["mode.res"]][["mode.flag"]], ". Sample has failed ABSOLUTE"))
     }    
   }
   

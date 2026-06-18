@@ -21,6 +21,7 @@ total_make_seg_obj = function(segs_tab, gender, filter_segs=FALSE, min_probes=NA
   if(is.F) { gender = "Female" }
 
   if( verbose ) { print(paste("Detected ", gender, " gender.", sep="")) }
+
   segs_tab = filter_sex_chromosomes( segs_tab, gender, verbose=verbose )
 
   # if( !is.na(gender) && gender %in% c( "Male", "Female") )
@@ -55,18 +56,18 @@ total_make_seg_obj = function(segs_tab, gender, filter_segs=FALSE, min_probes=NA
   # copy_num = 2^(segs_tab[, "tau"] )
   copy_num = segs_tab[, "tau"] / 2
   
-  # ix = copy_num > 5.0
-  # if (verbose) {
-  #   print( paste( "Capping ", sum(ix), " segs at tau = 5.0", sep=""))
-  # }
-  # copy_num[ix] = 5.0
+  ix = copy_num > 25.0
+  if (verbose) {
+    print( paste( "Capping ", sum(ix), " segs at tCR = 5.0", sep=""))
+  }
+  copy_num[ix] = 25.0
   
   seg_sigma_num = 0.1  ## TODO - get rid of this - not used in downstream model - but crashes filtering code if missing
   seg_sigma =  seg_sigma_num / sqrt(as.numeric(segs_tab[,"n_probes"]))
 #  seg_sigma = rep(NA, nrow(segs_tab))  ## calculate later in SCNA_model
   seg.ix <- cbind(c(1:nrow(segtab)))
   colnames(seg.ix) = c("seg.ix")
-  
+
   segtab = cbind(segtab, length, copy_num, seg_sigma, seg.ix)
 
   if (filter_segs) {
@@ -89,7 +90,7 @@ total_make_seg_obj = function(segs_tab, gender, filter_segs=FALSE, min_probes=NA
   total.seg.dat <- cbind(total.seg.dat, W)
   seg_dat$total.seg.dat = total.seg.dat
 
-  return(seg_dat)  
+  return(seg_dat)
 }
 
 total_extract_sample_obs = function(seg.obj)
