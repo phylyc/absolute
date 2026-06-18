@@ -66,6 +66,32 @@ ClassifySamplesWgdByProfile <- function( as.seg.dat, SCNA_model )
     if (sum(high.m[c(4:length(high.m))]) > 0.4) {
         wgd <- 2
     }
-    
+
+    return(wgd)
+}
+
+
+## Total-CN analog of ClassifySamplesWgdByProfile.
+## The allelic version above relies on homologous allele pairs (seg.ix appearing twice),
+## which total copy-ratio data does not have. Here we call WGD from the length-weighted
+## distribution of modal *total* copy number across segments: a non-doubled genome is
+## mostly at total CN 2, while a whole-genome-doubled genome carries most of its mass at
+## total CN >= 3 (typically 4). Thresholds mirror the allelic version's structure.
+ClassifyTotalSamplesWgdByProfile <- function( obs, SCNA_model )
+{
+    seg.q.tab <- SCNA_model[["seg.q.tab"]]
+    if (is.null(seg.q.tab)) { return(0) }
+
+    w <- as.numeric(obs[["W"]])
+    w <- w / sum(w)
+    modal_cn <- apply(seg.q.tab, 1, which.max) - 1   ## 0-based total CN state
+
+    frac_ge_3 <- sum(w[modal_cn >= 3])
+    frac_ge_5 <- sum(w[modal_cn >= 5])
+
+    wgd <- 0
+    if (frac_ge_3 > 0.5) { wgd <- 1 }
+    if (frac_ge_5 > 0.4) { wgd <- 2 }
+
     return(wgd)
 }

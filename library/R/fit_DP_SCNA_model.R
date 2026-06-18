@@ -425,7 +425,7 @@ get_neg_and_amp_Prs = function( obs, b, delta, SCNA_model )
 segs_in_comb_domain = function( obs, b, delta, SCNA_model )
 {
    comb_A = GetCopyRatioComb(SCNA_model[["kQ"]], delta, b, obs[["error.model"]])
-   comb_X = GetCopyRatioComb(SCNA_model[["kQ"]], delta, b/2, obs[["error.model"]])
+   comb_X = get_male_sex_chr_comb(SCNA_model[["kQ"]], delta, b, obs)
 #   male_X = obs[["male_X"]]
    male_X = obs[["normal_allele_count"]] == 1
 
@@ -545,7 +545,7 @@ calc_mode_seg_tabs = function( seg.obj, SCNA_model, b, delta, chr.arms.dat )
 
      SCNA_model[["WGD"]] = ClassifySamplesWgdByProfile( seg.obj[["as.seg.dat"]], SCNA_model )
    } else {
-     SCNA_model[["WGD"]] = ClassifySamplesWgdByProfile( seg.obj[["seg.dat"]], SCNA_model )
+     SCNA_model[["WGD"]] = ClassifyTotalSamplesWgdByProfile( obs, SCNA_model )
    }
 
    SCNA_model[["chr.arm.tab"]] <- CalcChrArmDistr(seg.obj, SCNA_model[["seg.q.tab"]], chr.arms.dat)

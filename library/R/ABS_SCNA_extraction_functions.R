@@ -458,7 +458,20 @@ get_GENCODE_transcript_GRs = function( genelist=NA, dropY=TRUE, genome_build="hg
    # data( "gencode.hg19.genes", package="ABSOLUTE" )   # provides GENCODE
    if ( genome_build == "hg19") { load(file.path(pkg_dir, "data", "gencode.hg19.genes.RData")) }
    else if ( genome_build == "hg38") { load(file.path(pkg_dir, "data", "gencode.hg38.genes.RData")) }
-   else {}
+   else if ( genome_build %in% c("mm9", "mm10") ) {
+      ## Mouse gene models are not shipped with the package. To enable gene-level SCNA
+      ## annotation during extraction, drop a file named gencode.<build>.genes.RData into
+      ## library/data/ containing a data.frame 'gencode' with columns HGNC, Chr, Start, End
+      ## (one row per gene; same format as gencode.hg19.genes.RData).
+      gencode.fn = file.path(pkg_dir, "data", paste0("gencode.", genome_build, ".genes.RData"))
+      if ( !file.exists(gencode.fn) ) {
+         stop("Gene-level annotation for ", genome_build, " requires ", basename(gencode.fn),
+              " (a data.frame 'gencode' with columns HGNC, Chr, Start, End), which is not ",
+              "shipped. Add it to library/data/, or skip gene-level annotation for mouse.")
+      }
+      load(gencode.fn)
+   }
+   else { stop("Unsupported genome_build for gene annotation: ", genome_build) }
    txdb = gencode
 
    if( is.na(genelist) ) { genelist = unique(txdb[,"HGNC"]) }
@@ -910,7 +923,14 @@ genotype_transcript_SCNAs_in_called_ABS_files = function( ABS_BASE_DIR, regs, SC
 
 call_genome_wide_ABSOLUTE_SCNAs = function( ABS.dat, SCNA_thresholds )
 {
-   segtab = AllelicGetAbsSegDat(ABS.dat)
+   ## Use the mode-appropriate abs-seg builder. AllelicGetAbsSegDat reads allele-resolved
+   ## "tot.*" model fields that don't exist in total CR mode; total_get_abs_seg_dat provides
+   ## the total-CN equivalents (rescaled_total_cn / corrected_total_cn / HZ).
+   if (!is.null(ABS.dat[["copy_num_type"]]) && ABS.dat[["copy_num_type"]] == "total") {
+      segtab = total_get_abs_seg_dat(ABS.dat)
+   } else {
+      segtab = AllelicGetAbsSegDat(ABS.dat)
+   }
 
    seg_amp_focality = compute_focality_score(segtab, "amp" )
    seg_del_focality = compute_focality_score(segtab, "del" )

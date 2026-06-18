@@ -21,7 +21,8 @@ GenomeHscrSegPlot <- function(allele.segs, seg_colors, y.lab, y.min, y.max, chr.
   chr.lens <- GetChrLens(chr.arms.dat, x=TRUE, y=TRUE)
   chr.lens <- as.numeric(chr.lens)
   chr.w <- chr.lens / sum(chr.lens)
-  
+  n_auto <- n_autosomes_from_chr_arms(chr.arms.dat)   ## genome-aware (22 human, 19 mouse)
+
   plot(0, type = "n", bty = "n", xlim = c(0, 1), ylim = c(y.min, y.max),
        xlab = "", ylab = y.lab, main = "", xaxt = "n", yaxt=yaxt)
 
@@ -29,7 +30,7 @@ GenomeHscrSegPlot <- function(allele.segs, seg_colors, y.lab, y.min, y.max, chr.
   
   if( label.chrs )
   {
-     lab.vals = chromosome_labels(x=TRUE, y=TRUE)
+     lab.vals = chromosome_labels(x=TRUE, y=TRUE, n_auto=n_auto)
      ww <- as.vector(rbind(chr.w, chr.w)) / 2
      chr.mids <- cumsum(ww)[(c(1:length(ww)) - 1) %% 2 == 0]
 
@@ -72,7 +73,7 @@ GenomeHscrSegPlot <- function(allele.segs, seg_colors, y.lab, y.min, y.max, chr.
     {
       seg.crds <- as.numeric(c(allele.segs[s, "Start.bp"], allele.segs[s, "End.bp"]))
   #    chr <- as.integer(allele.segs[s, "Chromosome"])
-      chr = chr2int(allele.segs[s, "Chromosome"])
+      chr = chr2int(allele.segs[s, "Chromosome"], n_auto=n_auto)
       genome.crds <- chr.offsets[chr] + seg.crds / chr.lens[chr] * chr.w[chr]
       means <- c(allele.segs[s, "A1.Seg.CN"],
                  allele.segs[s, "A2.Seg.CN"], NA)
@@ -109,9 +110,9 @@ GenomeHscrSegPlot <- function(allele.segs, seg_colors, y.lab, y.min, y.max, chr.
      {
         seg.crds <- as.numeric(c(total.seg.dat[s, "Start.bp"], total.seg.dat[s, "End.bp"]))
         # chr <- as.integer(total.seg.dat[s, "Chromosome"])
-        chr = chr2int(total.seg.dat[s, "Chromosome"])
+        chr = chr2int(total.seg.dat[s, "Chromosome"], n_auto=n_auto)
         genome.crds <- chr.offsets[chr] + seg.crds / chr.lens[chr] * chr.w[chr]
-        tot.CR = total.seg.dat[s, "copy_num"]/2
+        tot.CR = total.seg.dat[s, "copy_num"]   ## already the total copy ratio (tau / germline ploidy)
 
         min.w.d = 0.015/2 
         if( plot.seg.sem )
@@ -234,7 +235,7 @@ PlotHscrAndSeghist <- function(allele.segs, seg_colors, chr.arms.dat, max_CR, mi
     }
     else 
     {
-       seg_means = total.seg.dat[,"copy_num"]/2
+       seg_means = total.seg.dat[,"copy_num"]   ## already the total copy ratio
        seg_W = total.seg.dat[,"W"]
        comb.ab=NA
        seg_colors = tot.seg.colors

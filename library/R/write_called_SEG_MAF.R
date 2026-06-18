@@ -48,6 +48,11 @@ WriteIGVSegtab <- function(segobj, seg, s_name, out_dir) {
   # Write IGV segtab:
   ploidy = segobj[["mode.res"]][["mode.tab"]][1, "genome mass"]
   seg[, "sample"] = s_name
+  ## Allelic abs_seg carries an allele-summed "rescaled_total_cn". Total CR abs_seg
+  ## (total_get_abs_seg_dat) does not, so fall back to the expected absolute copy number.
+  if (!("rescaled_total_cn" %in% colnames(seg)) && ("expected_cn" %in% colnames(seg))) {
+    seg[, "rescaled_total_cn"] = seg[, "expected_cn"]
+  }
   seg[, "Segment_Mean"] = log2(pmax(seg[, "rescaled_total_cn"], 1e-4)) - log2(ploidy)
 
   X.ix = (seg[,"Chromosome"] == "X")
@@ -72,6 +77,10 @@ WriteMAF <- function(called_segobj, seg, out_fn) {
 
   SSNV_ccf_dens = called_segobj[["mode.res"]][["SSNV.ccf.dens"]][1,,]
   maf = cbind(mut_dat, SSNV_ccf_dens)
+  ## Total-CR mut.cn.dat can carry a duplicated T.seg.ix (the dispatched GetMutSegIx already
+  ## returns T.seg.ix, which is then re-bound explicitly); drop duplicate-named columns so the
+  ## written MAF is clean and foverlaps below does not choke on duplicate keys.
+  maf = maf[, !duplicated(colnames(maf)), drop=FALSE]
   # revert to standard MAF
   cols <- colnames(maf)
   if ("ref" %in% cols) { colnames(maf)[which(cols %in% c("ref"))] <- c("t_ref_count") }
@@ -79,25 +88,35 @@ WriteMAF <- function(called_segobj, seg, out_fn) {
   if ("dbSNP" %in% cols) { colnames(maf)[which(cols %in% c("dbSNP"))] <- c("dbSNP_Val_Status") }
   if ("sample" %in% cols) { colnames(maf)[which(cols %in% c("sample"))] <- c("Tumor_Sample_Barcode") }
 
-  # Add local allelic CN to variants:
+  # Add local CN to variants:
   # Convert to data.table and ensure maf has a start and end position (required by foverlaps)
   maf_dt <- as.data.table(maf)
-  seg_dt <- as.data.table(seg[, c("Chromosome", "Start.bp", "End.bp", "rescaled.cn.a1", "rescaled.cn.a2")])
-
-  # Ensure Chromosome is character in both tables
   maf_dt[, Chromosome := as.character(Chromosome)]
-  seg_dt[, Chromosome := as.character(Chromosome)]
-
-  # Set keys for fast binary search join
   setkey(maf_dt, Chromosome, Start_position, End_position)
+
+  ## Allelic abs_seg carries allele-specific rescaled CN (a1/a2). Total CR abs_seg has only a
+  ## total copy number, so annotate a single local_total_cn (modal absolute CN) instead. Either
+  ## way the per-mutation CCF / multiplicity / clonality columns above are already in the MAF.
+  if (all(c("rescaled.cn.a1", "rescaled.cn.a2") %in% colnames(seg))) {
+    seg_cols <- c("rescaled.cn.a1", "rescaled.cn.a2")
+    new_cols <- c("local_cn_a1", "local_cn_a2")
+  } else if ("modal_cn" %in% colnames(seg)) {
+    seg_cols <- "modal_cn"
+    new_cols <- "local_total_cn"
+  } else {
+    seg_cols <- "copy_ratio"
+    new_cols <- "local_total_cr"
+  }
+
+  seg_dt <- as.data.table(seg[, c("Chromosome", "Start.bp", "End.bp", seg_cols)])
+  seg_dt[, Chromosome := as.character(Chromosome)]
   setkey(seg_dt, Chromosome, Start.bp, End.bp)
 
   # Perform the overlap join
   new_maf <- data.table::foverlaps(maf_dt, seg_dt, by.x = c("Chromosome", "Start_position", "End_position"), type = "within", nomatch = 0L)
-  data.table::setnames(new_maf, old = "rescaled.cn.a1", new = "local_cn_a1")
-  data.table::setnames(new_maf, old = "rescaled.cn.a2", new = "local_cn_a2")
+  data.table::setnames(new_maf, old = seg_cols, new = new_cols)
   new_maf[, c("Start.bp", "End.bp") := NULL]
-  setcolorder(new_maf, c(names(maf), c("local_cn_a1", "local_cn_a2")))
+  setcolorder(new_maf, c(names(maf), new_cols))
 
   write.table(file=out_fn, new_maf, row.names=FALSE, sep="\t", quote=FALSE)
 }

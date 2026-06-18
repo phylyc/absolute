@@ -215,7 +215,15 @@ PlotModes <- function(segobj, chr.arms.dat, n.print = NA, called.mode.ix=NA, ver
 
    ## SCNA ev summary
     if (plot.total.CN) {
-      frame()
+      ## total CR: show the chr-arm minimum-event score per WGD hypothesis (lower = preferred).
+      arm_ev_result = SCNA_model[["SCNA_minev_chrarm_result"]]
+      e_wgd = arm_ev_result[["e_wgd"]]
+      if (!is.null(e_wgd) && all(is.finite(e_wgd))) {
+        bcols = rep("grey70", length(e_wgd)); bcols[which.min(e_wgd)] = "firebrick"
+        barplot( e_wgd, names=c("WGD0","WGD1","WGD2")[seq_along(e_wgd)],
+                 ylab="chr-arm events (lower=preferred)", col=bcols )
+        title(paste0("selected WGD", arm_ev_result[["WGD"]]), line=0.5, cex.main=0.9)
+      } else { frame() }
       frame()
     } else {
       arm_ev_result = SCNA_model[["SCNA_minev_chrarm_result"]]
@@ -276,7 +284,24 @@ PlotModes <- function(segobj, chr.arms.dat, n.print = NA, called.mode.ix=NA, ver
       else { for(i in 1:4){ frame() } }
 
     } else {
-      for(i in 1:11){ frame() }
+      ## total CR: no allele-specific SCNA deconstruction, but draw the SSNV density panels
+      ## (point-mutation VAF, multiplicity, and clonal-SSNV CCF) from the total-CN SSNV fit.
+      ## The "SSNVs on subclonal SCNAs" panel stays blank (no allele-resolved subclonal model).
+      ## Cell budget for this branch is 11 (the 5x6 mode grid); keep it balanced with frames.
+      if( !is.null(segobj[["mode.res"]][["modeled.muts"]][[i]]) && !all(is.na(segobj[["mode.res"]][["modeled.muts"]][[i]][,"ccf_hat"])) )
+      {
+         mut.cn.dat <- segobj[["mut.cn.dat"]]
+         modeled <- segobj[["mode.res"]][["modeled.muts"]][[i]]
+         modeled.mut.dat <- cbind(mut.cn.dat, modeled)
+         max_SSNVs_plot = 500
+
+         for(k in 1:7){ frame() }
+       ## 2 plots: point-mutation VAF + multiplicity
+         PlotSomaticMutDensities(modeled.mut.dat, segobj, i, mode.colors[i], min.cov=3, max_SSNVs_plot=max_SSNVs_plot, verbose=verbose)
+       ## 2 plots: clonal-SSNV CCF + (blank) SSNVs-on-subclonal-SCNA
+         plot_SSNV_on_subclonal_SCNA_CCF_summaries(modeled.mut.dat, segobj, i, min.cov=3, max_SSNVs_plot=max_SSNVs_plot, verbose=verbose)
+      }
+      else { for(k in 1:11){ frame() } }
     }
   }  ## modes
 

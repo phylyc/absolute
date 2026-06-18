@@ -52,10 +52,18 @@ total_make_seg_obj = function(segs_tab, gender, filter_segs=FALSE, min_probes=NA
   colnames(segtab) = c("Chromosome", "Start.bp", "End.bp", "n_probes", "length", "tau", "seg_sigma")
   
   length = segtab[, "End.bp"] - segtab[, "Start.bp"]
-  ## Convert from base 2 log
-  # copy_num = 2^(segs_tab[, "tau"] )
-  copy_num = segs_tab[, "tau"] / 2
-  
+
+  ## Germline (normal) total copy number per segment: 2 for autosomes and female X, 1 for male
+  ## X/Y. (Female Y is already dropped by filter_sex_chromosomes.) The input "tau" is the total
+  ## copy NUMBER (tau = chr_ploidy * 2^log2CR; germline tau == chr_ploidy), so dividing by the
+  ## germline ploidy yields the TOTAL COPY RATIO -- ~1 across all chromosomes with no alteration,
+  ## including male X/Y. For autosomes / female X this is identical to the previous tau/2.
+  chr_ploidy = rep(2, nrow(segtab))
+  if (is.M) {
+    chr_ploidy[ segtab[, "Chromosome"] %in% c("X", "Y") ] = 1
+  }
+  copy_num = segs_tab[, "tau"] / chr_ploidy
+
   ix = copy_num > 25.0
   if (verbose) {
     print( paste( "Capping ", sum(ix), " segs at tCR = 5.0", sep=""))
@@ -72,6 +80,8 @@ total_make_seg_obj = function(segs_tab, gender, filter_segs=FALSE, min_probes=NA
 
   if (filter_segs) {
     seg_dat$segtab = FilterSegs(segtab, min_probes=min_probes, max_sd=max_sd)$seg.info
+  } else {
+    seg_dat$segtab = segtab
   }
 
   W = as.numeric(seg_dat$segtab[,"length"])
@@ -81,13 +91,11 @@ total_make_seg_obj = function(segs_tab, gender, filter_segs=FALSE, min_probes=NA
 
   seg_dat$error_model = list()
 
-## create an object for total CN analysis
-  total.seg.dat =  segtab[, c("Chromosome", "Start.bp", "End.bp", "n_probes", "length", "tau", "seg_sigma", "seg.ix")]
-  colnames(total.seg.dat) = c("Chromosome", "Start.bp", "End.bp", "n_probes", "length", "copy_num", "seg_sigma", "seg.ix")
-
-  W <- as.numeric(total.seg.dat[, "length"])
-  W <- W / sum(W)
-  total.seg.dat <- cbind(total.seg.dat, W)
+## create an object for total CN analysis.
+## Built from the (possibly filtered) seg_dat$segtab so its rows stay consistent with the
+## modeled segments. "copy_num" is the TOTAL COPY RATIO (tau / germline ploidy, ~1 at germline
+## for every chromosome), the same quantity the model fits; downstream plots show it directly.
+  total.seg.dat = seg_dat$segtab[, c("Chromosome", "Start.bp", "End.bp", "n_probes", "length", "copy_num", "seg_sigma", "seg.ix", "W")]
   seg_dat$total.seg.dat = total.seg.dat
 
   return(seg_dat)

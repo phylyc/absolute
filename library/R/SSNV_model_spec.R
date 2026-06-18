@@ -139,8 +139,15 @@ log_density_alt_cond_coverage = function( alt, cov, f, SSNV_model)
    B = (1 - f_skew * f) * rho
    B[B < 0] = 0.0    ## fix rounding errors leading to small negative numbers
 
+   ## A==0 (at f==0) and B==0 (at f==1, or rounding) would make lbeta() in d_beta_binom
+   ## return NaN. Those columns are replaced by the dbinom error model just below, so floor
+   ## the beta params to a tiny positive value purely to keep lbeta finite. For f in (0,1)
+   ## both A and B are already comfortably positive, so the kept columns are unchanged.
+   A[A <= 0] = .Machine$double.eps
+   B[B <= 0] = .Machine$double.eps
+
    l_dens = matrix( d_beta_binom( alt, A, B, cov, log=TRUE ), nrow=length(alt), ncol=length(f), byrow=FALSE)
-  
+
    l_dens[ ,f==0.0 ] = dbinom( alt, cov, eps/3, log=TRUE )
    l_dens[ ,f==1.0 ] = dbinom( alt, cov, 1-eps/3, log=TRUE )
 

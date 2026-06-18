@@ -99,6 +99,15 @@ FitPPModeSomaticMuts <- function(
 
   mut.modeled.cn = cbind(allelic.clonal.mut.tab, total.clonal.mut.tab, subclonal.mut.tab, "clonal_scna_mut_ix"=clonal_scna_mut_ix)
 
+  ## Total-CR muts have no allele-specific modal CN, so allelic.clonal.mut.tab leaves q_hat NA.
+  ## Use the total-CN modal call (total_q_hat) as q_hat so the modeled.muts carried into the
+  ## ABS MAF and the SSNV plot panels (VAF / multiplicity / CCF) treat q_hat uniformly across
+  ## modes. Gated on the absence of allele-specific seg indices => allelic runs are unchanged.
+  if (!all(c("A1.ix", "A2.ix") %in% colnames(mut.cn.dat))) {
+    na.q = is.na(mut.modeled.cn[, "q_hat"])
+    mut.modeled.cn[na.q, "q_hat"] = mut.modeled.cn[na.q, "total_q_hat"]
+  }
+
   fit_res = fit_SSNV_model( cbind(mut.cn.dat, mut.modeled.cn), mode_info, SSNV_model, subclonal_scna_tab, scna_log_ccf_dens )
   som_theta_q_map = fit_res$som_theta_Q_MAP
   post_prs = fit_res$post_Prs

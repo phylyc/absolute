@@ -10,7 +10,6 @@
 
 ApplyKaryotypeModel <- function(mode.res, model.id, train.obj, apply_karyotype_model=FALSE, verbose=FALSE) {
     clust.res <- train.obj[[model.id]]$clust_res
-    q <- dim(mode.res[["theta.q.tab"]])[2]
     m <- nrow(mode.res[["mode.tab"]])
     max.q <- dim(clust.res[["M_clust"]])[3]
     
