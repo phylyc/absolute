@@ -458,7 +458,7 @@ get_GENCODE_transcript_GRs = function( genelist=NA, dropY=TRUE, genome_build="hg
    # data( "gencode.hg19.genes", package="ABSOLUTE" )   # provides GENCODE
    if ( genome_build == "hg19") { load(file.path(pkg_dir, "data", "gencode.hg19.genes.RData")) }
    else if ( genome_build == "hg38") { load(file.path(pkg_dir, "data", "gencode.hg38.genes.RData")) }
-   else if ( genome_build %in% c("mm9", "mm10") ) {
+   else if ( genome_build %in% c("mm9", "mm10", "mm39") ) {
       ## Mouse gene models are not shipped with the package. To enable gene-level SCNA
       ## annotation during extraction, drop a file named gencode.<build>.genes.RData into
       ## library/data/ containing a data.frame 'gencode' with columns HGNC, Chr, Start, End

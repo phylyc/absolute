@@ -1,6 +1,6 @@
 
 ## Number of autosomes for a given chr-arm table. We assume the arm table lists the
-## autosomes first, then X, then Y (true for the hg18/hg19/hg38 and mm9/mm10 reference
+## autosomes first, then X, then Y (true for the hg18/hg19/hg38 and mm9/mm10/mm39 reference
 ## tables shipped in library/data). So n_autosomes = (#distinct chromosomes) - 2.
 n_autosomes_from_chr_arms = function(chr.arms.dat)
 {

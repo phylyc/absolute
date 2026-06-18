@@ -44,7 +44,7 @@ RunAbsolute = function(seg.dat.fn, primary.disease, platform, sample.name, resul
   print( paste("Registering ", N_threads, " threads.", sep=""))
   registerDoMC(N_threads)
   
-  genome_build = match.arg(genome_build, c("mm9", "mm10", "hg18", "hg19", "hg38") )
+  genome_build = match.arg(genome_build, c("mm9", "mm10", "mm39", "hg18", "hg19", "hg38") )
   
  ##	   3) genome_HSCR_seg_plot.R is currently fixed to hg18 data (in genome.R)
 
@@ -58,6 +58,7 @@ RunAbsolute = function(seg.dat.fn, primary.disease, platform, sample.name, resul
   else if ( genome_build == "hg38") { chr.arms.dat.file = file.path(pkg_dir, "data", "hg38_ChrArmsDat.RData") }
   else if ( genome_build == "mm9" ) { chr.arms.dat.file = file.path(pkg_dir, "data", "mm9_ChrArmsDat.RData") }
   else if ( genome_build == "mm10" ) { chr.arms.dat.file = file.path(pkg_dir, "data", "mm10_ChrArmsDat.RData") }
+  else if ( genome_build == "mm39" ) { chr.arms.dat.file = file.path(pkg_dir, "data", "mm39_ChrArmsDat.RData") }
   else {}
 
   print(paste("Loading", chr.arms.dat.file))
