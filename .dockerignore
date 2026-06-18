@@ -1,0 +1,37 @@
+# Version control
+.git
+.gitignore
+
+# IDE / editor settings
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS metadata
+.DS_Store
+Thumbs.db
+
+# R project files not needed in image
+.Rhistory
+*.Rproj
+*.bak
+README.md
+Dockerfile
+.dockerignore
+
+# Top-level scripts (only library/ is COPY'd)
+ABSOLUTE_stub.R
+batch_exec_*.R
+make_*.R
+cut_release.sh
+deploy.sh
+install.sh
+
+# Environment / secrets
+.claude
+.env
+.env.*
+*.pem
+*.key

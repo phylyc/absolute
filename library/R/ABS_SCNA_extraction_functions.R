@@ -44,11 +44,6 @@ get_SCNA_thresholds = function( amp.CN.threshold = 7, H.amp.CN.threshold = 10 )
 
 build_gene_GR_data = function()
 {
-   #genes_FN = "refGene.hg19.20100825.sorted.txt"
-   #genes_FN = "/xchip/cga/reference/annotation/db/ucsc/hg19/gene_table.txt"
-#   genes_FN = "/xchip/gistic/variables/hg19/rg_20120227_dump.txt"
-#  gene_dat = read.delim(genes_FN, check.names=FALSE, stringsAsFactors=FALSE )
-
    data(refgene)
    gene_dat = refgene 
 
@@ -495,17 +490,6 @@ get_GENCODE_transcript_GRs = function( genelist=NA, dropY=TRUE, genome_build="hg
   
    return(gene_regs)
 }
-
-
-get_all_annotated_reg_GRs = function( )
-{
-x1 = "/xchip/cga/reference/hg19/gencode.v12.gc.txt"
-
-x2 = "/xchip/cga/reference/hg19/gencode.v12.annotation.patched_contigs.gtf"
-}
-
-
-
 
 
 
