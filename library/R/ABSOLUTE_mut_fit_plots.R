@@ -19,7 +19,7 @@ GetMutBetaDensities <- function(mut.dat, n.grid=100)
 }
 
 DrawMutBetaDensities <- function(beta.grid, pr.clonal, hz.del.flag, cols,
-                                 draw.indv=TRUE, draw.total=TRUE) {
+                                 draw.indv=TRUE, draw.total=TRUE, scale=1) {
   n.grid <- ncol(beta.grid)
   grid.vals <- seq_len(n.grid) / (n.grid + 1)
   pr.subclonal = 1-pr.clonal
@@ -59,20 +59,20 @@ DrawMutBetaDensities <- function(beta.grid, pr.clonal, hz.del.flag, cols,
     cr = col2rgb(cols[1])
     use_col = rgb(cr[1, 1], cr[2, 1], cr[3, 1], trans, maxColorValue=255)
     xx = c( grid.vals, rev(grid.vals) )
-    yy = c(rep(0, length(grid.vals)), rev( colSums(sc.grid)) )
+    yy = c(rep(0, length(grid.vals)), rev( colSums(sc.grid) * scale) )
     polygon( xx, yy, border=FALSE, col=use_col)
     #, add)
 
     cr = col2rgb(cols[2])
     use_col = rgb(cr[1, 1], cr[2, 1], cr[3, 1], trans, maxColorValue=255)
     xx = c( grid.vals, rev(grid.vals) )
-    yy = c(rep(0, length(grid.vals)), rev( colSums(clonal.grid)) )
+    yy = c(rep(0, length(grid.vals)), rev( colSums(clonal.grid) * scale) )
     polygon( xx, yy, border=FALSE, col=use_col)
     #, add)
   }
 }
 
-Mut_AF_plot = function(mut.dat, SSNV_cols, mode.color, draw.indv, draw.plot=TRUE)
+Mut_AF_plot = function(mut.dat, SSNV_cols, mode.color, draw.indv, draw.plot=TRUE, scale=1)
 {
 # not ok to filter because we are returning the result...
 #  nix = mut.dat[,"alt"]==0  # drop force-called muts
@@ -98,11 +98,11 @@ Mut_AF_plot = function(mut.dat, SSNV_cols, mode.color, draw.indv, draw.plot=TRUE
   if( draw.plot )
   {
 #     plot(0, type="n", bty="n", main="", xlab="Fraction of alternate reads", ylab="Density", 
-     plot(0, type="n", bty="n", main="", xlab="Point-mutation VAF", ylab="Density", 
-          xlim=c(0, 1), ylim=c(0, max(colSums(af_post_pr))), las=1 )
+     plot(0, type="n", bty="n", main="", xlab="Point-mutation VAF", ylab="Density",
+          xlim=c(0, 1), ylim=c(0, max(colSums(af_post_pr)) * scale), las=1 )
      hz.del.flag <- mut.dat[, "q_hat"] == 0
      DrawMutBetaDensities(af_post_pr, pr.clonal, hz.del.flag, SSNV_cols, draw.total=TRUE,
-                          draw.indv=draw.indv)
+                          draw.indv=draw.indv, scale=scale)
 
      if(!is.na(SSNV_skew)){
         msg = paste("skew = ", round(SSNV_skew,3), sep="")
@@ -124,9 +124,9 @@ Mut_AF_plot = function(mut.dat, SSNV_cols, mode.color, draw.indv, draw.plot=TRUE
 
 
 
-draw_mut_multiplicity_densities = function(mut_pr, grid, pr_clonal, pr_cryptic_SCNA, x_lim, 
-                                   xlab, cols, draw_indv=TRUE, draw_total=TRUE, 
-                                   add=FALSE, y_lim=NA) 
+draw_mut_multiplicity_densities = function(mut_pr, grid, pr_clonal, pr_cryptic_SCNA, x_lim,
+                                   xlab, cols, draw_indv=TRUE, draw_total=TRUE,
+                                   add=FALSE, y_lim=NA, scale=1)
 {  
   get_grid_combined_mut_densities = function(mut_pr, pr_clonal, grid, x_lim) 
   {
@@ -200,21 +200,21 @@ draw_mut_multiplicity_densities = function(mut_pr, grid, pr_clonal, pr_cryptic_S
      cr = col2rgb(cols[1])
      use_col = rgb(cr[1, 1], cr[2, 1], cr[3, 1], trans, maxColorValue=255)
      xx = c( mult_grid, rev(mult_grid) )
-     yy = c(rep(0, length(mult_grid)), rev( colSums(sc_dens*pr_subclonal)) )
+     yy = c(rep(0, length(mult_grid)), rev( colSums(sc_dens*pr_subclonal) * scale) )
      polygon( xx, yy, border=FALSE, col=use_col)
      #, add)
 
      cr = col2rgb(cols[2])
      use_col = rgb(cr[1, 1], cr[2, 1], cr[3, 1], trans, maxColorValue=255)
      xx = c( mult_grid, rev(mult_grid) )
-     yy = c(rep(0, length(mult_grid)), rev( colSums(clonal_dens*pr_clonal)) )
+     yy = c(rep(0, length(mult_grid)), rev( colSums(clonal_dens*pr_clonal) * scale) )
      polygon( xx, yy, border=FALSE, col=use_col)
      #, add)
    }
 }
 
 
-multiplicity_plot = function( seg.dat, mut.dat, af_post_pr, grid_mat, SSNV_cols, mode.color, draw.indv, add=FALSE, verbose=FALSE )
+multiplicity_plot = function( seg.dat, mut.dat, af_post_pr, grid_mat, SSNV_cols, mode.color, draw.indv, add=FALSE, verbose=FALSE, scale=1 )
 {
   hz.del.ix <- mut.dat[, "q_hat"] == 0
   SC_CN.ix = !is.na(mut.dat[,"H1"]) ## SSNVs on subclonal SCNAs
@@ -249,7 +249,7 @@ multiplicity_plot = function( seg.dat, mut.dat, af_post_pr, grid_mat, SSNV_cols,
   mult.xlim <- 2.5
   draw_mut_multiplicity_densities(mult_dens, mult_grid, pr.clonal, pr.cryptic.SCNA, x_lim=mult.xlim,
                           cols=SSNV_cols, xlab="Point-mutation multiplicity", draw_total=TRUE,
-                          draw_indv=draw.indv, y_lim=max(colSums(mult_dens, na.rm=TRUE)), add=add)
+                          draw_indv=draw.indv, y_lim=max(colSums(mult_dens, na.rm=TRUE)) * scale, add=add, scale=scale)
 
   abline( v=1, lty=3, lwd=0.5, col=mode.color )  ## highlight integer multiplicities
   abline( v=2, lty=3, lwd=0.5, col=mode.color )
@@ -520,7 +520,7 @@ plot_SSNVs_on_genome = function( SSNV_model, SSNV_colors, mut.dat, seg.dat, i, m
 
 
 ## External called function
-PlotSomaticMutDensities <- function(mut.dat, seg.dat, mode.ix, mode.color, min.cov=1, max_SSNVs_plot=500, verbose=FALSE)
+PlotSomaticMutDensities <- function(mut.dat, seg.dat, mode.ix, mode.color, min.cov=1, max_SSNVs_plot=500, max_SSNVs_dens=5000, verbose=FALSE)
 {
   cov <- mut.dat[, "alt"] + mut.dat[, "ref"]
   ix <- cov > min.cov & mut.dat[,"alt"] > 0
@@ -534,15 +534,29 @@ PlotSomaticMutDensities <- function(mut.dat, seg.dat, mode.ix, mode.color, min.c
     return()
   }
 
+## Downsample for the per-SNV density grids (these scale as N x grid in time and memory).
+## We only draw the pr-weighted *summed* densities at this scale, so an unbiased estimate
+## is recovered by scaling the column sums back up by N / n_sampled. The individual per-SNV
+## curves (draw.indv) are only drawn for small N, where no subsampling occurs (scale=1).
+  N_dens <- nrow(mut.dat)
+  if (N_dens > max_SSNVs_dens) {
+    s.ix <- sample(seq_len(N_dens), max_SSNVs_dens)
+    mut.dat <- mut.dat[s.ix, , drop=FALSE]
+    scale <- N_dens / max_SSNVs_dens
+    if (verbose) { print(paste0("PlotSomaticMutDensities: subsampled ", N_dens, " -> ", max_SSNVs_dens, " SSNVs (scale=", round(scale, 2), ")")) }
+  } else {
+    scale <- 1
+  }
+
   SSNV_cols = c("magenta", "olivedrab" )   ## SC, clonal
 
   draw.indv <- nrow(mut.dat) < max_SSNVs_plot
 
 ## 1st plot: mut VAFs with clonal / SC colors and purity line
-  res = Mut_AF_plot(mut.dat, SSNV_cols, mode.color, draw.indv)
+  res = Mut_AF_plot(mut.dat, SSNV_cols, mode.color, draw.indv, scale=scale)
 
 ## 2nd plot: Plot rescaling to multiplicity
-  multiplicity_plot( seg.dat, mut.dat, res[["af_post_pr"]], res[["grid_mat"]], SSNV_cols, mode.color,  draw.indv, verbose )
+  multiplicity_plot( seg.dat, mut.dat, res[["af_post_pr"]], res[["grid_mat"]], SSNV_cols, mode.color,  draw.indv, verbose=verbose, scale=scale )
 }
 
 
