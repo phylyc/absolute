@@ -1,6 +1,24 @@
 #!/usr/bin/env Rscript
 
-options(warn=1)
+options(
+  warn = 1,
+  error = function() {
+    cat("\n=== TRACEBACK ===\n")
+    traceback(3)
+    q(status = 1)
+  }
+)
+
+cat("=== BASIC RUNTIME INFO ===\n")
+cat("R version:", R.version.string, "\n")
+cat("Platform:", R.version$platform, "\n")
+cat("Working dir:", getwd(), "\n")
+cat("Temp dir:", tempdir(), "\n")
+cat("Timezone:", Sys.timezone(), "\n")
+cat("Locale:", Sys.getlocale(), "\n")
+cat("LibPaths:\n"); print(.libPaths())
+cat("Env vars of interest:\n")
+print(Sys.getenv(c("HOME", "PWD", "TMPDIR", "LANG", "LC_ALL", "TZ"), unset = NA))
 
 suppressPackageStartupMessages({
   #library(ABSOLUTE)

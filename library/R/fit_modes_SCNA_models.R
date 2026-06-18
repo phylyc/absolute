@@ -17,11 +17,7 @@ fit_modes_SCNA_models = function( seg.obj, mode.tab, SCNA_model, mut.cn.dat, chr
 
   N_tot_seg = length(seg.obj$obs.total.scna$d)
   total_subclonal_scna_tab = array(NA, dim=c(n.modes, N_tot_seg, 7) )
-  dimnames(subclonal_scna_tab)[[3]] = c("CCF_hat", "CI95_low", "CI95_high", "subclonal_ix", "Pr_subclonal", "qs", "qc" )
   total_log_ccf_dens = array(NA, dim=c(n.modes, N_tot_seg, length(SCNA_model[["ccf_grid"]])) )
-  dimnames(log_ccf_dens)[[3]] = SCNA_model[["ccf_grid"]]
-
-
 
    
 
