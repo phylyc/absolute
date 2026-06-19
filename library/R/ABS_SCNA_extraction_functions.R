@@ -180,7 +180,10 @@ call_regions_ABSOLUTE_SCNAs = function( segtab, regions )
 # gr.findoverlaps(gr1, gr2) is a faster and less clumsy reimplementation of GRanges findOverlaps
 #   reg_to_seg = gr.findoverlaps( regions, seg_GRs )
 
-   res = findOverlaps( regions, seg_GRs )
+   ## suppressWarnings: the gene 'regions' and the segtab 'seg_GRs' have non-identical seqlevels
+   ## (e.g. genes carry M; a WGS segtab carries unplaced/random scaffolds like JH*/GL*). The
+   ## Seqinfo merge warns about this, but only the shared chromosomes can overlap, so it is benign.
+   res = suppressWarnings( findOverlaps( regions, seg_GRs ) )
    reg_to_seg = list( "query.id"=queryHits(res), "subject.id"=subjectHits(res) )
    
 
@@ -467,9 +470,19 @@ get_GENCODE_transcript_GRs = function( genelist=NA, dropY=TRUE, genome_build="hg
       load(gencode.fn)
    }
    else { stop("Unsupported genome_build for gene annotation: ", genome_build) }
-   txdb = gencode
+   ## Coerce to a plain data.frame: the indexing below (txdb[,"HGNC"], txdb[ix,"Start"], ...)
+   ## relies on data.frame semantics returning vectors. If 'gencode' was saved as a data.table
+   ## (as the hg38/mm39 references are), txdb[ , "col"] returns a one-column data.table and
+   ## IRanges() fails with "'start' and 'end' must be numeric vectors".
+   txdb = as.data.frame(gencode, stringsAsFactors=FALSE)
 
    if( is.na(genelist) ) { genelist = unique(txdb[,"HGNC"]) }
+
+   ## Strip any "chr" prefix so seqnames match the pipeline's unprefixed convention
+   ## ("1".."22","X","Y"; see chr2int). hg19 genes are already unprefixed; hg38/mm39 are "chr1".
+   ## Without this, findOverlaps() against the segtab returns no hits and gene annotation is
+   ## silently empty (and the dropY filter below fails to match "chrY").
+   txdb[,"Chr"] = sub("^chr", "", txdb[,"Chr"], ignore.case=TRUE)
 
    if( dropY  )
    {
@@ -484,7 +497,7 @@ get_GENCODE_transcript_GRs = function( genelist=NA, dropY=TRUE, genome_build="hg
    }
    else
    {
-      gene_regs = GRanges( gsub("Chr", "", txdb[,"Chr"]), IRanges(txdb[,"Start"], txdb[,"End"]) )
+      gene_regs = GRanges( txdb[,"Chr"], IRanges(txdb[,"Start"], txdb[,"End"]) )
       names(gene_regs) = txdb[,"HGNC"]
    }
   
