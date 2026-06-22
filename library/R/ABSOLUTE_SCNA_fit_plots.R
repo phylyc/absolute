@@ -266,7 +266,10 @@ PlotModes <- function(segobj, chr.arms.dat, n.print = NA, called.mode.ix=NA, ver
       {
          mut.cn.dat <- segobj[["mut.cn.dat"]]
          modeled <- segobj[["mode.res"]][["modeled.muts"]][[i]]
-         modeled.mut.dat <- cbind(mut.cn.dat, modeled)
+         ## carry the per-mode ploidy (tau) onto the mutation table so the density plots can
+         ## reference it (e.g. the alpha/tau VAF line in Mut_AF_plot); mode.tab is the only place
+         ## ploidy lives -- modeled.muts itself only carries purity + SSNV_skew.
+         modeled.mut.dat <- cbind(mut.cn.dat, modeled, tau = mode.tab[i, "tau"])
 
          max_SSNVs_plot = 500
 
@@ -292,7 +295,10 @@ PlotModes <- function(segobj, chr.arms.dat, n.print = NA, called.mode.ix=NA, ver
       {
          mut.cn.dat <- segobj[["mut.cn.dat"]]
          modeled <- segobj[["mode.res"]][["modeled.muts"]][[i]]
-         modeled.mut.dat <- cbind(mut.cn.dat, modeled)
+         ## carry the per-mode ploidy (tau) onto the mutation table so the density plots can
+         ## reference it (e.g. the alpha/tau VAF line in Mut_AF_plot); mode.tab is the only place
+         ## ploidy lives -- modeled.muts itself only carries purity + SSNV_skew.
+         modeled.mut.dat <- cbind(mut.cn.dat, modeled, tau = mode.tab[i, "tau"])
          max_SSNVs_plot = 500
 
          for(k in 1:7){ frame() }

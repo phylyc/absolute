@@ -109,14 +109,22 @@ Mut_AF_plot = function(mut.dat, SSNV_cols, mode.color, draw.indv, draw.plot=TRUE
         mtext( text=msg, line=2, side=3, adj=1, cex=.7 )
      }
 
+     ## Expected VAF mode of a clonal, multiplicity-1 (heterozygous) SSNV at the average ploidy:
+     ##   VAF = alpha / (alpha*tau + 2*(1-alpha)) = delta  (see get_b_and_delta).
+     ## AT = alpha*tau + 2*(1-alpha) is the average total copies/cell; computed inline from
+     ## alpha (purity) and tau (per-mode ploidy, carried onto mut.dat in PlotModes) rather than
+     ## the mode.tab "AT" column, which is NA in some code paths.
      alpha <- mut.dat[1, "purity"]
-     abline(v=alpha / 2, lwd=0.5, lty=3, col=mode.color)
-     msg <- expression(hat(alpha) / 2)
-     mtext(text=msg, side=3, at=alpha/2, col=mode.color, line=0.2, cex=par("cex") * par("cex.axis"))
+     tau <- mut.dat[1, "tau"]
+     AT <- alpha * tau + 2 * (1 - alpha)
+     abline(v=alpha / AT, lwd=0.5, lty=3, col=mode.color)
+     # msg <- expression(hat(alpha) / (hat(alpha) * hat(tau) + (1-hat(alpha))*2))
+     msg <- "E[m=1]"
+     mtext(text=msg, side=3, at=alpha/AT, col=mode.color, line=0.2, cex=par("cex") * par("cex.axis"))
 
-     abline(v=alpha*SSNV_skew/2, lwd=0.5, lty=3, col="black")
-     msg <- expression(hat(f_s) * hat(alpha) / 2)
-#  mtext(text=msg, side=3, at=alpha*SSNV_skew/2, col="black", line=0.2, cex=par("cex") * par("cex.axis"))
+     abline(v=alpha*SSNV_skew/AT, lwd=0.5, lty=3, col="black")
+     msg <- expression(hat(f_s) * hat(alpha) / hat(AT))
+#  mtext(text=msg, side=3, at=alpha*SSNV_skew/AT, col="black", line=0.2, cex=par("cex") * par("cex.axis"))
   }
 
   return( list("af_post_pr"=af_post_pr, "grid_mat"=grid_mat))

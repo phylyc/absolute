@@ -25,7 +25,7 @@
         if( verbose ) { print( paste( "loading cached ", file.ext, " result", sep="")) }
         obj = try(readRDS( result_FN))
 
-        if( class(obj) == "try-error" ) { print( "load failed!!"); cached=FALSE }
+        if( inherits(obj, "try-error") ) { print( "load failed!!"); cached=FALSE }
         else { cached = TRUE }
      }
      else{ cached = FALSE }
