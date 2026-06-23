@@ -141,7 +141,7 @@ RunAbsolute = function(seg.dat.fn, primary.disease, platform, sample.name, resul
   tmp.dir = file.path(results.dir, "tmp")
   dir.create(tmp.dir, recursive = TRUE, showWarnings = FALSE)
   dir.create(results.dir, recursive=TRUE, showWarnings=FALSE)
-  file.base = paste(output.fn.base, copy_num_type, "ABSOLUTE", sep = ".")
+  file.base = paste(output.fn.base, "ABSOLUTE", copy_num_type, sep = ".")
 
   seg.dat[["primary.disease"]] = primary.disease
   seg.dat[["group"]] = DetermineGroup(primary.disease)

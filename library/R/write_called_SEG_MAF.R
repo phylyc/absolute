@@ -8,7 +8,7 @@
 ## whatsoever. Neither the Broad Institute nor MIT can be responsible for its
 ## use, misuse, or functionality.
 
-write_called_seg_maf = function(called_segobj_list, pp_calls, out_dir, verbose=FALSE) {
+write_called_seg_maf = function(called_segobj_list, pp_calls, out_dir, copy_num_type, verbose=FALSE) {
   dir.create(out_dir, showWarnings = FALSE)
   
   for (i in seq_along(called_segobj_list)) {
@@ -16,12 +16,12 @@ write_called_seg_maf = function(called_segobj_list, pp_calls, out_dir, verbose=F
     s_name = called_segobj$array.name
     
     abs_seg = GetAbsSegDat(called_segobj)
-    WriteAbsSegtab(list(abs_seg), s_name, file.path(out_dir, paste(s_name, "segtab.txt", sep=".")))
-    WriteIGVSegtab(called_segobj, abs_seg, s_name, out_dir)
+    WriteAbsSegtab(list(abs_seg), s_name, file.path(out_dir, paste(s_name, "segtab", copy_num_type, "txt", sep=".")))
+    WriteIGVSegtab(called_segobj, abs_seg, s_name, file.path( out_dir, paste( s_name, "IGV.seg", copy_num_type, "txt", sep=".")))
 
     ## MAF
     if (!is.null(called_segobj$mode.res$modeled.muts)) {
-      maf_out_fn = file.path(out_dir, paste(s_name, "ABS_MAF.txt", sep="."))
+      maf_out_fn = file.path(out_dir, paste(s_name, "ABS_MAF", copy_num_type, "txt", sep="."))
       WriteMAF(called_segobj, abs_seg, maf_out_fn)
     }
     if (verbose) {   
@@ -34,7 +34,7 @@ WriteAbsSegtab <- function(seg, s_name, out_fn) {
   for (s in seq_along(seg)) {
     sample <- rep(s_name, nrow(seg[[s]]))
     s_tab <- cbind(sample, seg[[s]])
-    
+
     ## colames only for 1st sample
     app <- s > 1   
     col <- s == 1
@@ -44,7 +44,7 @@ WriteAbsSegtab <- function(seg, s_name, out_fn) {
   }   
 }
 
-WriteIGVSegtab <- function(segobj, seg, s_name, out_dir) {
+WriteIGVSegtab <- function(segobj, seg, s_name, out_fn) {
   # Write IGV segtab:
   ploidy = segobj[["mode.res"]][["mode.tab"]][1, "genome mass"]
   seg[, "sample"] = s_name
@@ -68,7 +68,7 @@ WriteIGVSegtab <- function(segobj, seg, s_name, out_dir) {
   # {
   #   seg[Y.ix, "Segment_Mean"] = seg[Y.ix, "Segment_Mean"] + 1
   # }
-  write.table( seg[, c("sample", "Chromosome", "Start.bp", "End.bp", "Segment_Mean", "rescaled_total_cn")], file=file.path( out_dir, paste( s_name, "IGV.seg.txt", sep=".")), row.names=FALSE, sep="\t", quote=FALSE )
+  write.table( seg[, c("sample", "Chromosome", "Start.bp", "End.bp", "Segment_Mean", "rescaled_total_cn")], file=out_fn, row.names=FALSE, sep="\t", quote=FALSE )
 }
 
 WriteMAF <- function(called_segobj, seg, out_fn) {

@@ -8,18 +8,18 @@
 ## whatsoever. Neither the Broad Institute nor MIT can be responsible for its
 ## use, misuse, or functionality.
 
-ExtractReviewedResults = function( called.segobj.list, analyst.id, out.dir.base, obj.name, genome_build, verbose=FALSE)
+ExtractReviewedResults = function( called.segobj.list, analyst.id, out.dir.base, obj.name, genome_build, copy_num_type, verbose=FALSE)
 {
  ## agg MAF
   cat("Outputting aggregate MAF...")
-  MAF_list_fn = file.path(out.dir.base, "reviewed", paste(obj.name, ".MAF_list.Rds", sep=""))
+  MAF_list_fn = file.path(out.dir.base, "reviewed", paste(obj.name, ".MAF_list.", copy_num_type, ".Rds", sep=""))
   if( !file.exists(MAF_list_fn) )
   {
      MAF_list = get_MAF_list_from_called_seglist_obj( called.segobj.list )
      saveRDS( MAF_list, file=MAF_list_fn )
   } else{ MAF_list = readRDS(MAF_list_fn) }
 
-  fn = file.path(out.dir.base, "reviewed", paste(obj.name, ".aggregate_MAF.Rds", sep=""))
+  fn = file.path(out.dir.base, "reviewed", paste(obj.name, ".aggregate_MAF.", copy_num_type, ".Rds", sep=""))
   if( !file.exists(fn) )
   {
      AGG_MAF = aggregate_sample_MAF_list( MAF_list )
@@ -40,7 +40,7 @@ ExtractReviewedResults = function( called.segobj.list, analyst.id, out.dir.base,
   cat("Extracting SEG_MAF files...")
   seg.maf.dir = file.path(out.dir.base, "reviewed", "SEG_MAF")
   dir.create(seg.maf.dir, recursive=TRUE, showWarnings = FALSE)
-  write_called_seg_maf(called.segobj.list, pp.calls, seg.maf.dir)
+  write_called_seg_maf(called.segobj.list, pp.calls, seg.maf.dir, copy_num_type)
   cat("done\n")
  ##
 
@@ -49,7 +49,7 @@ if( FALSE )
 {
  ## Called summary plot
   pdf.fn = file.path(out.dir.base, "reviewed", 
-                     paste(obj.name, ".called.ABSOLUTE.plots.pdf", sep=""))
+                     paste(obj.name, ".called.ABSOLUTE.", copy_num_type, ".plots.pdf", sep=""))
   
 #  PlotModes(called.segobj.list, chr.arms.dat, pdf.fn, n.print=1)
 
@@ -70,8 +70,8 @@ if( FALSE )
    indv.called.dir = file.path(out.dir.base, "reviewed", "samples")
    dir.create(indv.called.dir, recursive=TRUE, showWarnings = FALSE)
 
-   file.base = file.path(paste(called.segobj.list[[1]][["sample.name"]], ".ABSOLUTE.", analyst.id, ".called", sep = ""))
-   called.files= file.path(indv.called.dir, paste(file.base, "RData", sep = "."))
+   file.base = file.path(paste(called.segobj.list[[1]][["sample.name"]], "ABSOLUTE", copy_num_type, analyst.id, "called", sep = "."))
+   called.files = file.path(indv.called.dir, paste(file.base, "RData", sep = "."))
    foreach (i=seq_along(called.files)) %dopar% {
       seg.obj = called.segobj.list[[i]]
       save(seg.obj, file=called.files[i])
@@ -91,11 +91,11 @@ if( FALSE )
 
    # out.dir.base = file.path( "ABSOLUTE_results", obj.name )
    transcript_GRs = get_GENCODE_transcript_GRs(genome_build=genome_build, verbose=FALSE)
-   gene_SCNA_calls = genotype_transcript_SCNAs_in_called_ABS_files( indv.called.dir, transcript_GRs, SCNA_thresholds, analyst_id = analyst.id, sample_ids = c(obj.name), sample_names = c(obj.name) )
-   saveRDS( gene_SCNA_calls, file.path(out.dir.base, "reviewed", paste(obj.name, ".gene_SCNA_data.Rds", sep="")) )
+   gene_SCNA_calls = genotype_transcript_SCNAs_in_called_ABS_files( indv.called.dir, transcript_GRs, SCNA_thresholds, analyst_id = analyst.id, copy_num_type = copy_num_type, sample_ids = c(obj.name), sample_names = c(obj.name) )
+   saveRDS( gene_SCNA_calls, file.path(out.dir.base, "reviewed", paste(obj.name, "gene_SCNA_data", copy_num_type, "Rds", sep=".")) )
 
    CN_dat = gene_SCNA_calls[["SCNA_event_dat"]][["amp.gene.data"]][,,"rescaled_total_cn"]
-   write.table( round(CN_dat,2), file=file.path(out.dir.base, "reviewed", paste(obj.name, ".gene_corrected_CN.txt", sep="")), quote=FALSE, sep="\t" )
+   write.table( round(CN_dat,2), file=file.path(out.dir.base, "reviewed", paste(obj.name, "gene_corrected_CN", copy_num_type, "txt", sep=".")), quote=FALSE, sep="\t" )
 
   # moved to writing of segtab
 # write a merged-sample IGV file with log2 corrected copy-ratios
@@ -137,16 +137,16 @@ apply_review_and_extract = function( pp.review.fn=NA, pp.solution.num=NA, result
   }
 
    if (!is.na(pp.review.fn)) {
-      called.segobj.list = run_PP_calls_liftover(pp.review.fn, analyst.id, modesegs.fn, out.dir.base, obj.name, chr.arms.dat, pp.calls_ploidy_colname, ploidy_colname, verbose=verbose )
+      called.segobj.list = run_PP_calls_liftover(pp.review.fn, analyst.id, modesegs.fn, out.dir.base, obj.name, chr.arms.dat, pp.calls_ploidy_colname, ploidy_colname, copy_num_type, verbose=verbose )
    } else if (!is.na(pp.solution.num) & file.exists(modesegs.fn)) {
-     called.segobj.list = run_PP_calls_liftover_from_num(pp.solution.num, analyst.id, modesegs.fn, out.dir.base, obj.name, chr.arms.dat, pp.calls_ploidy_colname, ploidy_colname, verbose=verbose )
+     called.segobj.list = run_PP_calls_liftover_from_num(pp.solution.num, analyst.id, modesegs.fn, out.dir.base, obj.name, chr.arms.dat, pp.calls_ploidy_colname, ploidy_colname, copy_num_type, verbose=verbose )
    } else {
      stop("pp.review.fn or pp.solution.num does not exist!")
    }
 
    if( length(called.segobj.list) > 0 )
    {
-      ExtractReviewedResults( called.segobj.list, analyst.id , out.dir.base, obj.name, genome_build=genome_build, verbose=TRUE )
+      ExtractReviewedResults( called.segobj.list, analyst.id , out.dir.base, obj.name, genome_build=genome_build, copy_num_type=copy_num_type, verbose=TRUE )
    }
    else{ stop("called.segobj.list has length 0!") }
 }

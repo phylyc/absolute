@@ -227,9 +227,9 @@ call_regions_ABSOLUTE_SCNAs = function( segtab, regions )
 
 
 ## used for Brain met can disc 2015 paper
-original_genotype_transcript_SCNAs_in_called_ABS_files = function( ABS_BASE_DIR, regs, SCNA_thresholds, samples=NA, analyst_id="SLC" )
+original_genotype_transcript_SCNAs_in_called_ABS_files = function( ABS_BASE_DIR, regs, SCNA_thresholds, samples=NA, analyst_id="SLC", copy_num_type="allelic" )
 {
-   fn_exts = paste(".ABSOLUTE.", analyst_id, ".called.RData", sep="")
+   fn_exts = paste(".ABSOLUTE.", copy_num_type, ".", analyst_id, ".called.RData", sep="")
 
    if( is.na(samples) )
    {
@@ -786,9 +786,9 @@ stop("deprecated")
 
 
 ## updated to support H.amp calling in single samples
-genotype_transcript_SCNAs_in_called_ABS_files = function( ABS_BASE_DIR, regs, SCNA_thresholds, sample_ids=NA, sample_names=NA, analyst_id="SLC" )
+genotype_transcript_SCNAs_in_called_ABS_files = function( ABS_BASE_DIR, regs, SCNA_thresholds, sample_ids=NA, sample_names=NA, analyst_id="SLC", copy_num_type="allelic" )
 {
-   fn_exts = paste(".ABSOLUTE.", analyst_id, ".called.RData", sep="")
+   fn_exts = paste(".ABSOLUTE.", copy_num_type, ".", analyst_id, ".called.RData", sep="")
 
    if( is.na(sample_ids) )
    {

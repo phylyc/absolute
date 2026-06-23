@@ -8,7 +8,7 @@
 ## whatsoever. Neither the Broad Institute nor MIT can be responsible for its
 ## use, misuse, or functionality.
 
-run_PP_calls_liftover_from_num = function(solution_num, analyst.id, modes.fn, out.dir.base, obj.name, chr.arms.dat, pp.calls_ploidy_colname = "ploidy", ploidy_colname="genome mass", verbose=FALSE) {
+run_PP_calls_liftover_from_num = function(solution_num, analyst.id, modes.fn, out.dir.base, obj.name, chr.arms.dat, pp.calls_ploidy_colname = "ploidy", ploidy_colname="genome mass", copy_num_type, verbose=FALSE) {
   ## provides seg.dat
   if( verbose ) { cat("Loading ABS object...") }
   load(modes.fn)
@@ -21,13 +21,13 @@ run_PP_calls_liftover_from_num = function(solution_num, analyst.id, modes.fn, ou
   called.segobj.list = override_absolute_calls(list(seg.dat), list(solution_num))
 
   ## PP tab
-  out.fn = file.path(out.dir.base, "reviewed", paste(obj.name, ".", analyst.id, ".ABSOLUTE.table.txt", sep=""))
+  out.fn = file.path(out.dir.base, "reviewed", paste(obj.name, ".", analyst.id, ".ABSOLUTE.table.", copy_num_type, ".txt", sep=""))
   PrintPpCallTable(called.segobj.list, out.fn)
 
   return(called.segobj.list)
 }
 
-run_PP_calls_liftover = function( reviewed.pp.calls.fn, analyst.id, modes.fn, out.dir.base, obj.name, chr.arms.dat, pp.calls_ploidy_colname = "ploidy", ploidy_colname="genome mass", verbose=FALSE)
+run_PP_calls_liftover = function( reviewed.pp.calls.fn, analyst.id, modes.fn, out.dir.base, obj.name, chr.arms.dat, pp.calls_ploidy_colname = "ploidy", ploidy_colname="genome mass", copy_num_type, verbose=FALSE)
 {
   ## provides agg_res
   if( verbose ) { cat("Loading ABS multi-sample object...") }
@@ -111,7 +111,7 @@ run_PP_calls_liftover = function( reviewed.pp.calls.fn, analyst.id, modes.fn, ou
         print( unmatched_sid )
 
       ## PP tab
-        unmatched.out.fn = file.path(out.dir.base, "reviewed", paste(obj.name, ".unmatched.", analyst.id, ".ABSOLUTE.table.txt", sep="") )
+        unmatched.out.fn = file.path(out.dir.base, "reviewed", paste(obj.name, ".unmatched.", analyst.id, ".ABSOLUTE.table.", copy_num_type, ".txt", sep="") )
         PrintPpCallTable(segobj.list[nix], unmatched.out.fn)
 
   ## print top 3 solutions for all samples where no match found (1 plot)
@@ -131,7 +131,7 @@ run_PP_calls_liftover = function( reviewed.pp.calls.fn, analyst.id, modes.fn, ou
 
  ## PP tab
   out.fn = file.path(out.dir.base, "reviewed", paste(obj.name, ".", analyst.id, 
-                                                     ".ABSOLUTE.table.txt", sep=""))
+                                                     ".ABSOLUTE.table.", copy_num_type, ".txt", sep=""))
   PrintPpCallTable(called.segobj.list, out.fn)
 
   return(called.segobj.list)
