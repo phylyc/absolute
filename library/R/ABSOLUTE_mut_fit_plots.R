@@ -119,7 +119,7 @@ Mut_AF_plot = function(mut.dat, SSNV_cols, mode.color, draw.indv, draw.plot=TRUE
      AT <- alpha * tau + 2 * (1 - alpha)
      abline(v=alpha / AT, lwd=0.5, lty=3, col=mode.color)
      # msg <- expression(hat(alpha) / (hat(alpha) * hat(tau) + (1-hat(alpha))*2))
-     msg <- "E[m=1]"
+     msg <- "E[VAF|m=1]"
      mtext(text=msg, side=3, at=alpha/AT, col=mode.color, line=0.2, cex=par("cex") * par("cex.axis"))
 
      abline(v=alpha*SSNV_skew/AT, lwd=0.5, lty=3, col="black")

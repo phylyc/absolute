@@ -186,7 +186,17 @@ PlotHscrAndSeghist <- function(allele.segs, seg_colors, chr.arms.dat, max_CR, mi
 #  obs = seg.dat[["obs.scna"]]
 #  allele.segs = get_hom_pairs_segtab( seg.dat )
   if (plot.total.CN) {
-    tot.seg.colors = rep( 1, nrow(allele.segs) )
+    ## Total CR genome/hist drawing colors each segment via tot.seg.colors (one color
+    ## per total segment). Honor a caller-supplied per-segment color vector -- passed
+    ## positionally as seg_colors, e.g. the clonality / seg-cluster / seg-LL colormaps
+    ## that the per-mode panels build -- instead of forcing every segment black. Fall
+    ## back to black only when no usable per-segment vector was provided (e.g. the raw
+    ## genome-wide overview, which has no model-derived coloring).
+    if (length(seg_colors) == nrow(allele.segs) && !all(is.na(seg_colors))) {
+      tot.seg.colors = seg_colors
+    } else if (!(length(tot.seg.colors) == nrow(allele.segs) && !all(is.na(tot.seg.colors)))) {
+      tot.seg.colors = rep( 1, nrow(allele.segs) )
+    }
     seg_colors = tot.seg.colors
   }
 
