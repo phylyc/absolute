@@ -39,6 +39,40 @@
   }
 
 
+.maf_file_arg_is_set = function(fn) {
+  !is.null(fn) && length(fn) > 0 && !is.na(fn[1]) && nzchar(fn[1])
+}
+
+
+.maf_file_exists = function(fn) {
+  .maf_file_arg_is_set(fn) && file.exists(fn[1])
+}
+
+
+.read_maf_or_null = function(maf.fn, label="MAF") {
+  maf = tryCatch(
+    read.delim(maf.fn, row.names = NULL, stringsAsFactors = FALSE,
+               check.names = FALSE, na.strings = c("NA", "---"),
+               blank.lines.skip=TRUE, comment.char="#"),
+    error = function(e) {
+      msg = conditionMessage(e)
+      if (grepl("no lines available in input|first five rows are empty", msg, ignore.case=TRUE)) {
+        print(paste(label, " file: ", maf.fn, " is empty or contains only comments; skipping.", sep=""))
+        return(NULL)
+      }
+      stop(e)
+    }
+  )
+
+  if ((!is.null(maf)) && nrow(maf) == 0) {
+    print(paste(label, " file: ", maf.fn, " contains no mutation records; skipping.", sep=""))
+    maf = NULL
+  }
+
+  return(maf)
+}
+
+
 RunAbsolute = function(seg.dat.fn, primary.disease, platform, sample.name, results.dir, copy_num_type, genome_build, gender=NA, min.ploidy=1, max.ploidy=8, max.as.seg.count=1500, max.non.clonal=0.8, max.neg.genome=0.005, maf.fn = NULL, indel.maf.fn = NULL, min.mut.af = NULL, output.fn.base=NULL, min_probes=10, max_sd=100, sigma.h=0.01, SSNV_skew=1, b.res=0.1, d.res=0.01, filter_segs=TRUE, force.alpha=NA, force.tau=NA, allelic_capseg_rds=NA, apply_karyotype_model=FALSE, N_threads=1, verbose = FALSE)
 {  
   print( paste("Registering ", N_threads, " threads.", sep=""))
@@ -190,7 +224,7 @@ RunAbsolute = function(seg.dat.fn, primary.disease, platform, sample.name, resul
     ## check for MAF (or VCF) describing somatic mutations
     maf = NULL
     indel.maf = NULL
-    if ((!is.na(maf.fn)) && (file.exists(maf.fn)) && is_vcf_file(maf.fn)) {
+    if (.maf_file_exists(maf.fn) && is_vcf_file(maf.fn)) {
       ## VCF input: parse into MAF-shaped SNV + indel frames. The indel frame
       ## takes the place of the indel.maf.fn file so it flows through the same
       ## indel-specific filtering in classic_CreateMutCnDat().
@@ -203,19 +237,15 @@ RunAbsolute = function(seg.dat.fn, primary.disease, platform, sample.name, resul
       ## If the VCF carries only indels, promote them so SSNV fitting still runs.
       if (is.null(maf) && (!is.null(indel.maf))) { maf = indel.maf; indel.maf = NULL }
     } else {
-      if ((!is.na(maf.fn)) && (file.exists(maf.fn))) {
-        maf = read.delim(maf.fn, row.names = NULL, stringsAsFactors = FALSE,
-                          check.names = FALSE, na.strings = c("NA", "---"),
-                          blank.lines.skip=TRUE, comment.char="#")
-      } else {
+      if (.maf_file_exists(maf.fn)) {
+        maf = .read_maf_or_null(maf.fn, "MAF")
+      } else if (.maf_file_arg_is_set(maf.fn)) {
          print(paste("MAF file: ", maf.fn, " not found.", sep = ""))
       }
 
-      if (!is.na(indel.maf.fn) && file.exists(indel.maf.fn)) {
-        indel.maf = read.delim(indel.maf.fn, row.names = NULL, stringsAsFactors = FALSE,
-                          check.names = FALSE, na.strings = c("NA", "---"),
-                          blank.lines.skip=TRUE, comment.char="#")
-      } else {
+      if (.maf_file_exists(indel.maf.fn)) {
+        indel.maf = .read_maf_or_null(indel.maf.fn, "Indel MAF")
+      } else if (.maf_file_arg_is_set(indel.maf.fn)) {
          print(paste("Indel MAF file: ", indel.maf.fn, " not found.", sep = ""))
       }
     }
