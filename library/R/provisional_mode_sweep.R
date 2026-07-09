@@ -9,11 +9,12 @@
 ## use, misuse, or functionality.
 
 
-ProvisionalModeSweep <- function(seg.obj, SCNA_model, mut.cn.dat, SSNV_model, force.alpha, force.tau, b.res=0.1, d.res=0.01, chr.arms.dat, verbose=FALSE)
+ProvisionalModeSweep <- function(seg.obj, SCNA_model, mut.cn.dat, SSNV_model, force.alpha, force.tau, b.res=0.1, d.res=0.01, chr.arms.dat, refit.alpha.tau=FALSE, refit.window.alpha=0.05, refit.window.tau=NA, verbose=FALSE)
 {
   Q = SCNA_model[["kQ"]]
   obs <- seg.obj[["obs.scna"]]
-  res <- FindLocationModes(obs, force.alpha, force.tau, SCNA_model, mut.cn.dat, SSNV_model, b.res=b.res, d.res=d.res, verbose=verbose)
+  res <- FindLocationModes(obs, force.alpha, force.tau, SCNA_model, mut.cn.dat, SSNV_model, b.res=b.res, d.res=d.res,
+                           refit.alpha.tau=refit.alpha.tau, refit.window.alpha=refit.window.alpha, refit.window.tau=refit.window.tau, verbose=verbose)
   
   if (!is.null(res[["mode.flag"]])) { 
       return(list("mode.flag"=res[["mode.flag"]]))
@@ -39,21 +40,33 @@ ProvisionalModeSweep <- function(seg.obj, SCNA_model, mut.cn.dat, SSNV_model, fo
 
 
 
-FindLocationModes <- function(obs, force.alpha, force.tau, SCNA_model, mut.cn.dat, SSNV_model, b.res=0.1, d.res=0.01, verbose=FALSE) {
+FindLocationModes <- function(obs, force.alpha, force.tau, SCNA_model, mut.cn.dat, SSNV_model, b.res=0.1, d.res=0.01, refit.alpha.tau=FALSE, refit.window.alpha=0.05, refit.window.tau=NA, verbose=FALSE) {
 
   kAlphaDom <- c(0, 1)
-  
+
 #  mode.tab <- MargModeFinder(obs, mut.cn.dat, SSNV_model, SCNA_model, verbose=verbose)
 
   if( !is.na(force.alpha) & !is.na(force.tau) )
-  {  
-     res = get_b_and_delta( force.alpha, force.tau)
-#     mode.tab = rbind( c(res$b, log(res$delta), NA), mode.tab )
-     mode.tab = matrix( c(res$b, log(res$delta)), nrow=1)
-
-     if(verbose) 
+  {
+     if( isTRUE(refit.alpha.tau) )
      {
-       msg = paste("Added force-call mode alpha=", force.alpha, ", tau=", force.tau, sep="")
+        ## Don't take the seeds at face value: locally optimize near them.
+        mode.row = refit_forced_mode(obs, force.alpha, force.tau, SCNA_model,
+                                     window.alpha=refit.window.alpha,
+                                     window.tau=refit.window.tau, verbose=verbose)
+        mode.tab = matrix( mode.row, nrow=1)
+     }
+     else
+     {
+        res = get_b_and_delta( force.alpha, force.tau)
+#        mode.tab = rbind( c(res$b, log(res$delta), NA), mode.tab )
+        mode.tab = matrix( c(res$b, log(res$delta)), nrow=1)
+     }
+
+     if(verbose)
+     {
+       msg = paste("Added force-call mode (seed) alpha=", force.alpha, ", tau=", force.tau,
+                   if (isTRUE(refit.alpha.tau)) " [refit enabled]" else "", sep="")
        print(msg)
      }
   }
@@ -132,6 +145,85 @@ FindLocationModes <- function(obs, force.alpha, force.tau, SCNA_model, mut.cn.da
   # }
   
   return(list(mode.tab = mode.tab))
+}
+
+## Local refit of a user-supplied (alpha, tau) seed. Rather than converting the
+## seed straight to (b, delta), run a short bounded optimization of the provisional
+## SCNA log-likelihood over a small box around the seed and return the best-fitting
+## c(b, log(delta)) pair. Invoked from FindLocationModes when --refit-alpha-tau is set.
+refit_forced_mode <- function(obs, force.alpha, force.tau, SCNA_model,
+                              window.alpha=0.05, window.tau=NA, verbose=FALSE)
+{
+  ## When the tau window is not supplied (NA), derive it from the alpha window so
+  ## both grant the copy-ratio comb the same wiggle. The comb spacing delta obeys
+  ## 1/delta = tau + 2(1-alpha)/alpha, so d(1/delta)/dtau = 1 and
+  ## d(1/delta)/dalpha = -2/alpha^2; matching the change in 1/delta gives
+  ## window.tau = (2 / alpha^2) * window.alpha. This grows as purity drops, so cap
+  ## it at 1.0 to keep low-purity samples from ranging over implausible ploidy.
+  tau.window.auto <- is.na(window.tau)
+  if (tau.window.auto) {
+    window.tau <- min( (2 / force.alpha^2) * window.alpha, 1.0 )
+    if (!is.finite(window.tau)) { window.tau <- 1.0 }
+  }
+
+  ## Negative provisional SCNA LL as a function of (alpha, tau); convert to
+  ## (b, delta) for the LL. provisional_SCNA_LL() stop()s on non-finite values,
+  ## so trap and penalize.
+  neg_ll <- function(alpha, tau) {
+    bd <- get_b_and_delta(alpha, tau)
+    ll <- tryCatch(provisional_SCNA_LL(obs, bd[["b"]], bd[["delta"]], SCNA_model),
+                   error = function(e) NA_real_)
+    if (!is.finite(ll)) { return(1e12) }
+    return(-ll)
+  }
+
+  ## Box = seed +/- window, clamped to the valid alpha and tau domains.
+  alpha.lo <- max(1e-4,     force.alpha - window.alpha)
+  alpha.hi <- min(1 - 1e-4, force.alpha + window.alpha)
+  tau.lo   <- max(SCNA_model[["kTauDom"]][1], force.tau - window.tau)
+  tau.hi   <- min(SCNA_model[["kTauDom"]][2], force.tau + window.tau)
+
+  ## Guard against a degenerate box when the seed sits outside its domain.
+  if (alpha.hi < alpha.lo) { alpha.lo <- alpha.hi <- min(max(force.alpha, 1e-4), 1 - 1e-4) }
+  if (tau.hi   < tau.lo)   { tau.lo   <- tau.hi   <- min(max(force.tau, SCNA_model[["kTauDom"]][1]), SCNA_model[["kTauDom"]][2]) }
+
+  ## A zero (or negative, or clamped-away) window pins that axis. L-BFGS-B
+  ## degenerates when a coordinate has lower==upper (it makes no progress on the
+  ## free axis either), so only optimize the free axes: 2-D via L-BFGS-B, 1-D via
+  ## optimize(), or 0-D (return the seed) when both are pinned.
+  free.alpha <- alpha.hi > alpha.lo
+  free.tau   <- tau.hi   > tau.lo
+
+  best.alpha <- min(max(force.alpha, alpha.lo), alpha.hi)
+  best.tau   <- min(max(force.tau,   tau.lo),   tau.hi)
+
+  if (free.alpha && free.tau) {
+    opt <- tryCatch(
+      optim(par = c(best.alpha, best.tau),
+            fn = function(par) neg_ll(par[1], par[2]), method = "L-BFGS-B",
+            lower = c(alpha.lo, tau.lo), upper = c(alpha.hi, tau.hi),
+            control = list(maxit = 200)),
+      error = function(e) {
+        if (verbose) { print(paste("Refit optim failed; falling back to seed. Error:", conditionMessage(e))) }
+        NULL })
+    if (!is.null(opt)) { best.alpha <- opt[["par"]][1]; best.tau <- opt[["par"]][2] }
+  } else if (free.tau) {
+    best.tau   <- optimize(function(tau)   neg_ll(best.alpha, tau), lower = tau.lo,   upper = tau.hi)[["minimum"]]
+  } else if (free.alpha) {
+    best.alpha <- optimize(function(alpha) neg_ll(alpha, best.tau), lower = alpha.lo, upper = alpha.hi)[["minimum"]]
+  }
+  ## else: both axes pinned -> keep the (clamped) seed
+
+  bd <- get_b_and_delta(best.alpha, best.tau)
+
+  if (verbose) {
+    print(sprintf("Refit alpha %.4f -> %.4f, tau %.4f -> %.4f (LL=%.4f, window +/-%.3f alpha / +/-%.3f tau%s)",
+                  force.alpha, best.alpha, force.tau, best.tau, -neg_ll(best.alpha, best.tau),
+                  window.alpha, window.tau,
+                  if (tau.window.auto) " [auto from alpha]" else ""))
+  }
+
+  return(c(bd[["b"]], log(bd[["delta"]])))
 }
 
 MargModeFinder <- function(obs, mut.cn.dat, SSNV_model, SCNA_model, b.res=0.1, d.res=0.01, verbose=FALSE)

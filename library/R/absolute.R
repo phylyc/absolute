@@ -73,7 +73,7 @@
 }
 
 
-RunAbsolute = function(seg.dat.fn, primary.disease, platform, sample.name, results.dir, copy_num_type, genome_build, gender=NA, min.ploidy=1, max.ploidy=8, max.as.seg.count=1500, max.non.clonal=0.8, max.neg.genome=0.005, maf.fn = NULL, indel.maf.fn = NULL, min.mut.af = NULL, output.fn.base=NULL, min_probes=10, max_sd=100, sigma.h=0.01, SSNV_skew=1, b.res=0.1, d.res=0.01, filter_segs=TRUE, force.alpha=NA, force.tau=NA, allelic_capseg_rds=NA, apply_karyotype_model=FALSE, N_threads=1, verbose = FALSE)
+RunAbsolute = function(seg.dat.fn, primary.disease, platform, sample.name, results.dir, copy_num_type, genome_build, gender=NA, min.ploidy=1, max.ploidy=8, max.as.seg.count=1500, max.non.clonal=0.8, max.neg.genome=0.005, maf.fn = NULL, indel.maf.fn = NULL, min.mut.af = NULL, output.fn.base=NULL, min_probes=10, max_sd=100, sigma.h=0.01, SSNV_skew=1, b.res=0.1, d.res=0.01, filter_segs=TRUE, force.alpha=NA, force.tau=NA, allelic_capseg_rds=NA, apply_karyotype_model=FALSE, N_threads=1, verbose = FALSE, refit.alpha.tau=FALSE, refit.window.alpha=0.05, refit.window.tau=NA)
 {  
   print( paste("Registering ", N_threads, " threads.", sep=""))
   registerDoMC(N_threads)
@@ -268,8 +268,9 @@ RunAbsolute = function(seg.dat.fn, primary.disease, platform, sample.name, resul
     }
 
   ## Caching for mode.tab
-    mode.tab = compute_cached( results.dir, file.base, "mode.tab", ProvisionalModeSweep, verbose, 
-               seg.dat, SCNA_model, mut.cn.dat, SSNV_model, force.alpha, force.tau, b.res, d.res, chr.arms.dat )
+    mode.tab = compute_cached( results.dir, file.base, "mode.tab", ProvisionalModeSweep, verbose,
+               seg.dat, SCNA_model, mut.cn.dat, SSNV_model, force.alpha, force.tau, b.res, d.res, chr.arms.dat,
+               refit.alpha.tau, refit.window.alpha, refit.window.tau )
 
 # For debugging - only process 1st mode:
 #   n.modes=1  ## for debugging

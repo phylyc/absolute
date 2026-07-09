@@ -41,6 +41,9 @@ option_list <- list(
   make_option("--gender", type = "character", default = NA, help = "gender [Male or Female] or biological sex of individual [XY or XX]", metavar = "string"),
   make_option("--alpha", type = "double", default = NA, help = "alpha (purity)", metavar = "number"),
   make_option("--tau", type = "double", default = NA, help = "tau (ploidy)", metavar = "number"),
+  make_option("--refit_alpha_tau", action = "store_true", default = FALSE, help = "locally optimize alpha/tau near the provided --alpha/--tau seeds instead of using them at face value [default= %default]", metavar = "logical"),
+  make_option("--refit_window_alpha", type = "double", default = 0.05, help = "half-width of the alpha search window when --refit-alpha-tau is set [default= %default]", metavar = "number"),
+  make_option("--refit_window_tau", type = "double", default = NA, help = "half-width of the tau search window when --refit_alpha_tau is set; if unset, auto-derived from --refit_window_alpha as (2/alpha^2)*window_alpha (capped at 1.0) to match the comb wiggle [default= auto]", metavar = "number"),
   make_option("--ssnv_skew", type = "double", default = 0.9883274, help = "skew", metavar = "number"),
   make_option("--min_ploidy", type = "double", default = 1.1, help = "minimum ploidy [default= %default]", metavar = "number"),
   make_option("--max_ploidy", type = "double", default = 6, help = "maximum ploidy [default= %default]", metavar = "number"),
@@ -98,6 +101,9 @@ d.res <- opt$delta_res
 filter_segs <- TRUE
 force.alpha <- opt$alpha
 force.tau <- opt$tau
+refit.alpha.tau <- opt$refit_alpha_tau
+refit.window.alpha <- opt$refit_window_alpha
+refit.window.tau <- opt$refit_window_tau
 allelic_capseg_rds <- opt$rds
 verbose <- TRUE
 sample.name <- opt$sample
@@ -119,5 +125,6 @@ RunAbsolute(
   seg.dat.fn, primary.disease, platform, sample.name, results.dir, copy_num_type, genome_build, gender,
   min.ploidy, max.ploidy, max.as.seg.count, max.non.clonal, max.neg.genome, maf.fn, indel.maf.fn, min.mut.af,
   output.fn.base, min_probes, max_sd, sigma.h, SSNV_skew, b.res, d.res, filter_segs, force.alpha, force.tau,
-  allelic_capseg_rds, apply_karyotype_model, N_threads, verbose
+  allelic_capseg_rds, apply_karyotype_model, N_threads, verbose,
+  refit.alpha.tau = refit.alpha.tau, refit.window.alpha = refit.window.alpha, refit.window.tau = refit.window.tau
 )
