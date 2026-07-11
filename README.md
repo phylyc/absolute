@@ -60,7 +60,13 @@ Functional annotations (gene, variant classification, protein change, COSMIC cou
 
 ```--tau```: ploidy for force-calling
 
-```--copy_num_type```: {"allelic", "total"}; determines purity/ploidy based on allelic or total copy ratios. Both modes are supported.
+```--refit_alpha_tau```: flag (off by default). When set together with ``--alpha`` and ``--tau``, the given purity/ploidy are treated as *seeds* rather than taken at face value: ABSOLUTE locally optimizes alpha/tau in a small window around the seeds to snap them onto the nearest well-fitting mode. Useful when the force-called values are approximate (e.g. carried over from another tool or a previous run). Without this flag, ``--alpha``/``--tau`` are used exactly as provided.
+
+```--refit_window_alpha```: half-width of the purity search window used when ``--refit_alpha_tau`` is set (default 0.05, i.e. alpha ± 0.05).
+
+```--refit_window_tau```: half-width of the ploidy search window used when ``--refit_alpha_tau`` is set. If unset, it is auto-derived from ``--refit_window_alpha`` as ``(2 / alpha^2) * refit_window_alpha`` (capped at 1.0) to match the copy-ratio comb spacing.
+
+```--copy_num_type```: {"allelic", "total"}; determines purity/ploidy based on allelic or total copy ratios. Both modes are supported. This value is also embedded into the output file names (see below) so allelic and total runs of the same sample do not overwrite each other.
 
 ```--genome_build```: This package currently supports human {hg18, hg19, hg38} and mouse {mm9, mm10, mm39}
 
@@ -99,10 +105,12 @@ Functional annotations (gene, variant classification, protein change, COSMIC cou
 
 ### Output of library/scripts/extract_solution.R
 
-1. `.../reviewed/SEGMAF/*.ABS_MAF.txt`: annotated SNV/INDEL MAF file.
-2. `.../reviewed/SEGMAF/*.segtab.txt`: Absolute copy number estimates for the segmentation table
-3. `.../reviewed/SEGMAF/*.IGV.seg.txt`: IGV-compatible segmentation table of absolute copy number
-4. `.../reviewed/*.ABSOLUTE.table.txt`: purity/ploidy table
+The `copy_num_type` (`allelic` or `total`) is embedded into each output file name so that allelic and total runs of the same sample can coexist in the same results directory.
+
+1. `.../reviewed/SEG_MAF/*.ABS_MAF.<copy_num_type>.txt`: annotated SNV/INDEL MAF file.
+2. `.../reviewed/SEG_MAF/*.segtab.<copy_num_type>.txt`: Absolute copy number estimates for the segmentation table
+3. `.../reviewed/SEG_MAF/*.IGV.seg.<copy_num_type>.txt`: IGV-compatible segmentation table of absolute copy number
+4. `.../reviewed/*.<analyst_id>.ABSOLUTE.table.<copy_num_type>.txt`: purity/ploidy table
 
 Consider running [this script](https://github.com/phylyc/somatic_workflow/blob/master/python/map_to_absolute_copy_number.py) on the output to rescue any dropped segments.
 
