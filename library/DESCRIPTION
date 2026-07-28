@@ -4,6 +4,7 @@ Description: Absolute Quantification of Somatic DNA Alterations in Human Cancer
 Version: 1.7.0
 Author: Scott L. Carter, Philipp Hähnel
 Maintainer: Philipp Hähnel <phahnel@broadinstitute.org>
-Depends: GenomicRanges, data.table, matrixStats, reshape2, doMC 
+Depends: GenomicRanges, data.table, matrixStats, reshape2, doMC
 License: BSD_3_clause + file LICENSE
+Encoding: UTF-8
 LazyLoad: yes

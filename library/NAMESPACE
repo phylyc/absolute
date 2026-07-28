@@ -1,9 +1,18 @@
+## GenomicRanges stays a blanket import: it re-exports the S4 generics the code
+## dispatches through (start, sort, order, match, values, score, findOverlaps,
+## as.data.frame, ...), and naming them individually risks silently falling back
+## to the base/stats function and losing GRanges method dispatch.
 import(GenomicRanges)
-import(data.table)
-import(matrixStats)
-import(reshape2)
+
+## The remaining three are imported by name so the previously order-dependent
+## collisions are resolved explicitly: melt/dcast come from reshape2 (the call
+## sites in evo_reg.R melt matrices/arrays and dcast plain data.frames, which
+## only reshape2 handles), and data.table::shift is left out entirely since
+## nothing calls shift().
+importFrom(data.table, ":=", as.data.table, data.table, foverlaps, setcolorder, setkey, setnames)
+importFrom(matrixStats, logSumExp, product, rowLogSumExps)
+importFrom(reshape2, dcast, melt)
+
 export(RunAbsolute)
-export(batch_exec_ABSOLUTE)
 export(apply_review_and_extract)
-export(firehose_CAPSEG_SIF)
 export(FitPPModeSomaticMuts)
