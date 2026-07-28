@@ -39,8 +39,7 @@ WriteAbsSegtab <- function(seg, s_name, out_fn) {
     app <- s > 1   
     col <- s == 1
     
-    write.table(s_tab, file=out_fn, col.names=col, append=app, row.names=FALSE,
-                quote=FALSE, sep="\t")
+    .write_tsv(s_tab, out_fn, col.names=col, append=app)
   }   
 }
 
@@ -68,7 +67,7 @@ WriteIGVSegtab <- function(segobj, seg, s_name, out_fn) {
   # {
   #   seg[Y.ix, "Segment_Mean"] = seg[Y.ix, "Segment_Mean"] + 1
   # }
-  write.table( seg[, c("sample", "Chromosome", "Start.bp", "End.bp", "Segment_Mean", "rescaled_total_cn")], file=out_fn, row.names=FALSE, sep="\t", quote=FALSE )
+  .write_tsv( seg[, c("sample", "Chromosome", "Start.bp", "End.bp", "Segment_Mean", "rescaled_total_cn")], out_fn )
 }
 
 WriteMAF <- function(called_segobj, seg, out_fn) {
@@ -118,5 +117,7 @@ WriteMAF <- function(called_segobj, seg, out_fn) {
   new_maf[, c("Start.bp", "End.bp") := NULL]
   setcolorder(new_maf, c(names(maf), new_cols))
 
-  write.table(file=out_fn, new_maf, row.names=FALSE, sep="\t", quote=FALSE)
+  ## Unquoted, so any tab/newline that survived annotation would break the row
+  ## structure; .write_tsv() strips them and names the offending columns.
+  .write_tsv(new_maf, out_fn, label="ABS_MAF")
 }

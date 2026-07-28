@@ -306,9 +306,7 @@ aggregate_ABS_MAF_files = function( MAF_FNs )
    MAF_list = list()
    for( i in 1:length(MAF_FNs))
    {
-      MAF = read.delim(MAF_FNs[i], row.names = NULL, stringsAsFactors = FALSE, 
-                        check.names = FALSE, na.strings = c("NA", "---"),
-                        blank.lines.skip=TRUE, comment.char="#")
+      MAF = .read_tsv(MAF_FNs[i], comment = "#", na.strings = c("NA", "---"))
 
       MAF_list[[i]] = MAF
    }

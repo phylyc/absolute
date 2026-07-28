@@ -51,9 +51,7 @@
 
 .read_maf_or_null = function(maf.fn, label="MAF") {
   maf = tryCatch(
-    read.delim(maf.fn, row.names = NULL, stringsAsFactors = FALSE,
-               check.names = FALSE, na.strings = c("NA", "---"),
-               blank.lines.skip=TRUE, comment.char="#"),
+    .read_tsv(maf.fn, comment = "#", label = label, na.strings = c("NA", "---")),
     error = function(e) {
       msg = conditionMessage(e)
       if (grepl("no lines available in input|first five rows are empty", msg, ignore.case=TRUE)) {
@@ -150,7 +148,7 @@ RunAbsolute = function(seg.dat.fn, primary.disease, platform, sample.name, resul
     {
       if( !is.na(seg.dat.fn) && !file.exists(seg.dat.fn)) { stop("seg.dat.fn does not exist") }
 
-      segtab = read.delim( seg.dat.fn, row.names=NULL, stringsAsFactors=FALSE, check.names=FALSE)
+      segtab = .read_tsv( seg.dat.fn, label="seg file" )
 
       if (copy_num_type == "allelic") {
         nix = is.na(segtab[,"f"])

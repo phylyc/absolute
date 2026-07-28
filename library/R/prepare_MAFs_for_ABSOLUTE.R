@@ -42,9 +42,9 @@ classic_CreateMutCnDat <- function(maf, indel.maf, seg.dat, min.mut.af=0, verbos
   
   if ("total_normals_called" %in% colnames(mut.cn.dat)) {
     ix <- mut.cn.dat[, "total_normals_called"] > 1
-    if (verbose) {
+    if (verbose || any(ix)) {
       print(paste("Removing ", sum(ix), " of ", length(ix),
-                  " mutations due to seen in > 1 normals", 
+                  " mutations due to seen in > 1 normals",
                   sep = ""))
     }
     mut.cn.dat <- mut.cn.dat[!ix, ]
@@ -152,9 +152,11 @@ classic_CreateMutCnDat <- function(maf, indel.maf, seg.dat, min.mut.af=0, verbos
   mut.cn.dat[, "ref"] = as.integer(mut.cn.dat[, "ref"])
 
   na.ix <- is.na(mut.cn.dat[, "alt"] + mut.cn.dat[, "ref"])
-  if (verbose) {
+## report unconditionally when it drops anything: this silently removed indels
+## whose alt/ref counts failed to parse, with no trace in a non-verbose log.
+  if (verbose || any(na.ix)) {
     print(paste("Removing ", sum(na.ix), " of ", length(na.ix),
-                " mutations with NA coverage", 
+                " mutations with NA coverage",
                 sep = ""))
   }
   mut.cn.dat <- mut.cn.dat[!na.ix, ]
@@ -171,9 +173,9 @@ classic_CreateMutCnDat <- function(maf, indel.maf, seg.dat, min.mut.af=0, verbos
   ix <- af < min.mut.af
   ix[  (mut.cn.dat[, "alt"] + mut.cn.dat[, "ref"]) == 0 ] = FALSE 
 
-  if (verbose) {
+  if (verbose || any(ix)) {
     print(paste("Removing ", sum(ix), " of ", length(ix),
-                " mutations due to allelic fraction < ", 
+                " mutations due to allelic fraction < ",
                 min.mut.af, sep = ""))
   }
 
@@ -210,10 +212,11 @@ classic_CreateMutCnDat <- function(maf, indel.maf, seg.dat, min.mut.af=0, verbos
 
   if( any(is.na(normal_allele_count))){ stop("NA normal_allele_count") }
 
-  if (verbose) {
+  if (verbose || any(!ix)) {
 #    print( paste( "Mapped ", sum(male_X), " mutations with male_X status", sep=""))
-    print(paste("Removing ", sum(!ix), " unmapped mutations on Chrs: ", sep = ""))
-    print(mut.cn.dat[!ix, "Chromosome"])
+    print(paste("Removing ", sum(!ix), " of ", length(ix),
+                " mutations unmapped to any segment", sep = ""))
+    if (verbose) { print(mut.cn.dat[!ix, "Chromosome"]) }
   }
   if (sum(ix) == 0) {
     stop("No mutations left")

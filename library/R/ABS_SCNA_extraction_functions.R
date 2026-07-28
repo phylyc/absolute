@@ -61,7 +61,9 @@ build_gene_GR_data = function()
 
 load_GISTIC_peak_GR_data = function( GISTIC_peaks_fn, reg_tab=NA )
 { 
-   GISTIC_peaks = read.delim( GISTIC_peaks_fn, check.names=FALSE, stringsAsFactors=FALSE, header=0, row.names=1, nrows=5 )
+   ## quote="": these tables carry free-text peak annotation; see tsv_io.R. Read
+   ## directly rather than via .read_tsv() because of the header=0 / row.names=1 shape.
+   GISTIC_peaks = read.delim( GISTIC_peaks_fn, check.names=FALSE, stringsAsFactors=FALSE, header=0, row.names=1, nrows=5, quote="" )
    GISTIC_peaks = GISTIC_peaks[,-ncol(GISTIC_peaks)]   ## extra col
    peak_strs = as.character( GISTIC_peaks["wide peak boundaries",] )
    

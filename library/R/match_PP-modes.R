@@ -37,8 +37,7 @@ run_PP_calls_liftover = function( reviewed.pp.calls.fn, analyst.id, modes.fn, ou
 
   if (!file.exists(reviewed.pp.calls.fn)) { stop() }
 
-  dat = read.delim(reviewed.pp.calls.fn, row.names=NULL, stringsAsFactors=FALSE, header=1,
-                    check.names=FALSE)
+  dat = .read_tsv(reviewed.pp.calls.fn, comment="", label="reviewed PP calls")
 
   review.dir = paste(file.path(out.dir.base, "reviewed"))
   dir.create(review.dir, recursive=TRUE, showWarnings = FALSE)

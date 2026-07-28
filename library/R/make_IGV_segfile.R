@@ -8,7 +8,7 @@ write_IGV_segfile = function(BASE_DIR, OUT_FN)
    segtab = data.frame()
    for( i in 1:length(fn_list))
    {
-      dat = read.delim( fn_list[i], check.names=FALSE, stringsAsFactors=FALSE )
+      dat = .read_tsv( fn_list[i] )
    
       segtab = rbind( segtab, dat[,cols] )
    
